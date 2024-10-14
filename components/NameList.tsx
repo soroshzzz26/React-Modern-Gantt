@@ -39,7 +39,7 @@ const detectCollisions = (tasks: Person["tasks"]) => {
 
 export default function NameList({ people }: NameListProps) {
     return (
-        <div className="w-64 flex-shrink-0 bg-gray-100  border-r">
+        <div className="w-64 flex-shrink-0 bg-gray-100 border-r">
             <div className="h-24 border-b border-gray-200 bg-gray-50 flex items-center justify-center">
                 <span className="font-semibold">Team Members</span>
             </div>
@@ -49,15 +49,15 @@ export default function NameList({ people }: NameListProps) {
                 return (
                     <div
                         key={person.name}
-                        className={`flex items-center space-x-2 px-4 ${
+                        className={`flex items-center space-x-2 px-4  ${
                             index !== people.length - 1 ? "border-b border-gray-200" : ""
                         }`}>
                         <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">
                             {person.name.charAt(0)}
                         </div>
-                        <div className="" style={{ height: `${rowHeight}px` }}>
-                            <span className="font-semibold">{person.name}</span>
-                            <span className="text-xs text-gray-500">{person.tasks.length} tasks</span>
+                        <div className="flex flex-col justify-center " style={{ height: `${rowHeight}px` }}>
+                            <p className="font-semibold">{person.name}</p>
+                            <p className="text-xs text-gray-500">{person.tasks.length} tasks</p>
                         </div>
                     </div>
                 );

@@ -41,7 +41,7 @@ export default function Timeline({
     }
 
     return (
-        <div className="flex-grow overflow-x-auto" ref={scrollContainerRef}>
+        <div className="flex-grow overflow-x-auto overflow-y-hidden" ref={scrollContainerRef}>
             <div className="inline-block min-w-full">
                 <div
                     className="grid border-b"

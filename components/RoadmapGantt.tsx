@@ -199,7 +199,7 @@ export function RoadmapGantt() {
     return (
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Team Roadmap (2023-2024)</h2>
-            <div className="flex border border-gray-200 rounded-lg ">
+            <div className="flex border border-gray-200 rounded-lg">
                 <NameList people={people} />
                 <Timeline
                     people={people}
