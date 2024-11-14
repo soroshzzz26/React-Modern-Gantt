@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-
 interface Task {
     id: string;
     name: string;
@@ -29,6 +28,22 @@ export default function TaskRow({ person, startDate, endDate, totalDays, onTaskU
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
     const rowRef = useRef<HTMLDivElement>(null);
 
+    // const getPositionAndWidth = (task: Task) => {
+    //     const taskStart = (task.startDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+    //     const taskDuration = (task.endDate.getTime() - task.startDate.getTime()) / (1000 * 3600 * 24);
+
+    //     // Fixed width of the timeline and padding
+    //     const daysInMonth = 6; // 6 days per month
+    //     const monthWidth = 200; // 200px per month
+    //     const dayWidth = monthWidth / daysInMonth; // Width of a day
+    //     const padding = 2; // 2px padding
+
+    //     const left = (taskStart / totalDays) * (totalDays * (dayWidth + padding));
+    //     const width = (taskDuration / totalDays) * (totalDays * (dayWidth + padding));
+
+    //     return { left: `${left}px`, width: `${width}px` };
+    // };
+
     const getPositionAndWidth = (task: Task) => {
         const taskStart = (task.startDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
         const taskDuration = (task.endDate.getTime() - task.startDate.getTime()) / (1000 * 3600 * 24);
@@ -36,6 +51,22 @@ export default function TaskRow({ person, startDate, endDate, totalDays, onTaskU
         const width = (taskDuration / totalDays) * 100;
         return { left: `${left}%`, width: `${width}%` };
     };
+
+    // getPositionAndWidth but each month is 200px
+    // const getPositionAndWidth = (task: Task) => {
+    //     const taskStart = (task.startDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24);
+    //     const taskDuration = (task.endDate.getTime() - task.startDate.getTime()) / (1000 * 3600 * 24);
+
+    //     const dayWidth = 6.6; // 6 days per month
+    //     console.log(task.startDate.getMonth());
+
+    //     const padding = 2; // 2px padding
+
+    //     const left = (taskStart / totalDays) * (totalDays * dayWidth);
+    //     const width = (taskDuration / totalDays) * (totalDays * dayWidth);
+
+    //     return { left: `${left}px`, width: `${width}px` };
+    // };
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
@@ -133,13 +164,13 @@ export default function TaskRow({ person, startDate, endDate, totalDays, onTaskU
             document.removeEventListener("mouseleave", handleMouseLeave);
             document.removeEventListener("mouseup", handleMouseUp);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const detectCollisions = (tasks: Task[]) => {
-        const sortedTasks = [...tasks].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
         const rows: Task[][] = [];
 
-        sortedTasks.forEach(task => {
+        tasks.forEach(task => {
             let placed = false;
             for (let i = 0; i < rows.length; i++) {
                 const lastTaskInRow = rows[i][rows[i].length - 1];
@@ -182,22 +213,26 @@ export default function TaskRow({ person, startDate, endDate, totalDays, onTaskU
                             }}
                             onMouseDown={e => handleMouseDown(e, task, "move")}
                             onMouseEnter={() => setHoveredTask(task)}>
-                            <div
-                                className="absolute left-0 w-2 h-full cursor-ew-resize group"
-                                onMouseDown={e => {
-                                    e.stopPropagation();
-                                    handleMouseDown(e, task, "resize-start");
-                                }}>
-                                <div className="absolute left-0 w-1 h-full bg-white opacity-0 group-hover:opacity-50 transition-opacity"></div>
-                            </div>
-                            <div
-                                className="absolute right-0 w-2 h-full cursor-ew-resize group"
-                                onMouseDown={e => {
-                                    e.stopPropagation();
-                                    handleMouseDown(e, task, "resize-end");
-                                }}>
-                                <div className="absolute right-0 w-1 h-full bg-white opacity-0 group-hover:opacity-50 transition-opacity"></div>
-                            </div>
+                            {(hoveredTask === task || draggingTask === task) && (
+                                <div
+                                    className="absolute left-[2px] w-1.5 h-[90%] bg-white rounded-md cursor-ew-resize"
+                                    onMouseDown={e => {
+                                        e.stopPropagation();
+                                        handleMouseDown(e, task, "resize-start");
+                                    }}
+                                />
+                            )}
+
+                            {(hoveredTask === task || draggingTask === task) && (
+                                <div
+                                    className="absolute right-[2px] w-1.5 h-[90%] bg-white rounded-md cursor-ew-resize"
+                                    onMouseDown={e => {
+                                        e.stopPropagation();
+                                        handleMouseDown(e, task, "resize-end");
+                                    }}
+                                />
+                            )}
+
                             <span className="select-none">{task.name}</span>
                         </div>
                         {(hoveredTask === task || draggingTask === task) && (
