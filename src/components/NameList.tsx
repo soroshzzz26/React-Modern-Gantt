@@ -1,5 +1,5 @@
 import React from "react";
-import { NameListProps, detectCollisions } from "../models";
+import { NameListProps, detectCollisions, Person } from "../models";
 
 /**
  * NameList Component
@@ -21,7 +21,7 @@ const NameList: React.FC<NameListProps> = ({ people, showAvatar = true, showTask
 
             {/* Person rows */}
             <div className="people-list">
-                {people.map((person, index) => {
+                {people.map((person: Person, index: number) => {
                     // Calculate rows needed based on task collisions
                     const collisionRows = detectCollisions(person.tasks);
                     const rowHeight = Math.max(60, collisionRows.length * 40); // Minimum height or 40px per row

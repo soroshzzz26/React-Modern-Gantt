@@ -173,8 +173,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
             onMouseLeave={() => setHoveredTask(null)}
             ref={rowRef}>
             {/* Render each task in its appropriate row */}
-            {taskRows.map((rowTasks, rowIndex) =>
-                rowTasks.map(task => {
+            {taskRows.map((rowTasks: Task[], rowIndex: number) =>
+                rowTasks.map((task: Task) => {
                     const { left, width, isOutOfRange } = getTaskDisplay(task);
 
                     // Skip tasks outside the visible range

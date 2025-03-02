@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useRef, useState, useEffect } from "react";
 import { Person, Task, GanttChartProps, DEFAULT_THEME, generateTimelineHeader, getDuration } from "../models";
 import NameList from "./NameList";
@@ -92,7 +90,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                         columnWidth={columnWidth}
                         theme={theme}
                         scrollContainerRef={scrollContainerRef}>
-                        {people.map(person => (
+                        {people.map((person: Person) => (
                             <TaskRow
                                 key={person.id}
                                 person={person}
@@ -131,8 +129,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 function findEarliestDate(people: Person[]): Date {
     let earliestDate = new Date();
 
-    people.forEach(person => {
-        person.tasks.forEach(task => {
+    people.forEach((person: Person) => {
+        person.tasks.forEach((task: Task) => {
             if (task.startDate < earliestDate) {
                 earliestDate = new Date(task.startDate);
             }
@@ -145,8 +143,8 @@ function findEarliestDate(people: Person[]): Date {
 function findLatestDate(people: Person[]): Date {
     let latestDate = new Date();
 
-    people.forEach(person => {
-        person.tasks.forEach(task => {
+    people.forEach((person: Person) => {
+        person.tasks.forEach((task: Task) => {
             if (task.endDate > latestDate) {
                 latestDate = new Date(task.endDate);
             }

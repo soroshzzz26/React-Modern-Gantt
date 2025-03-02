@@ -5,6 +5,7 @@ import postcss from "rollup-plugin-postcss";
 import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import autoprefixer from "autoprefixer";
+import { createFilter } from "@rollup/pluginutils";
 import pkg from "./package.json";
 
 export default {
@@ -27,6 +28,24 @@ export default {
         peerDepsExternal(),
         resolve(),
         commonjs(),
+        // Custom plugin to handle "use client" directive with proper sourcemap support
+        {
+            name: "replace-use-client",
+            transform(code, id) {
+                // Only apply to .tsx and .ts files
+                const filter = createFilter(["**/*.ts", "**/*.tsx"]);
+                if (!filter(id)) return null;
+
+                // If the file doesn't include 'use client', return null (no transformation needed)
+                if (!code.includes('"use client"')) return null;
+
+                // Replace the directive
+                return {
+                    code: code.replace(/"use client";?\s*/, ""),
+                    map: { mappings: "" },
+                };
+            },
+        },
         typescript({
             tsconfig: "./tsconfig.json",
             exclude: ["**/__tests__/**", "**/examples/**"],
