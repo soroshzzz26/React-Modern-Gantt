@@ -1,0 +1,108 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-header {
+  background-color: #f8fafc;
+  padding: 20px;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.App-main {
+  flex-grow: 1;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.App-footer {
+  background-color: #f8fafc;
+  padding: 10px;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+}
+
+/* Add Tailwind-like utilities */
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.bg-emerald-500 {
+  background-color: #10b981;
+}
+
+.bg-violet-500 {
+  background-color: #8b5cf6;
+}
+
+.bg-blue-500 {
+  background-color: #3b82f6;
+}
+
+.bg-orange-500 {
+  background-color: #f97316;
+}
+
+.bg-red-500 {
+  background-color: #ef4444;
+}
+
+.bg-gray-500 {
+  background-color: #6b7280;
+}
