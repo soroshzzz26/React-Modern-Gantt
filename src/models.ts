@@ -44,6 +44,36 @@ export interface GanttChartProps {
     onTaskClick?: (task: Task, person: Person) => void;
 }
 
+export interface TaskRowProps {
+    person: Person;
+    startDate: Date;
+    endDate: Date;
+    totalDays: number;
+    onTaskUpdate: (personId: string, updatedTask: Task) => void;
+}
+
+export interface NameListProps {
+    people: Person[];
+    showAvatar?: boolean;
+    showTaskCount?: boolean;
+    theme?: GanttTheme;
+}
+
+export interface TimelineProps {
+    startDate: Date;
+    endDate: Date;
+    columnWidth: number;
+    theme?: GanttTheme;
+    children?: React.ReactNode;
+    scrollContainerRef?: React.RefObject<HTMLDivElement>;
+}
+
+export enum DateDisplayFormat {
+    MONTH_YEAR = "month-year",
+    FULL_DATE = "full-date",
+    SHORT_DATE = "short-date",
+}
+
 // Default theme
 export const DEFAULT_THEME: GanttTheme = {
     headerBackground: "bg-white",
@@ -58,6 +88,21 @@ export const DEFAULT_THEME: GanttTheme = {
  */
 export function formatMonth(date: Date): string {
     return date.toLocaleString("default", { month: "short" });
+}
+
+/**
+ * Format date according to specified format
+ */
+export function formatDate(date: Date, format: DateDisplayFormat = DateDisplayFormat.FULL_DATE): string {
+    switch (format) {
+        case DateDisplayFormat.MONTH_YEAR:
+            return date.toLocaleString("default", { month: "short", year: "2-digit" });
+        case DateDisplayFormat.SHORT_DATE:
+            return date.toLocaleString("default", { month: "short", day: "numeric" });
+        case DateDisplayFormat.FULL_DATE:
+        default:
+            return date.toLocaleString("default", { month: "short", day: "numeric", year: "numeric" });
+    }
 }
 
 /**
@@ -80,6 +125,20 @@ export function getMonthsBetween(startDate: Date, endDate: Date): Date[] {
     }
 
     return months;
+}
+
+/**
+ * Get days in month
+ */
+export function getDaysInMonth(year: number, month: number): number {
+    return new Date(year, month + 1, 0).getDate();
+}
+
+/**
+ * Get standard day markers for timeline (1, 8, 15, 22, 29)
+ */
+export function getStandardDayMarkers(): number[] {
+    return [1, 8, 15, 22, 29];
 }
 
 /**
@@ -145,10 +204,12 @@ export function detectTaskOverlaps(tasks: Task[]): Task[][] {
         let placed = false;
 
         for (let i = 0; i < rows.length; i++) {
-            const lastTaskInRow = rows[i][rows[i].length - 1];
+            // Check if task can be placed in this row (no overlap with any task in the row)
+            const canPlaceInRow = rows[i].every(
+                existingTask => task.startDate >= existingTask.endDate || task.endDate <= existingTask.startDate
+            );
 
-            // Check if task can be placed in this row (no overlap)
-            if (task.startDate >= lastTaskInRow.endDate) {
+            if (canPlaceInRow) {
                 rows[i].push(task);
                 placed = true;
                 break;

@@ -1,9 +1,24 @@
 import React from "react";
-import { TaskRowProps } from "../models";
-/**
- * TaskRow Component
- *
- * Displays tasks for a person in rows that avoid collisions
- */
-declare const TaskRow: React.FC<TaskRowProps>;
-export default TaskRow;
+interface Task {
+    id: string;
+    name: string;
+    startDate: Date;
+    endDate: Date;
+    color: string;
+    percent?: number;
+}
+interface Person {
+    id: string;
+    name: string;
+    tasks: Task[];
+}
+interface TaskRowProps {
+    person: Person;
+    startDate: Date;
+    endDate: Date;
+    totalDays: number;
+    onTaskUpdate: (personId: string, updatedTask: Task) => void;
+    editMode?: boolean;
+}
+export default function TaskRow({ person, startDate, endDate, totalDays, onTaskUpdate, editMode, }: TaskRowProps): React.JSX.Element;
+export {};
