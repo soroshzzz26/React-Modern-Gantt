@@ -203,20 +203,23 @@ export function detectTaskOverlaps(tasks: Task[]): Task[][] {
     sortedTasks.forEach(task => {
         let placed = false;
 
+        // Check each existing row for collisions
         for (let i = 0; i < rows.length; i++) {
-            // Check if task can be placed in this row (no overlap with any task in the row)
-            const canPlaceInRow = rows[i].every(
-                existingTask => task.startDate >= existingTask.endDate || task.endDate <= existingTask.startDate
-            );
+            // A task can be placed in this row if it doesn't overlap with ANY task in the row
+            const hasCollision = rows[i].some(existingTask => {
+                // Check if date ranges overlap
+                return !(task.startDate >= existingTask.endDate || task.endDate <= existingTask.startDate);
+            });
 
-            if (canPlaceInRow) {
+            // If no collision in this row, place the task here
+            if (!hasCollision) {
                 rows[i].push(task);
                 placed = true;
                 break;
             }
         }
 
-        // If task couldn't be placed in existing rows, create a new row
+        // If task couldn't be placed in any existing row, create a new row
         if (!placed) {
             rows.push([task]);
         }

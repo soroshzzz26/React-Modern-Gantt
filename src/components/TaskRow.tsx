@@ -39,7 +39,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     // Calculate task rows to avoid overlaps
     const taskRows = detectTaskOverlaps(person.tasks);
-    const rowHeight = Math.max(60, taskRows.length * 30 + 15);
+
+    // Use 40px per row for height calculation, with a minimum of 60px
+    // Add some padding at the bottom (20px)
+    const rowHeight = Math.max(60, taskRows.length * 40 + 20);
 
     // Event handlers
     const handleTaskClick = (event: React.MouseEvent, task: Task) => {
@@ -217,6 +220,11 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
+    // Handle empty task list
+    if (!person.tasks || person.tasks.length === 0) {
+        return <div className="relative h-16">No tasks available</div>;
+    }
+
     return (
         <div
             className="relative"
@@ -252,7 +260,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                 style={{
                                     left: `${leftPx}px`,
                                     width: `${widthPx}px`,
-                                    top: `${rowIndex * 30 + 15}px`,
+                                    top: `${rowIndex * 40 + 10}px`, // 40px per row with 10px offset for better spacing
                                 }}
                                 onClick={e => handleTaskClick(e, task)}
                                 onMouseDown={e => handleMouseDown(e, task, "move")}
