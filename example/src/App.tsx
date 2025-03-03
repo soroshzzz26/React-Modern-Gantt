@@ -20,7 +20,7 @@ const GanttChartDemo = () => {
                 {
                     id: "task-2",
                     name: "Mobile Responsiveness",
-                    startDate: new Date(2023, 3, 1),
+                    startDate: new Date(2023, 0, 1),
                     endDate: new Date(2023, 4, 30),
                     color: "bg-violet-500",
                     percent: 80,

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
     GanttChartProps,
     DEFAULT_THEME,
@@ -52,7 +52,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
         let height = 0;
         people.forEach(person => {
             const taskRows = detectTaskOverlaps(person.tasks);
-            height += Math.max(60, taskRows.length * 30 + 15);
+            height += Math.max(60, taskRows.length * 40 + 20); // 40px per row + padding
         });
         return height;
     };
@@ -67,6 +67,13 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Format month with year for display
     const formatMonthYear = (date: Date) => {
         return date.toLocaleString("default", { month: "short", year: "2-digit" });
+    };
+
+    // Handle task updates - this will trigger re-render and recalculate collisions
+    const handleTaskUpdate = (personId: string, updatedTask: Task) => {
+        if (onTaskUpdate) {
+            onTaskUpdate(personId, updatedTask);
+        }
     };
 
     return (
@@ -84,14 +91,14 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 {/* Fixed Team Member column */}
                 <div className="w-40 flex-shrink-0 z-10 bg-white shadow-sm">
                     {/* Header placeholder - to align with timeline */}
-                    <div className="p-2 font-semibold text-gray-700 border-r border-b border-gray-200 h-12">
+                    <div className="p-2 font-semibold text-gray-700 border-r border-b border-gray-200 h-10.5">
                         Team Member
                     </div>
 
                     {/* Person names */}
                     {people.map(person => {
                         const taskRows = detectTaskOverlaps(person.tasks);
-                        const rowHeight = Math.max(60, taskRows.length * 30 + 15);
+                        const rowHeight = Math.max(60, taskRows.length * 40 + 20);
 
                         return (
                             <div
@@ -152,7 +159,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                     totalMonths={totalMonths}
                                     monthWidth={150}
                                     editMode={editMode}
-                                    onTaskUpdate={onTaskUpdate}
+                                    onTaskUpdate={handleTaskUpdate}
                                     onTaskClick={onTaskClick}
                                 />
                             ))}

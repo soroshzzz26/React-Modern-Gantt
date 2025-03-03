@@ -227,7 +227,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     return (
         <div
-            className="relative"
+            className="relative border-b border-gray-200"
             style={{ height: `${rowHeight}px` }}
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}
