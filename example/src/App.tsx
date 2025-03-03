@@ -94,7 +94,7 @@ const GanttChartDemo = () => {
 
     // Handler for task clicks
     const handleTaskClick = (task: any, person: any) => {
-        alert(
+        console.log(
             `Clicked on "${task.name}" (${
                 person.name
             })\nStart: ${task.startDate.toLocaleDateString()}\nEnd: ${task.endDate.toLocaleDateString()}`

@@ -1,24 +1,19 @@
 import React from "react";
-interface Task {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
-    color: string;
-    percent?: number;
-}
-interface Person {
-    id: string;
-    name: string;
-    tasks: Task[];
-}
+import { Person, Task } from "../models";
 interface TaskRowProps {
     person: Person;
     startDate: Date;
     endDate: Date;
-    totalDays: number;
-    onTaskUpdate: (personId: string, updatedTask: Task) => void;
+    totalMonths: number;
+    monthWidth: number;
     editMode?: boolean;
+    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
+    onTaskClick?: (task: Task, person: Person) => void;
 }
-export default function TaskRow({ person, startDate, endDate, totalDays, onTaskUpdate, editMode, }: TaskRowProps): React.JSX.Element;
-export {};
+/**
+ * TaskRow Component
+ *
+ * Displays and manages the tasks for a single person
+ */
+declare const TaskRow: React.FC<TaskRowProps>;
+export default TaskRow;

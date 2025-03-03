@@ -1,210 +1,64 @@
 import React, { useState, useRef, useEffect } from "react";
-
-interface Task {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
-    color: string;
-    percent?: number;
-}
-
-interface Person {
-    id: string;
-    name: string;
-    tasks: Task[];
-}
+import { Person, Task, detectTaskOverlaps, calculateTaskPosition } from "../models";
 
 interface TaskRowProps {
     person: Person;
     startDate: Date;
     endDate: Date;
-    totalDays: number;
-    onTaskUpdate: (personId: string, updatedTask: Task) => void;
+    totalMonths: number;
+    monthWidth: number;
     editMode?: boolean;
+    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
+    onTaskClick?: (task: Task, person: Person) => void;
 }
 
-export default function TaskRow({
+/**
+ * TaskRow Component
+ *
+ * Displays and manages the tasks for a single person
+ */
+const TaskRow: React.FC<TaskRowProps> = ({
     person,
     startDate,
     endDate,
-    totalDays,
-    onTaskUpdate,
+    totalMonths,
+    monthWidth,
     editMode = true,
-}: TaskRowProps) {
-    const [draggingTask, setDraggingTask] = useState<Task | null>(null);
-    const [dragType, setDragType] = useState<"move" | "resize-start" | "resize-end" | "adjust-progress" | null>(null);
-    const [dragStartX, setDragStartX] = useState(0);
+    onTaskUpdate,
+    onTaskClick,
+}) => {
+    // Hover and drag states
     const [hoveredTask, setHoveredTask] = useState<Task | null>(null);
+    const [draggingTask, setDraggingTask] = useState<Task | null>(null);
+    const [dragType, setDragType] = useState<"move" | "resize-left" | "resize-right" | null>(null);
+    const [dragStartX, setDragStartX] = useState(0);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+    // Reference to the row element
     const rowRef = useRef<HTMLDivElement>(null);
 
-    // Calculate position and width based on dates and timeline bounds
-    const getPositionAndWidth = (task: Task) => {
-        const taskStartMs = task.startDate.getTime();
-        const taskEndMs = task.endDate.getTime();
-        const timelineStartMs = startDate.getTime();
-        const timelineEndMs = endDate.getTime();
-        const timelineRange = timelineEndMs - timelineStartMs;
+    // Calculate task rows to avoid overlaps
+    const taskRows = detectTaskOverlaps(person.tasks);
+    const rowHeight = Math.max(60, taskRows.length * 30 + 15);
 
-        // Calculate position as percentage of timeline
-        const taskStart = Math.max(0, taskStartMs - timelineStartMs) / timelineRange;
-        const taskEnd = Math.min(1, (taskEndMs - timelineStartMs) / timelineRange);
-        const taskWidth = taskEnd - taskStart;
-
-        return {
-            left: `${taskStart * 100}%`,
-            width: `${taskWidth * 100}%`,
-        };
+    // Event handlers
+    const handleTaskClick = (event: React.MouseEvent, task: Task) => {
+        if (onTaskClick && !draggingTask) {
+            onTaskClick(task, person);
+        }
     };
 
-    const formatDate = (date: Date) => {
-        return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    const handleTaskMouseEnter = (event: React.MouseEvent, task: Task) => {
+        if (!draggingTask) {
+            setHoveredTask(task);
+            updateTooltipPosition(event);
+        }
     };
 
-    const getDuration = (start: Date, end: Date) => {
-        const diffTime = Math.abs(end.getTime() - start.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-    };
-
-    const handleMouseDown = (
-        e: React.MouseEvent,
-        task: Task,
-        type: "move" | "resize-start" | "resize-end" | "adjust-progress"
-    ) => {
-        if (!editMode) return;
-
-        e.preventDefault(); // Prevent default to avoid text selection
-        e.stopPropagation(); // Stop propagation to avoid parent handlers
-
-        setDraggingTask(task);
-        setDragType(type);
-        setDragStartX(e.clientX);
-        updateTooltipPosition(e);
-
-        // Add mousemove and mouseup listeners to document
-        document.addEventListener("mouseup", handleMouseUp);
-        document.addEventListener("mousemove", handleMouseMove);
-
-        console.log(`Mouse down on task ${task.id} with type ${type}`); // Debug
-    };
-
-    const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
-        if (e instanceof MouseEvent && e.type === "mousemove") {
-            // This is necessary to handle the document-level mousemove event
-            const mouseEvent = e as MouseEvent;
-            if (hoveredTask) {
-                setTooltipPosition({
-                    x: mouseEvent.clientX - (rowRef.current?.getBoundingClientRect().left || 0) + 20,
-                    y: mouseEvent.clientY - (rowRef.current?.getBoundingClientRect().top || 0),
-                });
-            }
-        } else {
-            // For React MouseEvent
-            updateTooltipPosition(e as React.MouseEvent);
+    const handleTaskMouseLeave = () => {
+        if (!draggingTask) {
+            setHoveredTask(null);
         }
-
-        if (!draggingTask || !dragType || !rowRef.current) return;
-
-        const rect = rowRef.current.getBoundingClientRect();
-        const deltaX = e.clientX - dragStartX;
-        const percentDelta = deltaX / rect.width;
-        const timelineDuration = endDate.getTime() - startDate.getTime();
-        const timeDelta = percentDelta * timelineDuration;
-
-        let newStartDate = new Date(draggingTask.startDate);
-        let newEndDate = new Date(draggingTask.endDate);
-        let newPercent = draggingTask.percent;
-
-        if (dragType === "move") {
-            // Move the entire task
-            newStartDate = new Date(newStartDate.getTime() + timeDelta);
-            newEndDate = new Date(newEndDate.getTime() + timeDelta);
-        } else if (dragType === "resize-start") {
-            // Resize from the start
-            newStartDate = new Date(newStartDate.getTime() + timeDelta);
-        } else if (dragType === "resize-end") {
-            // Resize from the end
-            newEndDate = new Date(newEndDate.getTime() + timeDelta);
-        } else if (dragType === "adjust-progress" && draggingTask.percent !== undefined) {
-            // Adjust progress percentage
-            const taskElements = document.querySelectorAll(`[data-task-id="${draggingTask.id}"]`);
-            if (taskElements.length > 0) {
-                const taskRect = taskElements[0].getBoundingClientRect();
-                const taskWidth = taskRect.width;
-                const offsetX = e.clientX - taskRect.left;
-                newPercent = Math.max(0, Math.min(100, (offsetX / taskWidth) * 100));
-            }
-        }
-
-        // Ensure the task stays within the timeline bounds
-        if (newStartDate < startDate) {
-            newStartDate = new Date(startDate);
-            if (dragType === "move") {
-                const duration = draggingTask.endDate.getTime() - draggingTask.startDate.getTime();
-                newEndDate = new Date(newStartDate.getTime() + duration);
-            }
-        }
-
-        if (newEndDate > endDate) {
-            newEndDate = new Date(endDate);
-            if (dragType === "move") {
-                const duration = draggingTask.endDate.getTime() - draggingTask.startDate.getTime();
-                newStartDate = new Date(newEndDate.getTime() - duration);
-            }
-        }
-
-        // Ensure end date is not before start date
-        if (newEndDate < newStartDate) {
-            if (dragType === "resize-start") {
-                newStartDate = new Date(newEndDate);
-            } else {
-                newEndDate = new Date(newStartDate);
-            }
-        }
-
-        // Create updated task
-        const updatedTask = {
-            ...draggingTask,
-            startDate: newStartDate,
-            endDate: newEndDate,
-            percent: newPercent,
-        };
-
-        // Update dragging reference first
-        setDraggingTask(updatedTask);
-
-        // Then update the task data
-        onTaskUpdate(person.id, updatedTask);
-
-        // Reset start point for next delta calculation
-        setDragStartX(e.clientX);
-
-        // Debug
-        console.log(`Task updated during drag: Start=${newStartDate.toISOString()}, End=${newEndDate.toISOString()}`);
-    };
-
-    const handleMouseUp = () => {
-        if (draggingTask && dragType) {
-            // Final update with new dates/progress
-            onTaskUpdate(person.id, draggingTask);
-            console.log(`Mouse up - Task updated: ${draggingTask.id}`);
-        }
-
-        setDraggingTask(null);
-        setDragType(null);
-        document.removeEventListener("mouseup", handleMouseUp);
-        document.removeEventListener("mousemove", handleMouseMove);
-    };
-
-    // Special handler for the div element itself
-    const taskDivMouseDown = (e: React.MouseEvent, task: Task) => {
-        if (!editMode) return;
-        e.preventDefault();
-        e.stopPropagation();
-        console.log(`Direct task div mousedown on ${task.id}`);
-        handleMouseDown(e, task, "move");
     };
 
     const updateTooltipPosition = (e: React.MouseEvent) => {
@@ -217,151 +71,284 @@ export default function TaskRow({
         }
     };
 
+    const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
+        // Update tooltip position for hover
+        if (e instanceof MouseEvent && e.type === "mousemove") {
+            if (hoveredTask) {
+                const mouseEvent = e as MouseEvent;
+                setTooltipPosition({
+                    x: mouseEvent.clientX - (rowRef.current?.getBoundingClientRect().left || 0) + 20,
+                    y: mouseEvent.clientY - (rowRef.current?.getBoundingClientRect().top || 0),
+                });
+            }
+        } else {
+            updateTooltipPosition(e as React.MouseEvent);
+        }
+
+        // Handle task dragging
+        if (draggingTask && dragType && rowRef.current) {
+            const rect = rowRef.current.getBoundingClientRect();
+            const totalWidth = totalMonths * monthWidth;
+            const deltaX = e.clientX - dragStartX;
+
+            // Find the task element
+            const taskEl = document.querySelector(`[data-task-id="${draggingTask.id}"]`) as HTMLElement;
+            if (!taskEl) return;
+
+            // Get current position and dimensions
+            const currentLeft = parseFloat(taskEl.style.left);
+            const currentWidth = parseFloat(taskEl.style.width);
+
+            if (dragType === "move") {
+                // Move the entire task
+                const newLeft = Math.max(0, Math.min(totalWidth - currentWidth, currentLeft + deltaX));
+                taskEl.style.left = `${newLeft}px`;
+            } else if (dragType === "resize-left") {
+                // Resize from left side
+                const maxDelta = currentWidth - 20; // Minimum width
+                const constrainedDelta = Math.min(maxDelta, deltaX);
+                const newLeft = Math.max(0, currentLeft + constrainedDelta);
+                const newWidth = Math.max(20, currentWidth - constrainedDelta);
+
+                taskEl.style.left = `${newLeft}px`;
+                taskEl.style.width = `${newWidth}px`;
+            } else if (dragType === "resize-right") {
+                // Resize from right side
+                const newWidth = Math.max(20, Math.min(totalWidth - currentLeft, currentWidth + deltaX));
+                taskEl.style.width = `${newWidth}px`;
+            }
+
+            setDragStartX(e.clientX);
+        }
+    };
+
+    const handleMouseDown = (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => {
+        if (!editMode) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        setDraggingTask(task);
+        setDragType(type);
+        setDragStartX(event.clientX);
+
+        // Add document-level event listeners
+        document.addEventListener("mouseup", handleMouseUp);
+        document.addEventListener("mousemove", handleMouseMove as unknown as EventListener);
+    };
+
+    const handleMouseUp = () => {
+        if (draggingTask && dragType && rowRef.current) {
+            // Find the task element
+            const taskEl = document.querySelector(`[data-task-id="${draggingTask.id}"]`) as HTMLElement;
+            if (taskEl) {
+                // Get final position and dimensions
+                const left = parseFloat(taskEl.style.left);
+                const width = parseFloat(taskEl.style.width);
+
+                // Convert pixel position to date
+                const msPerPixel = (endDate.getTime() - startDate.getTime()) / (totalMonths * monthWidth);
+                const startOffset = left * msPerPixel;
+                const durationMs = width * msPerPixel;
+
+                // Calculate new dates
+                const newStartDate = new Date(startDate.getTime() + startOffset);
+                const newEndDate = new Date(newStartDate.getTime() + durationMs);
+
+                // Create updated task
+                const updatedTask = {
+                    ...draggingTask,
+                    startDate: newStartDate,
+                    endDate: newEndDate,
+                };
+
+                // Call update callback
+                if (onTaskUpdate) {
+                    onTaskUpdate(person.id, updatedTask);
+                }
+            }
+        }
+
+        // Reset drag state
+        setDraggingTask(null);
+        setDragType(null);
+        document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
+    };
+
+    // Cleanup event listeners on unmount
     useEffect(() => {
         return () => {
             document.removeEventListener("mouseup", handleMouseUp);
-            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
         };
     }, []);
 
-    // Detect collisions between tasks and organize them into rows
-    const detectCollisions = (tasks: Task[]) => {
-        // Sort tasks by start date
-        const sortedTasks = [...tasks].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-        const rows: Task[][] = [];
-
-        sortedTasks.forEach(task => {
-            let placed = false;
-            // Try to find a row where this task can be placed without overlap
-            for (let i = 0; i < rows.length; i++) {
-                const rowTasks = rows[i];
-                // Check against all tasks in the row
-                let canPlace = true;
-
-                for (const existingTask of rowTasks) {
-                    // Check if tasks overlap
-                    if (!(task.endDate <= existingTask.startDate || task.startDate >= existingTask.endDate)) {
-                        canPlace = false;
-                        break;
-                    }
-                }
-
-                if (canPlace) {
-                    rows[i].push(task);
-                    placed = true;
-                    break;
-                }
-            }
-
-            // If the task couldn't be placed in any existing row, create a new row for it
-            if (!placed) {
-                rows.push([task]);
-            }
-        });
-
-        return rows;
+    // Format date for tooltip
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
     };
 
-    const taskRows = detectCollisions(person.tasks);
-    const rowHeight = Math.max(60, taskRows.length * 40); // 40px per task row
+    // Calculate duration between dates
+    const getDuration = (start: Date, end: Date) => {
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
 
-    if (!person || !person.tasks || person.tasks.length === 0) {
-        return <div className="relative h-16">No tasks available</div>;
-    }
+    // Get live date from element position during drag
+    const getLiveDateFromElement = (taskId: string, dateType: "start" | "end"): Date => {
+        const taskEl = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
+        if (!taskEl) return dateType === "start" ? startDate : endDate;
+
+        const left = parseFloat(taskEl.style.left || "0");
+        const width = parseFloat(taskEl.style.width || "0");
+
+        // Calculate milliseconds per pixel
+        const msPerPixel = (endDate.getTime() - startDate.getTime()) / (totalMonths * monthWidth);
+
+        // Calculate date based on position
+        if (dateType === "start") {
+            const startOffset = left * msPerPixel;
+            return new Date(startDate.getTime() + startOffset);
+        } else {
+            const endOffset = (left + width) * msPerPixel;
+            return new Date(startDate.getTime() + endOffset);
+        }
+    };
 
     return (
         <div
-            className="relative select-none"
+            className="relative"
             style={{ height: `${rowHeight}px` }}
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}
-            ref={rowRef}>
-            {taskRows.map((rowTasks, rowIndex) =>
-                rowTasks.map(task => {
-                    const { left, width } = getPositionAndWidth(task);
-                    const isHovered = hoveredTask === task;
-                    const isDragging = draggingTask === task;
-                    const showControls = (isHovered || isDragging) && editMode;
+            ref={rowRef}
+            data-testid={`task-row-${person.id}`}>
+            {/* Tasks by row to avoid overlaps */}
+            {taskRows.map((rowTasks, rowIndex) => (
+                <React.Fragment key={`task-row-${rowIndex}`}>
+                    {rowTasks.map(task => {
+                        // Get position information
+                        const { left, width } = calculateTaskPosition(task, startDate, endDate);
 
-                    return (
-                        <React.Fragment key={task.id}>
+                        // Convert percentage to pixels
+                        const leftPx = (parseFloat(left) * totalMonths * monthWidth) / 100;
+                        const widthPx = (parseFloat(width) * totalMonths * monthWidth) / 100;
+
+                        // Check interaction states
+                        const isHovered = hoveredTask?.id === task.id;
+                        const isDragging = draggingTask?.id === task.id;
+                        const showHandles = (isHovered || isDragging) && editMode;
+
+                        return (
                             <div
-                                className={`absolute h-8 rounded-md ${
+                                key={`task-${task.id}`}
+                                className={`absolute h-8 rounded ${
                                     task.color
-                                } z-10 flex items-center justify-between text-xs text-white font-semibold ${
-                                    editMode ? "cursor-move" : "cursor-default"
-                                } task-bar select-none`}
-                                data-task-id={task.id}
+                                } flex items-center px-2 text-xs text-white font-medium ${
+                                    editMode ? "cursor-move" : "cursor-pointer"
+                                }`}
                                 style={{
-                                    left,
-                                    width,
-                                    top: `${rowIndex * 40 + 4}px`,
+                                    left: `${leftPx}px`,
+                                    width: `${widthPx}px`,
+                                    top: `${rowIndex * 30 + 15}px`,
                                 }}
-                                onMouseDown={editMode ? e => taskDivMouseDown(e, task) : undefined}
-                                onMouseEnter={() => setHoveredTask(task)}>
-                                {/* Task content */}
-                                <div className="truncate px-2 py-1 flex-grow">{task.name}</div>
-
-                                {/* Left resize handle */}
-                                {showControls && (
+                                onClick={e => handleTaskClick(e, task)}
+                                onMouseDown={e => handleMouseDown(e, task, "move")}
+                                onMouseEnter={e => handleTaskMouseEnter(e, task)}
+                                onMouseLeave={handleTaskMouseLeave}
+                                data-testid={`task-${task.id}`}
+                                data-task-id={task.id}>
+                                {/* Left resize handle - only visible on hover/drag */}
+                                {showHandles && (
                                     <div
-                                        className="absolute left-0 w-1.5 h-[90%] bg-white rounded-md cursor-ew-resize"
+                                        className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 cursor-ew-resize rounded-l"
                                         onMouseDown={e => {
                                             e.stopPropagation();
-                                            handleMouseDown(e, task, "resize-start");
+                                            handleMouseDown(e, task, "resize-left");
                                         }}
                                     />
                                 )}
 
-                                {/* Right resize handle */}
-                                {showControls && (
-                                    <div
-                                        className="absolute right-0 w-1.5 h-[90%] bg-white rounded-md cursor-ew-resize"
-                                        onMouseDown={e => {
-                                            e.stopPropagation();
-                                            handleMouseDown(e, task, "resize-end");
-                                        }}
-                                    />
-                                )}
+                                <div className="truncate select-none">{task.name}</div>
 
                                 {/* Progress bar */}
                                 {task.percent !== undefined && (
-                                    <div className="absolute bottom-1 left-1 right-1 h-1.5 bg-black bg-opacity-20 rounded-full overflow-hidden">
+                                    <div className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-white rounded-full"
                                             style={{ width: `${task.percent}%` }}
                                         />
-                                        {/* Progress adjustment handle */}
-                                        {showControls && (
-                                            <div
-                                                className="absolute top-1/2 h-3 w-3 bg-white rounded-full -translate-y-1/2 cursor-ew-resize border border-gray-400"
-                                                style={{ left: `calc(${task.percent}% - 4px)` }}
-                                                onMouseDown={e => {
-                                                    e.stopPropagation();
-                                                    handleMouseDown(e, task, "adjust-progress");
-                                                }}
-                                            />
-                                        )}
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Tooltip */}
-                            {(isHovered || isDragging) && (
-                                <div
-                                    className="absolute z-20 bg-white border border-gray-200 rounded-md shadow-md p-2 text-xs select-none"
-                                    style={{ left: `${tooltipPosition.x}px`, top: `${tooltipPosition.y - 40}px` }}>
-                                    <div className="font-bold">{task.name}</div>
-                                    <div>Start: {formatDate(task.startDate)}</div>
-                                    <div>End: {formatDate(task.endDate)}</div>
-                                    <div>Duration: {getDuration(task.startDate, task.endDate)} days</div>
-                                    {task.percent !== undefined && <div>Progress: {Math.round(task.percent)}%</div>}
-                                </div>
-                            )}
-                        </React.Fragment>
-                    );
-                })
+                                {/* Right resize handle - only visible on hover/drag */}
+                                {showHandles && (
+                                    <div
+                                        className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 cursor-ew-resize rounded-r"
+                                        onMouseDown={e => {
+                                            e.stopPropagation();
+                                            handleMouseDown(e, task, "resize-right");
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        );
+                    })}
+                </React.Fragment>
+            ))}
+
+            {/* Tooltip */}
+            {(hoveredTask || draggingTask) && (
+                <div
+                    className="absolute z-20 bg-white border border-gray-200 rounded-md shadow-md p-2 text-xs select-none"
+                    style={{
+                        left: `${tooltipPosition.x}px`,
+                        top: `${tooltipPosition.y - 40}px`,
+                        minWidth: "150px",
+                    }}>
+                    <div className="font-bold mb-1">{(draggingTask || hoveredTask)?.name}</div>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+                        <div className="font-semibold">Start:</div>
+                        <div>
+                            {dragType && draggingTask
+                                ? // Calculate and show live date during drag
+                                  formatDate(getLiveDateFromElement(draggingTask.id, "start"))
+                                : formatDate((draggingTask || hoveredTask)!.startDate)}
+                        </div>
+                        <div className="font-semibold">End:</div>
+                        <div>
+                            {dragType && draggingTask
+                                ? // Calculate and show live date during drag
+                                  formatDate(getLiveDateFromElement(draggingTask.id, "end"))
+                                : formatDate((draggingTask || hoveredTask)!.endDate)}
+                        </div>
+                        <div className="font-semibold">Duration:</div>
+                        <div>
+                            {dragType && draggingTask
+                                ? // Calculate live duration
+                                  getDuration(
+                                      getLiveDateFromElement(draggingTask.id, "start"),
+                                      getLiveDateFromElement(draggingTask.id, "end")
+                                  )
+                                : getDuration(
+                                      (draggingTask || hoveredTask)!.startDate,
+                                      (draggingTask || hoveredTask)!.endDate
+                                  )}{" "}
+                            days
+                        </div>
+                        {(draggingTask || hoveredTask)?.percent !== undefined && (
+                            <>
+                                <div className="font-semibold">Progress:</div>
+                                <div>{(draggingTask || hoveredTask)!.percent}%</div>
+                            </>
+                        )}
+                    </div>
+                </div>
             )}
         </div>
     );
-}
+};
+
+export default TaskRow;
