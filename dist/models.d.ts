@@ -1,4 +1,6 @@
-/// <reference types="react" />
+/**
+ * Core data models for the simplified Gantt chart
+ */
 export interface Task {
     id: string;
     name: string;
@@ -11,77 +13,54 @@ export interface Task {
 export interface Person {
     id: string;
     name: string;
-    tasks: Task[];
-    avatar?: string;
     role?: string;
+    avatar?: string;
+    tasks: Task[];
 }
 export interface GanttTheme {
     headerBackground?: string;
     headerText?: string;
-    timelineBackground?: string;
-    timelineBorder?: string;
-    timelineText?: string;
-    taskDefaultColor?: string;
-    highlightColor?: string;
+    backgroundHighlight?: string;
+    borderColor?: string;
     todayMarkerColor?: string;
-    tooltipBackground?: string;
-    tooltipText?: string;
 }
 export interface GanttChartProps {
     people: Person[];
     startDate?: Date;
     endDate?: Date;
     title?: string;
-    showAvatar?: boolean;
-    showTaskCount?: boolean;
-    theme?: GanttTheme;
-    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
-    onTaskClick?: (task: Task, person: Person) => void;
     currentDate?: Date;
     showCurrentDateMarker?: boolean;
-    visibleColumns?: number;
-    columnWidth?: number;
-    onProgressChange?: (personId: string, taskId: string, percent: number) => void;
-}
-export interface TimelineProps {
-    startDate: Date;
-    endDate: Date;
-    columnWidth: number;
-    theme?: GanttTheme;
-    children: React.ReactNode;
-    scrollContainerRef: React.RefObject<HTMLDivElement>;
-}
-export interface NameListProps {
-    people: Person[];
-    showAvatar?: boolean;
-    showTaskCount?: boolean;
-    theme?: GanttTheme;
-}
-export interface TaskRowProps {
-    person: Person;
-    startDate: Date;
-    endDate: Date;
-    columnWidth: number;
+    editMode?: boolean;
     theme?: GanttTheme;
     onTaskUpdate?: (personId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, person: Person) => void;
-    onProgressChange?: (personId: string, taskId: string, percent: number) => void;
-}
-export declare enum DateDisplayFormat {
-    MONTH_YEAR = "MONTH_YEAR",
-    WEEK_DAY = "WEEK_DAY",
-    DAY_MONTH = "DAY_MONTH",
-    FULL_DATE = "FULL_DATE"
 }
 export declare const DEFAULT_THEME: GanttTheme;
-export declare function formatDate(date: Date, format?: DateDisplayFormat): string;
-export declare function getDaysInMonth(year: number, month: number): number;
-export declare function getDuration(start: Date, end: Date): number;
-export declare function calculateTaskPosition(task: Task, startDate: Date, endDate: Date, columnWidth: number): {
+/**
+ * Formats a date to display just the month
+ */
+export declare function formatMonth(date: Date): string;
+/**
+ * Gets an array of months between two dates
+ */
+export declare function getMonthsBetween(startDate: Date, endDate: Date): Date[];
+/**
+ * Calculates the position and width of a task in percentage
+ */
+export declare function calculateTaskPosition(task: Task, startDate: Date, endDate: Date): {
     left: string;
     width: string;
-    isOutOfRange: boolean;
 };
-export declare function detectCollisions(tasks: Task[]): Task[][];
-export declare function generateTimelineHeader(startDate: Date, endDate: Date): string[];
-export declare function snapDateToGrid(date: Date, gridSize?: number): Date;
+/**
+ * Detects task overlaps and organizes them into rows
+ */
+export declare function detectTaskOverlaps(tasks: Task[]): Task[][];
+/**
+ * Finds the earliest start date from all tasks
+ */
+export declare function findEarliestDate(people: Person[]): Date;
+/**
+ * Finds the latest end date from all tasks
+ */
+export declare function findLatestDate(people: Person[]): Date;

@@ -3,7 +3,7 @@ import { TimelineProps } from "../models";
 /**
  * Timeline Component
  *
- * Displays the timeline header with months and days
+ * Displays the month/day headers for the Gantt chart
  */
 declare const Timeline: React.FC<TimelineProps>;
 export default Timeline;

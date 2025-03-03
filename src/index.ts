@@ -1,22 +1,17 @@
-// Main component
+// Main components
 export { default as GanttChart } from "./components/GanttChart";
+export { default as TaskEditor } from "./components/TaskEditor";
 
-// Sub-components (exported for advanced customization)
-export { default as Timeline } from "./components/Timeline";
-export { default as NameList } from "./components/NameList";
-export { default as TaskRow } from "./components/TaskRow";
+// Types and models
+export type { Task, Person, GanttTheme, GanttChartProps } from "./models";
 
-// Types and utilities
-export type { Task, Person, GanttTheme, GanttChartProps, TimelineProps, NameListProps, TaskRowProps } from "./models";
-
-// Enums, constants, and functions
+// Utility functions
 export {
-    DateDisplayFormat,
     DEFAULT_THEME,
-    formatDate,
-    getDaysInMonth,
-    getDuration,
+    formatMonth,
+    getMonthsBetween,
     calculateTaskPosition,
-    detectCollisions,
-    generateTimelineHeader,
+    detectTaskOverlaps,
+    findEarliestDate,
+    findLatestDate,
 } from "./models";

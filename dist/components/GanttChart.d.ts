@@ -3,7 +3,7 @@ import { GanttChartProps } from "../models";
 /**
  * GanttChart Component
  *
- * A modern, interactive Gantt chart for project planning and visualization
+ * A simple, month-based Gantt chart for project timelines
  */
-export declare const GanttChart: React.FC<GanttChartProps>;
+declare const GanttChart: React.FC<GanttChartProps>;
 export default GanttChart;

@@ -3,7 +3,7 @@ import { TaskRowProps } from "../models";
 /**
  * TaskRow Component
  *
- * Displays and manages the tasks for a person/resource
+ * Displays tasks for a person in rows that avoid collisions
  */
 declare const TaskRow: React.FC<TaskRowProps>;
 export default TaskRow;

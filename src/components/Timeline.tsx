@@ -1,10 +1,10 @@
 import React from "react";
-import { TimelineProps, getDaysInMonth, formatDate, DateDisplayFormat } from "../models";
+import { TimelineProps, getDaysInMonth, formatDate, DateDisplayFormat, getStandardDayMarkers } from "../models";
 
 /**
  * Timeline Component
  *
- * Displays the timeline header with months and days
+ * Displays the month/day headers for the Gantt chart
  */
 const Timeline: React.FC<TimelineProps> = ({
     startDate,
@@ -26,27 +26,31 @@ const Timeline: React.FC<TimelineProps> = ({
         currentDate.setMonth(currentDate.getMonth() + 1);
     }
 
-    // Always display 5 days per month at fixed 7-day intervals
-    const getKeyDaysForMonth = (): number[] => {
-        // Always return these 5 fixed days (1, 8, 15, 22, 29)
-        return [1, 8, 15, 22, 29];
-    };
+    // Get the standard day markers (always 1, 8, 15, 22, 29)
+    const dayMarkers = getStandardDayMarkers();
 
-    // Class definitions based on theme
+    // Apply theme classes
     const headerBgClass = theme?.headerBackground || "bg-gray-50";
     const headerTextClass = theme?.headerText || "text-gray-700";
     const borderClass = theme?.timelineBorder || "border-gray-200";
     const subheaderTextClass = theme?.timelineText || "text-gray-500";
 
     return (
-        <div className="timeline flex-grow overflow-x-auto overflow-y-hidden" ref={scrollContainerRef}>
+        <div
+            className="timeline flex-grow overflow-x-auto overflow-y-hidden"
+            data-testid="gantt-timeline"
+            ref={scrollContainerRef}>
             <div className="inline-block min-w-full">
                 {/* Month headers */}
                 <div
                     className="grid border-b"
-                    style={{ gridTemplateColumns: `repeat(${months.length}, ${columnWidth}px)` }}>
+                    style={{ gridTemplateColumns: `repeat(${months.length}, ${columnWidth}px)` }}
+                    data-testid="timeline-months">
                     {months.map((month, index) => (
-                        <div key={`month-${index}`} className={`border-r ${borderClass}`}>
+                        <div
+                            key={`month-${index}`}
+                            className={`border-r ${borderClass}`}
+                            data-month={formatDate(month.date, DateDisplayFormat.MONTH_YEAR)}>
                             {/* Month name */}
                             <div className={`flex h-12 items-center justify-center ${headerBgClass}`}>
                                 <p className={`font-semibold ${headerTextClass}`}>
@@ -54,18 +58,25 @@ const Timeline: React.FC<TimelineProps> = ({
                                 </p>
                             </div>
 
-                            {/* Day numbers - Always show 5 days per month */}
+                            {/* Day markers - always show 5 standard days */}
                             <div
-                                className={`flex h-12 items-center justify-between px-2 text-xs ${subheaderTextClass} ${headerBgClass}`}>
-                                {getKeyDaysForMonth().map(day => {
-                                    // Handle days that may not exist in the month (like 29 in February)
-                                    const validDay = day <= month.daysInMonth ? day : month.daysInMonth;
+                                className={`flex h-12 items-center justify-between px-2 text-xs ${subheaderTextClass} ${headerBgClass}`}
+                                data-testid="day-markers">
+                                {dayMarkers.map(dayMarker => {
+                                    // Handle months with fewer days by capping at the last day
+                                    const displayDay = dayMarker <= month.daysInMonth ? dayMarker : month.daysInMonth;
+
+                                    // Calculate actual date for data attribute (for testing/debugging)
+                                    const markerDate = new Date(month.date);
+                                    markerDate.setDate(displayDay);
+
                                     return (
                                         <div
-                                            key={`day-${month.date.getMonth()}-${day}`}
-                                            className="relative"
-                                            style={{ width: "20px", textAlign: "center" }}>
-                                            <span>{validDay}</span>
+                                            key={`day-${month.date.getMonth()}-${dayMarker}`}
+                                            className="relative w-5 text-center"
+                                            data-day={displayDay}
+                                            data-date={markerDate.toISOString().split("T")[0]}>
+                                            <span>{displayDay}</span>
                                             {/* Vertical day separator line */}
                                             <div
                                                 className="absolute top-full h-screen w-px bg-gray-200 -z-10"
@@ -81,8 +92,10 @@ const Timeline: React.FC<TimelineProps> = ({
                     ))}
                 </div>
 
-                {/* Task rows */}
-                <div className="relative task-container">{children}</div>
+                {/* Task rows container */}
+                <div className="relative task-container" data-testid="task-container">
+                    {children}
+                </div>
             </div>
         </div>
     );
