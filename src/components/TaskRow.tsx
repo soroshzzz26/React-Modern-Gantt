@@ -7,6 +7,7 @@ import {
     DateDisplayFormat,
     getDuration,
     calculateTaskPosition,
+    snapDateToGrid,
 } from "../models";
 
 /**
@@ -22,12 +23,15 @@ const TaskRow: React.FC<TaskRowProps> = ({
     theme,
     onTaskUpdate,
     onTaskClick,
+    onProgressChange,
 }) => {
     const [draggingTask, setDraggingTask] = useState<Task | null>(null);
-    const [dragType, setDragType] = useState<"move" | "resize-start" | "resize-end" | null>(null);
+    const [dragType, setDragType] = useState<"move" | "resize-start" | "resize-end" | "progress" | null>(null);
     const [dragStartX, setDragStartX] = useState(0);
+    const [dragStartY, setDragStartY] = useState(0);
     const [hoveredTask, setHoveredTask] = useState<Task | null>(null);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
     const rowRef = useRef<HTMLDivElement>(null);
 
     // Get the position and width for a task based on its dates
@@ -41,11 +45,17 @@ const TaskRow: React.FC<TaskRowProps> = ({
     };
 
     // Handle mouse down on a task (for drag to move or resize)
-    const handleMouseDown = (e: React.MouseEvent, task: Task, type: "move" | "resize-start" | "resize-end") => {
+    const handleMouseDown = (
+        e: React.MouseEvent,
+        task: Task,
+        type: "move" | "resize-start" | "resize-end" | "progress"
+    ) => {
         e.preventDefault();
         setDraggingTask(task);
         setDragType(type);
         setDragStartX(e.clientX);
+        setDragStartY(e.clientY);
+        setIsDragging(false); // Reset at the start of a potential drag
         updateTooltipPosition(e);
 
         // Add the mouse up listener to the document
@@ -64,11 +74,30 @@ const TaskRow: React.FC<TaskRowProps> = ({
     const handleDocumentMouseMove = (e: MouseEvent) => {
         if (!draggingTask || !dragType || !rowRef.current) return;
 
+        // Set isDragging to true after the pointer has moved more than 5px
+        // This prevents accidental clicks being registered as drags
+        if (!isDragging) {
+            const deltaX = Math.abs(e.clientX - dragStartX);
+            const deltaY = Math.abs(e.clientY - dragStartY);
+            if (deltaX > 5 || deltaY > 5) {
+                setIsDragging(true);
+            } else {
+                return; // Don't process small movements
+            }
+        }
+
         const rect = rowRef.current.getBoundingClientRect();
-        const deltaX = e.clientX - dragStartX;
+
+        if (dragType === "progress") {
+            // Handle progress dragging
+            handleProgressDrag(e, rect, draggingTask);
+            return;
+        }
 
         // Calculate days per pixel based on column width
-        const daysPerPixel = getDuration(startDate, endDate) / rect.width;
+        const totalDaysInView = getDuration(startDate, endDate);
+        const daysPerPixel = totalDaysInView / rect.width;
+        const deltaX = e.clientX - dragStartX;
         const daysDelta = deltaX * daysPerPixel;
 
         let newStartDate = new Date(draggingTask.startDate);
@@ -85,6 +114,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
             // Resize from the end (move end date)
             newEndDate = new Date(newEndDate.getTime() + daysDelta * 24 * 60 * 60 * 1000);
         }
+
+        // Snap dates to whole days
+        newStartDate = snapDateToGrid(newStartDate);
+        newEndDate = snapDateToGrid(newEndDate);
 
         // Ensure the task stays within the timeline boundaries
         if (newStartDate < startDate) {
@@ -112,6 +145,17 @@ const TaskRow: React.FC<TaskRowProps> = ({
             }
         }
 
+        // Ensure minimum task duration of 1 day
+        if (getDuration(newStartDate, newEndDate) < 1) {
+            if (dragType === "resize-start") {
+                newStartDate = new Date(newEndDate);
+                newStartDate.setDate(newStartDate.getDate() - 1);
+            } else {
+                newEndDate = new Date(newStartDate);
+                newEndDate.setDate(newEndDate.getDate() + 1);
+            }
+        }
+
         // Update the task
         const updatedTask = { ...draggingTask, startDate: newStartDate, endDate: newEndDate };
         if (onTaskUpdate) {
@@ -122,10 +166,48 @@ const TaskRow: React.FC<TaskRowProps> = ({
         setDragStartX(e.clientX);
     };
 
+    // Handle progress bar dragging
+    const handleProgressDrag = (e: MouseEvent, rect: DOMRect, task: Task) => {
+        if (!rowRef.current) return;
+
+        // Calculate task position
+        const taskDisplay = getTaskDisplay(task);
+        const taskLeft = parseFloat(taskDisplay.left.replace("px", ""));
+        const taskWidth = parseFloat(taskDisplay.width.replace("px", ""));
+
+        // Calculate relative position to the task
+        const relativeX = e.clientX - rect.left - taskLeft;
+
+        // Calculate new percentage (constrained between 0-100)
+        let newPercent = Math.max(0, Math.min(100, (relativeX / taskWidth) * 100));
+        newPercent = Math.round(newPercent); // Round to nearest whole percent
+
+        // Update the task if percentage changed
+        if (task.percent !== newPercent) {
+            const updatedTask = { ...task, percent: newPercent };
+
+            // Use specific progress update handler if available
+            if (onProgressChange) {
+                onProgressChange(person.id, task.id, newPercent);
+            } else if (onTaskUpdate) {
+                onTaskUpdate(person.id, updatedTask);
+            }
+
+            setDraggingTask(updatedTask);
+        }
+    };
+
     // Handle mouse up after dragging
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+        // If we never really dragged (just a click), and it was a move operation,
+        // we should treat it as a task click
+        if (!isDragging && dragType === "move" && draggingTask && onTaskClick) {
+            onTaskClick(draggingTask, person);
+        }
+
         setDraggingTask(null);
         setDragType(null);
+        setIsDragging(false);
         document.removeEventListener("mouseup", handleMouseUp);
         document.removeEventListener("mousemove", handleDocumentMouseMove);
     };
@@ -196,13 +278,23 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                 }}
                                 onMouseDown={e => handleMouseDown(e, task, "move")}
                                 onMouseEnter={() => setHoveredTask(task)}
-                                onClick={e => handleTaskClick(e, task)}>
+                                onClick={e => {
+                                    // Only treat as a click if we're not in the middle of a drag operation
+                                    if (!isDragging) {
+                                        handleTaskClick(e, task);
+                                    }
+                                }}>
                                 {/* Task name with ellipsis if too long */}
                                 <span className="truncate select-none">{task.name}</span>
 
                                 {/* Task progress indicator (optional) */}
                                 {task.percent !== undefined && (
-                                    <div className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 rounded-full overflow-hidden">
+                                    <div
+                                        className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 rounded-full overflow-hidden cursor-ew-resize"
+                                        onMouseDown={e => {
+                                            e.stopPropagation(); // Prevent task move
+                                            handleMouseDown(e, task, "progress");
+                                        }}>
                                         <div
                                             className="h-full bg-white rounded-full"
                                             style={{ width: `${task.percent}%` }}></div>
@@ -253,6 +345,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                             <>
                                                 <div className="font-semibold">Progress:</div>
                                                 <div>{task.percent}%</div>
+                                                <div className="font-semibold col-span-2 mt-1 text-xs text-gray-600">
+                                                    (Drag progress bar to adjust)
+                                                </div>
                                             </>
                                         )}
                                     </div>

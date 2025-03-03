@@ -19,6 +19,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     theme = DEFAULT_THEME,
     onTaskUpdate,
     onTaskClick,
+    onProgressChange,
     currentDate = new Date(),
     showCurrentDateMarker = true,
     visibleColumns = 6,
@@ -28,6 +29,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     const derivedStartDate = customStartDate || findEarliestDate(people);
     const derivedEndDate = customEndDate || findLatestDate(people);
 
+    // Add padding to the timeline start/end
     const startDate = new Date(derivedStartDate);
     startDate.setDate(1); // Set to the first day of the month
 
@@ -74,6 +76,22 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
+    const handleProgressChange = (personId: string, taskId: string, percent: number) => {
+        if (onProgressChange) {
+            onProgressChange(personId, taskId, percent);
+        } else if (onTaskUpdate) {
+            // If no specific progress handler, update the whole task
+            const person = people.find(p => p.id === personId);
+            if (person) {
+                const task = person.tasks.find(t => t.id === taskId);
+                if (task) {
+                    const updatedTask = { ...task, percent };
+                    onTaskUpdate(personId, updatedTask);
+                }
+            }
+        }
+    };
+
     return (
         <div className="gantt-chart w-full rounded-lg border border-gray-200 overflow-hidden">
             <div className="p-4 border-b border-gray-200">
@@ -100,6 +118,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                                 theme={theme}
                                 onTaskUpdate={handleTaskUpdate}
                                 onTaskClick={handleTaskClick}
+                                onProgressChange={handleProgressChange}
                             />
                         ))}
                     </Timeline>

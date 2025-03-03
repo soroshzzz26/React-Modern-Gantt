@@ -41,6 +41,7 @@ export interface GanttChartProps {
     showCurrentDateMarker?: boolean;
     visibleColumns?: number;
     columnWidth?: number;
+    onProgressChange?: (personId: string, taskId: string, percent: number) => void;
 }
 export interface TimelineProps {
     startDate: Date;
@@ -64,6 +65,7 @@ export interface TaskRowProps {
     theme?: GanttTheme;
     onTaskUpdate?: (personId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, person: Person) => void;
+    onProgressChange?: (personId: string, taskId: string, percent: number) => void;
 }
 export declare enum DateDisplayFormat {
     MONTH_YEAR = "MONTH_YEAR",
@@ -82,3 +84,4 @@ export declare function calculateTaskPosition(task: Task, startDate: Date, endDa
 };
 export declare function detectCollisions(tasks: Task[]): Task[][];
 export declare function generateTimelineHeader(startDate: Date, endDate: Date): string[];
+export declare function snapDateToGrid(date: Date, gridSize?: number): Date;

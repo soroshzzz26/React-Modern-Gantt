@@ -43,6 +43,7 @@ export interface GanttChartProps {
     showCurrentDateMarker?: boolean;
     visibleColumns?: number; // Number of columns visible without scrolling
     columnWidth?: number; // Width in pixels for each month column
+    onProgressChange?: (personId: string, taskId: string, percent: number) => void; // New callback for progress changes
 }
 
 export interface TimelineProps {
@@ -69,6 +70,7 @@ export interface TaskRowProps {
     theme?: GanttTheme;
     onTaskUpdate?: (personId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, person: Person) => void;
+    onProgressChange?: (personId: string, taskId: string, percent: number) => void; // Pass through progress change handler
 }
 
 export enum DateDisplayFormat {
@@ -126,23 +128,57 @@ export function calculateTaskPosition(
     width: string;
     isOutOfRange: boolean;
 } {
-    const totalDays = getDuration(startDate, endDate);
-    const taskStart = Math.max(0, getDuration(startDate, task.startDate) - 1);
-    const taskEnd = Math.min(totalDays, getDuration(startDate, task.endDate));
-    const taskDuration = taskEnd - taskStart;
+    // Standardize dates by setting hours to zero to avoid time-related calculation errors
+    const startTime = new Date(startDate);
+    startTime.setHours(0, 0, 0, 0);
 
-    // Convert day positions to pixels based on column width
-    const dayWidth = columnWidth / getDaysInMonth(startDate.getFullYear(), startDate.getMonth());
-    const left = taskStart * dayWidth;
+    const endTime = new Date(endDate);
+    endTime.setHours(23, 59, 59, 999);
+
+    const taskStartTime = new Date(task.startDate);
+    taskStartTime.setHours(0, 0, 0, 0);
+
+    const taskEndTime = new Date(task.endDate);
+    taskEndTime.setHours(23, 59, 59, 999);
+
+    // Total days in the visible timeline
+    const totalDays = getDuration(startTime, endTime);
+
+    // Calculate task position
+    // Zero-based index of start day (days from timeline start)
+    const taskStartDay = Math.max(0, getDuration(startTime, taskStartTime));
+
+    // End day position
+    const taskEndDay = Math.min(totalDays, getDuration(startTime, taskEndTime));
+
+    // Task width in days
+    const taskDuration = Math.max(1, taskEndDay - taskStartDay); // Ensure at least 1 day width
+
+    // Calculate days per month on average for the timeline
+    const avgDaysPerMonth = totalDays / calculateMonthsBetween(startTime, endTime);
+
+    // Calculate pixel width per day based on column width
+    const dayWidth = columnWidth / avgDaysPerMonth;
+
+    // Position and width calculations
+    const left = taskStartDay * dayWidth;
     const width = taskDuration * dayWidth;
 
-    const isOutOfRange = task.startDate > endDate || task.endDate < startDate;
+    // Check if task is outside the visible range
+    const isOutOfRange = taskEndTime < startTime || taskStartTime > endTime;
 
     return {
         left: `${left}px`,
         width: `${width}px`,
         isOutOfRange,
     };
+}
+
+// Helper function to calculate the number of months between two dates
+function calculateMonthsBetween(startDate: Date, endDate: Date): number {
+    return (
+        (endDate.getFullYear() - startDate.getFullYear()) * 12 + endDate.getMonth() - startDate.getMonth() + 1 // Include both start and end months
+    );
 }
 
 export function detectCollisions(tasks: Task[]): Task[][] {
@@ -179,4 +215,13 @@ export function generateTimelineHeader(startDate: Date, endDate: Date): string[]
     }
 
     return dates;
+}
+
+// New function to snap a date to the timeline grid
+export function snapDateToGrid(date: Date, gridSize: number = 1): Date {
+    const newDate = new Date(date);
+    const day = newDate.getDate();
+    const snappedDay = Math.round(day / gridSize) * gridSize;
+    newDate.setDate(snappedDay);
+    return newDate;
 }

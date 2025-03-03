@@ -26,14 +26,10 @@ const Timeline: React.FC<TimelineProps> = ({
         currentDate.setMonth(currentDate.getMonth() + 1);
     }
 
-    // Function to get specific days to display for a month (1st, 8th, 15th, 22nd, 29th)
-    const getKeyDaysForMonth = (year: number, month: number, daysInMonth: number): number[] => {
-        const days = [1];
-        if (daysInMonth >= 8) days.push(8);
-        if (daysInMonth >= 15) days.push(15);
-        if (daysInMonth >= 22) days.push(22);
-        if (daysInMonth >= 29) days.push(29);
-        return days;
+    // Always display 5 days per month at fixed 7-day intervals
+    const getKeyDaysForMonth = (): number[] => {
+        // Always return these 5 fixed days (1, 8, 15, 22, 29)
+        return [1, 8, 15, 22, 29];
     };
 
     // Class definitions based on theme
@@ -58,28 +54,28 @@ const Timeline: React.FC<TimelineProps> = ({
                                 </p>
                             </div>
 
-                            {/* Day numbers */}
+                            {/* Day numbers - Always show 5 days per month */}
                             <div
                                 className={`flex h-12 items-center justify-between px-2 text-xs ${subheaderTextClass} ${headerBgClass}`}>
-                                {getKeyDaysForMonth(
-                                    month.date.getFullYear(),
-                                    month.date.getMonth(),
-                                    month.daysInMonth
-                                ).map(day => (
-                                    <div
-                                        key={`day-${month.date.getMonth()}-${day}`}
-                                        className="relative"
-                                        style={{ width: "20px", textAlign: "center" }}>
-                                        <span>{day}</span>
-                                        {/* Vertical day separator line */}
+                                {getKeyDaysForMonth().map(day => {
+                                    // Handle days that may not exist in the month (like 29 in February)
+                                    const validDay = day <= month.daysInMonth ? day : month.daysInMonth;
+                                    return (
                                         <div
-                                            className="absolute top-full h-screen w-px bg-gray-200 -z-10"
-                                            style={{
-                                                left: "50%",
-                                                transform: "translateX(-50%)",
-                                            }}></div>
-                                    </div>
-                                ))}
+                                            key={`day-${month.date.getMonth()}-${day}`}
+                                            className="relative"
+                                            style={{ width: "20px", textAlign: "center" }}>
+                                            <span>{validDay}</span>
+                                            {/* Vertical day separator line */}
+                                            <div
+                                                className="absolute top-full h-screen w-px bg-gray-200 -z-10"
+                                                style={{
+                                                    left: "50%",
+                                                    transform: "translateX(-50%)",
+                                                }}></div>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     ))}
