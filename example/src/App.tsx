@@ -1,9 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GanttChart } from "react-modern-gantt";
 
+// Define types to match the library's expected types
+interface Task {
+    id: string;
+    name: string;
+    startDate: Date;
+    endDate: Date;
+    color: string;
+    percent?: number;
+    dependencies?: string[];
+}
+
+interface Person {
+    id: string;
+    name: string;
+    role?: string;
+    avatar?: string;
+    tasks: Task[];
+}
+
+interface TaskUpdate {
+    personId: string;
+    taskId: string;
+    startDate: Date;
+    endDate: Date;
+    time: string;
+}
+
 const GanttChartDemo = () => {
-    // Demo data
-    const [people, setPeople] = useState([
+    // Demo data with proper typing
+    const [people, setPeople] = useState<Person[]>([
         {
             id: "1",
             name: "Alice Johnson",
@@ -75,30 +102,138 @@ const GanttChartDemo = () => {
         },
     ]);
 
-    const [currentMonth, setCurrentMonth] = useState(new Date(2023, 3, 15)); // April 15, 2023
-    const [editMode, setEditMode] = useState(true);
+    const [currentMonth, setCurrentMonth] = useState<Date>(new Date(2023, 3, 15)); // April 15, 2023
+    const [editMode, setEditMode] = useState<boolean>(true);
+    const [lastUpdatedTask, setLastUpdatedTask] = useState<TaskUpdate | null>(null);
+    const [updateCounter, setUpdateCounter] = useState<number>(0);
 
-    // Handler for task updates
-    const handleTaskUpdate = (personId: any, updatedTask: any) => {
-        setPeople(currentPeople =>
-            currentPeople.map(person =>
-                person.id === personId
-                    ? {
-                          ...person,
-                          tasks: person.tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)),
-                      }
-                    : person
+    // Debugging - log whenever people changes
+    useEffect(() => {
+        console.log("People state updated:", people);
+    }, [people]);
+
+    // Handler for task updates with improved error handling and debugging
+    const handleTaskUpdate = (personId: string, updatedTask: any) => {
+        console.log("App: handleTaskUpdate called", { personId, updatedTask });
+
+        // Add detailed console logging for debugging
+        console.log("personId:", personId);
+        console.log("updatedTask type:", typeof updatedTask);
+        console.log(
+            "updatedTask contents:",
+            JSON.stringify(
+                {
+                    ...updatedTask,
+                    startDate: updatedTask.startDate?.toString(),
+                    endDate: updatedTask.endDate?.toString(),
+                },
+                null,
+                2
             )
         );
+        console.log(
+            "Date types: startDate is",
+            updatedTask.startDate instanceof Date ? "Date object" : typeof updatedTask.startDate,
+            "endDate is",
+            updatedTask.endDate instanceof Date ? "Date object" : typeof updatedTask.endDate
+        );
+
+        // Validate critical data
+        if (!personId || !updatedTask || !updatedTask.id) {
+            console.error("Invalid update data:", { personId, updatedTask });
+            return;
+        }
+
+        // Ensure we have valid Date objects
+        const startDate =
+            updatedTask.startDate instanceof Date
+                ? new Date(updatedTask.startDate) // Create a fresh copy to ensure reactivity
+                : new Date(updatedTask.startDate);
+
+        const endDate =
+            updatedTask.endDate instanceof Date
+                ? new Date(updatedTask.endDate) // Create a fresh copy to ensure reactivity
+                : new Date(updatedTask.endDate);
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            console.error("Invalid dates in update:", {
+                startDate: updatedTask.startDate,
+                endDate: updatedTask.endDate,
+            });
+            return;
+        }
+
+        // Increment update counter to track updates
+        setUpdateCounter(prev => prev + 1);
+
+        // Keep track of the last updated task for debugging
+        setLastUpdatedTask({
+            personId,
+            taskId: updatedTask.id,
+            startDate,
+            endDate,
+            time: new Date().toISOString(),
+        });
+
+        // Update the state using a functional update to ensure we have the latest state
+        setPeople(prevPeople => {
+            // Create a deep copy of the people array
+            const newPeople = [...prevPeople];
+
+            // Find the person index
+            const personIndex = newPeople.findIndex(p => p.id === personId);
+            if (personIndex < 0) {
+                console.error(`Person with ID ${personId} not found`);
+                return prevPeople;
+            }
+
+            // Create a copy of the person object
+            const person = { ...newPeople[personIndex] };
+
+            // Find the task index
+            const taskIndex = person.tasks.findIndex(t => t.id === updatedTask.id);
+            if (taskIndex < 0) {
+                console.error(`Task with ID ${updatedTask.id} not found for person ${personId}`);
+                return prevPeople;
+            }
+
+            // Create a copy of the tasks array
+            person.tasks = [...person.tasks];
+
+            // Update the specific task with a new object
+            person.tasks[taskIndex] = {
+                ...person.tasks[taskIndex], // Keep all original properties
+                startDate, // Update with new dates
+                endDate,
+                // Ensure other properties from the updatedTask are maintained
+                name: updatedTask.name || person.tasks[taskIndex].name,
+                color: updatedTask.color || person.tasks[taskIndex].color,
+                percent: updatedTask.percent !== undefined ? updatedTask.percent : person.tasks[taskIndex].percent,
+                dependencies: updatedTask.dependencies || person.tasks[taskIndex].dependencies,
+            };
+
+            // Update the person in our new array
+            newPeople[personIndex] = person;
+
+            console.log(`Task update ${updateCounter} complete:`, {
+                personId,
+                taskId: updatedTask.id,
+                startDate: startDate.toLocaleString(),
+                endDate: endDate.toLocaleString(),
+            });
+
+            return newPeople;
+        });
     };
 
     // Handler for task clicks
-    const handleTaskClick = (task: any, person: any) => {
-        console.log(
-            `Clicked on "${task.name}" (${
-                person.name
-            })\nStart: ${task.startDate.toLocaleDateString()}\nEnd: ${task.endDate.toLocaleDateString()}`
-        );
+    const handleTaskClick = (task: Task, person: Person) => {
+        if (!task || !person) return;
+
+        const startDate = task.startDate instanceof Date ? task.startDate.toLocaleDateString() : "Invalid date";
+        const endDate = task.endDate instanceof Date ? task.endDate.toLocaleDateString() : "Invalid date";
+
+        console.log(`Clicked on "${task.name}" (${person.name})\nStart: ${startDate}\nEnd: ${endDate}`);
     };
 
     return (
@@ -115,13 +250,13 @@ const GanttChartDemo = () => {
                                 className="rounded border border-gray-300 px-2 py-1"
                                 value={currentMonth.getMonth()}
                                 onChange={e => setCurrentMonth(new Date(2023, parseInt(e.target.value), 15))}>
-                                <option value={0}>January</option>
-                                <option value={1}>February</option>
-                                <option value={2}>March</option>
-                                <option value={3}>April</option>
-                                <option value={4}>May</option>
-                                <option value={5}>June</option>
-                                <option value={6}>July</option>
+                                <option value="0">January</option>
+                                <option value="1">February</option>
+                                <option value="2">March</option>
+                                <option value="3">April</option>
+                                <option value="4">May</option>
+                                <option value="5">June</option>
+                                <option value="6">July</option>
                             </select>
                         </div>
 
@@ -135,6 +270,24 @@ const GanttChartDemo = () => {
                     </div>
                 </div>
 
+                {/* Debugging info */}
+                {lastUpdatedTask && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                        <h3 className="font-bold text-yellow-800">Last Task Update (#{updateCounter})</h3>
+                        <pre className="text-xs mt-2 bg-white p-2 rounded overflow-auto">
+                            {JSON.stringify(
+                                {
+                                    ...lastUpdatedTask,
+                                    startDate: lastUpdatedTask.startDate.toLocaleString(),
+                                    endDate: lastUpdatedTask.endDate.toLocaleString(),
+                                },
+                                null,
+                                2
+                            )}
+                        </pre>
+                    </div>
+                )}
+
                 {/* Gantt Chart with Editor */}
                 <div className="relative">
                     <GanttChart
@@ -144,6 +297,7 @@ const GanttChartDemo = () => {
                         editMode={editMode}
                         showCurrentDateMarker={true}
                         onTaskClick={handleTaskClick}
+                        onTaskUpdate={handleTaskUpdate}
                     />
                 </div>
 

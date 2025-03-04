@@ -1,6 +1,6 @@
 // Main components
 export { default as GanttChart } from "./components/GanttChart";
-export { default as TaskRow } from "./components/TaskRow";
+export { default as TaskRow } from "./components/Task/TaskRow";
 
 // Types and models
 export type { Task, Person, GanttTheme, GanttChartProps, TaskRowProps, NameListProps, TimelineProps } from "./models";

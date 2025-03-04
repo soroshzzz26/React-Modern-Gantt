@@ -9,7 +9,7 @@ import {
     findEarliestDate,
     findLatestDate,
 } from "../models";
-import TaskRow from "./TaskRow";
+import TaskRow from "./Task/TaskRow";
 
 /**
  * GanttChart Component
@@ -17,7 +17,7 @@ import TaskRow from "./TaskRow";
  * A simple, month-based Gantt chart for project timelines
  */
 const GanttChart: React.FC<GanttChartProps> = ({
-    people,
+    people = [], // Provide empty array as default to avoid undefined
     startDate: customStartDate,
     endDate: customEndDate,
     title = "Project Timeline",
@@ -32,9 +32,23 @@ const GanttChart: React.FC<GanttChartProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+    // Add logging for debugging
+    useEffect(() => {
+        console.log("GanttChart rendered with props:", {
+            peopleCount: people?.length,
+            startDate: customStartDate,
+            endDate: customEndDate,
+            onTaskUpdate: !!onTaskUpdate,
+            onTaskClick: !!onTaskClick,
+        });
+    }, [people, customStartDate, customEndDate, onTaskUpdate, onTaskClick]);
+
+    // Validate people array to ensure it's valid
+    const validPeople = Array.isArray(people) ? people : [];
+
     // Find the earliest and latest dates if not provided
-    const derivedStartDate = customStartDate || findEarliestDate(people);
-    const derivedEndDate = customEndDate || findLatestDate(people);
+    const derivedStartDate = customStartDate || findEarliestDate(validPeople);
+    const derivedEndDate = customEndDate || findLatestDate(validPeople);
 
     // Get all months for the timeline
     const months = getMonthsBetween(derivedStartDate, derivedEndDate);
@@ -50,29 +64,63 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Calculate total container height based on all people's tasks
     const getTotalHeight = () => {
         let height = 0;
-        people.forEach(person => {
-            const taskRows = detectTaskOverlaps(person.tasks);
-            height += Math.max(60, taskRows.length * 40 + 20); // 40px per row + padding
+        validPeople.forEach(person => {
+            if (person && Array.isArray(person.tasks)) {
+                const taskRows = detectTaskOverlaps(person.tasks);
+                height += Math.max(60, taskRows.length * 40 + 20); // 40px per row + padding
+            } else {
+                // Default height for person with no valid tasks
+                height += 60;
+            }
         });
         return height;
     };
 
     // Apply theme classes
-    const headerBgClass = theme.headerBackground || "bg-white";
-    const headerTextClass = theme.headerText || "text-gray-700";
-    const borderClass = theme.borderColor || "border-gray-200";
-    const highlightClass = theme.backgroundHighlight || "bg-blue-50";
-    const markerClass = theme.todayMarkerColor || "bg-red-500";
+    const headerBgClass = theme?.headerBackground || "bg-white";
+    const headerTextClass = theme?.headerText || "text-gray-700";
+    const borderClass = theme?.borderColor || "border-gray-200";
+    const highlightClass = theme?.backgroundHighlight || "bg-blue-50";
+    const markerClass = theme?.todayMarkerColor || "bg-red-500";
 
     // Format month with year for display
     const formatMonthYear = (date: Date) => {
+        if (!(date instanceof Date)) return "";
         return date.toLocaleString("default", { month: "short", year: "2-digit" });
     };
 
     // Handle task updates - this will trigger re-render and recalculate collisions
     const handleTaskUpdate = (personId: string, updatedTask: Task) => {
+        console.log("GanttChart: handleTaskUpdate called with:", { personId, updatedTask });
         if (onTaskUpdate) {
-            onTaskUpdate(personId, updatedTask);
+            try {
+                // Ensure we have Date objects
+                const ensuredTask = {
+                    ...updatedTask,
+                    startDate:
+                        updatedTask.startDate instanceof Date ? updatedTask.startDate : new Date(updatedTask.startDate),
+                    endDate: updatedTask.endDate instanceof Date ? updatedTask.endDate : new Date(updatedTask.endDate),
+                };
+
+                // Call the parent's onTaskUpdate function
+                onTaskUpdate(personId, ensuredTask);
+            } catch (error) {
+                console.error("Error in handleTaskUpdate:", error);
+            }
+        } else {
+            console.warn("onTaskUpdate is not defined");
+        }
+    };
+
+    // Handle task clicks
+    const handleTaskClick = (task: Task, person: Person) => {
+        console.log("GanttChart: handleTaskClick called with:", { task, person });
+        if (onTaskClick) {
+            try {
+                onTaskClick(task, person);
+            } catch (error) {
+                console.error("Error in handleTaskClick:", error);
+            }
         }
     };
 
@@ -96,17 +144,20 @@ const GanttChart: React.FC<GanttChartProps> = ({
                     </div>
 
                     {/* Person names */}
-                    {people.map(person => {
-                        const taskRows = detectTaskOverlaps(person.tasks);
+                    {validPeople.map(person => {
+                        if (!person) return null;
+
+                        const tasks = Array.isArray(person.tasks) ? person.tasks : [];
+                        const taskRows = detectTaskOverlaps(tasks);
                         const rowHeight = Math.max(60, taskRows.length * 40 + 20);
 
                         return (
                             <div
-                                key={`person-${person.id}`}
+                                key={`person-${person.id || "unknown"}`}
                                 className="p-2 border-r border-b border-gray-200 font-medium"
                                 style={{ height: `${rowHeight}px` }}
-                                data-testid={`person-label-${person.id}`}>
-                                <div className="font-medium">{person.name}</div>
+                                data-testid={`person-label-${person.id || "unknown"}`}>
+                                <div className="font-medium">{person.name || "Unnamed"}</div>
                                 {person.role && <div className="text-xs text-gray-500">{person.role}</div>}
                             </div>
                         );
@@ -150,19 +201,23 @@ const GanttChart: React.FC<GanttChartProps> = ({
                             )}
 
                             {/* Task rows */}
-                            {people.map(person => (
-                                <TaskRow
-                                    key={`task-row-${person.id}`}
-                                    person={person}
-                                    startDate={derivedStartDate}
-                                    endDate={derivedEndDate}
-                                    totalMonths={totalMonths}
-                                    monthWidth={150}
-                                    editMode={editMode}
-                                    onTaskUpdate={handleTaskUpdate}
-                                    onTaskClick={onTaskClick}
-                                />
-                            ))}
+                            {validPeople.map(person => {
+                                if (!person || !person.id) return null;
+
+                                return (
+                                    <TaskRow
+                                        key={`task-row-${person.id}`}
+                                        person={person}
+                                        startDate={derivedStartDate}
+                                        endDate={derivedEndDate}
+                                        totalMonths={totalMonths}
+                                        monthWidth={150}
+                                        editMode={editMode}
+                                        onTaskUpdate={handleTaskUpdate}
+                                        onTaskClick={handleTaskClick}
+                                    />
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
