@@ -1,4 +1,4 @@
-import { Task } from "../models";
+import { Task } from "@/utils/types";
 
 /**
  * Manages the detection and resolution of task collisions

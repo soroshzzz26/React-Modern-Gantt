@@ -1,20 +1,9 @@
 import React from "react";
-import { Person, Task } from "../../models";
-interface TaskRowProps {
-    person: Person;
-    startDate: Date;
-    endDate: Date;
-    totalMonths: number;
-    monthWidth: number;
-    editMode?: boolean;
-    showProgress?: boolean;
-    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
-    onTaskClick?: (task: Task, person: Person) => void;
-}
+import { TaskRowProps } from "@/utils/types";
 /**
  * TaskRow Component
  *
- * Displays and manages the tasks for a single person
+ * Displays and manages the tasks for a single task group
  */
 declare const TaskRow: React.FC<TaskRowProps>;
 export default TaskRow;

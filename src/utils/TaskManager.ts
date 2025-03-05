@@ -1,4 +1,4 @@
-import { Task } from "../models";
+import { Task } from "@/utils/types";
 
 /**
  * Manages operations on tasks like calculating positions, dates, etc.

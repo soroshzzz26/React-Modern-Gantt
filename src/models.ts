@@ -1,81 +1,7 @@
 /**
- * Core data models for the simplified Gantt chart
+ * Core utility functions for the Gantt chart
  */
-
-// Basic types
-export interface Task {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
-    color: string;
-    percent?: number;
-    dependencies?: string[];
-}
-
-export interface Person {
-    id: string;
-    name: string;
-    role?: string;
-    avatar?: string;
-    tasks: Task[];
-}
-
-// Theme configuration
-export interface GanttTheme {
-    headerBackground?: string;
-    headerText?: string;
-    backgroundHighlight?: string;
-    borderColor?: string;
-    todayMarkerColor?: string;
-}
-
-// Component props
-export interface GanttChartProps {
-    people: Person[];
-    startDate?: Date;
-    endDate?: Date;
-    title?: string;
-    currentDate?: Date;
-    showCurrentDateMarker?: boolean;
-    todayLabel?: string;
-    editMode?: boolean;
-    theme?: GanttTheme;
-    headerLabel?: string;
-    showProgress?: boolean;
-    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
-    onTaskClick?: (task: Task, person: Person) => void;
-}
-
-export interface TaskRowProps {
-    person: Person;
-    startDate: Date;
-    endDate: Date;
-    totalDays: number;
-    onTaskUpdate: (personId: string, updatedTask: Task) => void;
-}
-
-export interface NameListProps {
-    people: Person[];
-    showAvatar?: boolean;
-    showTaskCount?: boolean;
-    theme?: GanttTheme;
-}
-
-export interface TimelineProps {
-    startDate: Date;
-    endDate: Date;
-    columnWidth: number;
-    theme?: GanttTheme;
-    children?: React.ReactNode;
-    scrollContainerRef?: React.RefObject<HTMLDivElement>;
-}
-
-export enum DateDisplayFormat {
-    MONTH_YEAR = "month-year",
-    FULL_DATE = "full-date",
-    SHORT_DATE = "short-date",
-}
+import { Task, TaskGroup, GanttTheme, DateDisplayFormat } from "./utils/types";
 
 // Default theme
 export const DEFAULT_THEME: GanttTheme = {
@@ -231,11 +157,11 @@ export function detectTaskOverlaps(tasks: Task[]): Task[][] {
 /**
  * Finds the earliest start date from all tasks
  */
-export function findEarliestDate(people: Person[]): Date {
+export function findEarliestDate(taskGroups: TaskGroup[]): Date {
     let earliestDate = new Date();
 
-    people.forEach(person => {
-        person.tasks.forEach(task => {
+    taskGroups.forEach(group => {
+        group.tasks.forEach(task => {
             if (task.startDate < earliestDate) {
                 earliestDate = new Date(task.startDate);
             }
@@ -249,11 +175,11 @@ export function findEarliestDate(people: Person[]): Date {
 /**
  * Finds the latest end date from all tasks
  */
-export function findLatestDate(people: Person[]): Date {
+export function findLatestDate(taskGroups: TaskGroup[]): Date {
     let latestDate = new Date();
 
-    people.forEach(person => {
-        person.tasks.forEach(task => {
+    taskGroups.forEach(group => {
+        group.tasks.forEach(task => {
             if (task.endDate > latestDate) {
                 latestDate = new Date(task.endDate);
             }

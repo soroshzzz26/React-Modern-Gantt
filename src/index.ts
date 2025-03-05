@@ -1,16 +1,35 @@
 // Main components
 export { default as GanttChart } from "./components/GanttChart";
 export { default as TaskRow } from "./components/Task/TaskRow";
+export { default as TaskList } from "./components/Task/TaskList";
 
-// Types and models
-export type { Task, Person, GanttTheme, GanttChartProps, TaskRowProps, NameListProps, TimelineProps } from "./models";
+// UI Elements for composition
+export {
+    GanttTitle,
+    GanttHeader,
+    GanttCurrentDateMarker,
+    GanttTaskList,
+    GanttTimeline,
+    GanttTaskItem,
+} from "./components/Elements";
+
+// Types
+export type {
+    Task,
+    TaskGroup,
+    GanttTheme,
+    GanttChartProps,
+    TaskRowProps,
+    TaskListProps,
+    TimelineProps,
+    DateDisplayFormat,
+} from "@/utils/types";
 
 // Utility functions
 export {
     DEFAULT_THEME,
     formatMonth,
     formatDate,
-    DateDisplayFormat,
     getMonthsBetween,
     getDaysInMonth,
     getStandardDayMarkers,

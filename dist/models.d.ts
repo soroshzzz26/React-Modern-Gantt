@@ -1,71 +1,7 @@
 /**
- * Core data models for the simplified Gantt chart
+ * Core utility functions for the Gantt chart
  */
-/// <reference types="react" />
-export interface Task {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
-    color: string;
-    percent?: number;
-    dependencies?: string[];
-}
-export interface Person {
-    id: string;
-    name: string;
-    role?: string;
-    avatar?: string;
-    tasks: Task[];
-}
-export interface GanttTheme {
-    headerBackground?: string;
-    headerText?: string;
-    backgroundHighlight?: string;
-    borderColor?: string;
-    todayMarkerColor?: string;
-}
-export interface GanttChartProps {
-    people: Person[];
-    startDate?: Date;
-    endDate?: Date;
-    title?: string;
-    currentDate?: Date;
-    showCurrentDateMarker?: boolean;
-    todayLabel?: string;
-    editMode?: boolean;
-    theme?: GanttTheme;
-    headerLabel?: string;
-    showProgress?: boolean;
-    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
-    onTaskClick?: (task: Task, person: Person) => void;
-}
-export interface TaskRowProps {
-    person: Person;
-    startDate: Date;
-    endDate: Date;
-    totalDays: number;
-    onTaskUpdate: (personId: string, updatedTask: Task) => void;
-}
-export interface NameListProps {
-    people: Person[];
-    showAvatar?: boolean;
-    showTaskCount?: boolean;
-    theme?: GanttTheme;
-}
-export interface TimelineProps {
-    startDate: Date;
-    endDate: Date;
-    columnWidth: number;
-    theme?: GanttTheme;
-    children?: React.ReactNode;
-    scrollContainerRef?: React.RefObject<HTMLDivElement>;
-}
-export declare enum DateDisplayFormat {
-    MONTH_YEAR = "month-year",
-    FULL_DATE = "full-date",
-    SHORT_DATE = "short-date"
-}
+import { Task, TaskGroup, GanttTheme, DateDisplayFormat } from "./utils/types";
 export declare const DEFAULT_THEME: GanttTheme;
 /**
  * Formats a date to display just the month
@@ -101,8 +37,8 @@ export declare function detectTaskOverlaps(tasks: Task[]): Task[][];
 /**
  * Finds the earliest start date from all tasks
  */
-export declare function findEarliestDate(people: Person[]): Date;
+export declare function findEarliestDate(taskGroups: TaskGroup[]): Date;
 /**
  * Finds the latest end date from all tasks
  */
-export declare function findLatestDate(people: Person[]): Date;
+export declare function findLatestDate(taskGroups: TaskGroup[]): Date;

@@ -1,29 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Person, Task } from "../../models";
+import { Task, TaskGroup, TaskRowProps } from "@/utils/types";
 import { CollisionManager } from "../../utils/CollisionManager";
 import { TaskManager } from "../../utils/TaskManager";
 import TaskRenderer from "./TaskRenderer";
 import TaskTooltip from "./TaskTooltip";
 
-interface TaskRowProps {
-    person: Person;
-    startDate: Date;
-    endDate: Date;
-    totalMonths: number;
-    monthWidth: number;
-    editMode?: boolean;
-    showProgress?: boolean;
-    onTaskUpdate?: (personId: string, updatedTask: Task) => void;
-    onTaskClick?: (task: Task, person: Person) => void;
-}
-
 /**
  * TaskRow Component
  *
- * Displays and manages the tasks for a single person
+ * Displays and manages the tasks for a single task group
  */
 const TaskRow: React.FC<TaskRowProps> = ({
-    person,
+    taskGroup,
     startDate,
     endDate,
     totalMonths,
@@ -33,9 +21,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
     onTaskUpdate,
     onTaskClick,
 }) => {
-    if (!person || !person.id || !Array.isArray(person.tasks)) {
-        console.warn("TaskRow: Invalid person data", person);
-        return <div className="relative h-16">Invalid person data</div>;
+    if (!taskGroup || !taskGroup.id || !Array.isArray(taskGroup.tasks)) {
+        console.warn("TaskRow: Invalid task group data", taskGroup);
+        return <div className="relative h-16">Invalid task group data</div>;
     }
 
     const validStartDate = startDate instanceof Date ? startDate : new Date();
@@ -63,14 +51,14 @@ const TaskRow: React.FC<TaskRowProps> = ({
     };
 
     const taskRows = previewTask
-        ? CollisionManager.getPreviewArrangement(previewTask, person.tasks)
-        : CollisionManager.detectOverlaps(person.tasks);
+        ? CollisionManager.getPreviewArrangement(previewTask, taskGroup.tasks)
+        : CollisionManager.detectOverlaps(taskGroup.tasks);
 
     const rowHeight = Math.max(60, taskRows.length * 40 + 20);
 
     const handleTaskClick = (event: React.MouseEvent, task: Task) => {
         if (onTaskClick && !draggingTask) {
-            onTaskClick(task, person);
+            onTaskClick(task, taskGroup);
         }
     };
 
@@ -188,7 +176,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
             const currentPreviewTask = previewTaskRef.current;
 
             if (currentDraggingTask && currentPreviewTask && onTaskUpdate) {
-                onTaskUpdate(person.id, currentPreviewTask);
+                onTaskUpdate(taskGroup.id, currentPreviewTask);
             }
         } catch (error) {
             console.error("Error in handleMouseUp:", error);
@@ -206,9 +194,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     useEffect(() => {
         if (!draggingTask && previewTask && onTaskUpdate) {
-            onTaskUpdate(person.id, previewTask);
+            onTaskUpdate(taskGroup.id, previewTask);
         }
-    }, [draggingTask, previewTask, person.id, onTaskUpdate]);
+    }, [draggingTask, previewTask, taskGroup.id, onTaskUpdate]);
 
     useEffect(() => {
         return () => {
@@ -217,7 +205,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         };
     }, []);
 
-    if (!person.tasks || person.tasks.length === 0) {
+    if (!taskGroup.tasks || taskGroup.tasks.length === 0) {
         return <div className="relative h-16">No tasks available</div>;
     }
 
@@ -228,7 +216,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}
             ref={rowRef}
-            data-testid={`task-row-${person.id}`}>
+            data-testid={`task-row-${taskGroup.id}`}>
             {taskRows.map((rowTasks, rowIndex) => (
                 <React.Fragment key={`task-row-${rowIndex}`}>
                     {rowTasks.map(task => {

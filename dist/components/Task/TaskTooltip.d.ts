@@ -1,5 +1,5 @@
 import React from "react";
-import { Task } from "../../models";
+import { Task } from "@/utils/types";
 interface TaskTooltipProps {
     task: Task;
     position: {

@@ -1,9 +1,9 @@
 import React from "react";
-import { GanttChartProps } from "../models";
+import { GanttChartProps } from "@/utils/types";
 /**
- * GanttChart Component
+ * Enhanced GanttChart Component
  *
- * A simple, month-based Gantt chart for project timelines
+ * A modern, customizable Gantt chart for project timelines with both props and composable API
  */
 declare const GanttChart: React.FC<GanttChartProps>;
 export default GanttChart;
