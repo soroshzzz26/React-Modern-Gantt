@@ -12,12 +12,9 @@ export class CollisionManager {
             return [];
         }
 
-        // Sort tasks by start date
-        const sortedTasks = [...tasks].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
         const rows: Task[][] = [];
 
-        sortedTasks.forEach(task => {
+        tasks.forEach(task => {
             let placed = false;
 
             // Check each existing row for collisions

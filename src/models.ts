@@ -195,12 +195,9 @@ export function calculateTaskPosition(
  * Detects task overlaps and organizes them into rows
  */
 export function detectTaskOverlaps(tasks: Task[]): Task[][] {
-    // Sort tasks by start date
-    const sortedTasks = [...tasks].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
     const rows: Task[][] = [];
 
-    sortedTasks.forEach(task => {
+    tasks.forEach(task => {
         let placed = false;
 
         // Check each existing row for collisions

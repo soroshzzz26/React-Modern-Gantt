@@ -53,6 +53,19 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     // Reference to the row element
     const rowRef = useRef<HTMLDivElement>(null);
+    const draggingTaskRef = useRef<Task | null>(null);
+    const previewTaskRef = useRef<Task | null>(null);
+
+    // Update the state setters to also update the refs
+    const updateDraggingTask = (task: Task | null) => {
+        setDraggingTask(task);
+        draggingTaskRef.current = task;
+    };
+
+    const updatePreviewTask = (task: Task | null) => {
+        setPreviewTask(task);
+        previewTaskRef.current = task;
+    };
 
     // Calculate task rows to avoid overlaps
     // If we have a preview task, use it for dynamic collision detection
@@ -96,6 +109,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
         // Update tooltip position
+
         if (e instanceof MouseEvent && e.type === "mousemove") {
             if (hoveredTask) {
                 const mouseEvent = e as MouseEvent;
@@ -167,6 +181,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
                 // Update the preview task state which triggers a re-render with new collision detection
                 setPreviewTask(updatedTask);
+                updatePreviewTask(updatedTask);
+
+                console.log("Preview task updated:", updatedTask);
 
                 setDragStartX(e.clientX);
             } catch (error) {
@@ -188,6 +205,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
         // Initialize preview task with current task
         setPreviewTask(task);
 
+        updateDraggingTask(task);
+        updatePreviewTask(task);
+
         // Add document-level event listeners
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mousemove", handleMouseMove as unknown as EventListener);
@@ -195,28 +215,43 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     const handleMouseUp = () => {
         try {
-            if (draggingTask && previewTask) {
-                // If we have a preview task, use it for the update
-                // This ensures we're using the final position/dates after drag
+            console.log("handleMouseUp");
+            // Use the ref values which are always current
+            const currentDraggingTask = draggingTaskRef.current;
+            const currentPreviewTask = previewTaskRef.current;
+            console.log("draggingTask (ref):", currentDraggingTask);
+            console.log("previewTask (ref):", currentPreviewTask);
+
+            if (currentDraggingTask && currentPreviewTask) {
                 if (onTaskUpdate) {
-                    console.log("Calling onTaskUpdate with:", previewTask);
-                    // Use setTimeout to ensure this happens after the current event cycle
-                    setTimeout(() => {
-                        if (onTaskUpdate) onTaskUpdate(person.id, previewTask);
-                    }, 0);
+                    console.log("Calling onTaskUpdate with:", currentPreviewTask);
+                    onTaskUpdate(person.id, currentPreviewTask);
                 }
             }
         } catch (error) {
             console.error("Error in handleMouseUp:", error);
         } finally {
-            // Always reset states and remove event listeners
+            // Reset states and refs
             setDraggingTask(null);
             setDragType(null);
             setPreviewTask(null);
+            draggingTaskRef.current = null;
+            previewTaskRef.current = null;
+
             document.removeEventListener("mouseup", handleMouseUp);
             document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
         }
     };
+    // Add this effect to react to changes in dragging state
+    useEffect(() => {
+        console.log("Drag operation completed with:", previewTask);
+        if (!draggingTask && previewTask) {
+            // This triggers when dragging ends with a valid preview
+            if (onTaskUpdate) {
+                onTaskUpdate(person.id, previewTask);
+            }
+        }
+    }, [draggingTask, previewTask, person.id, onTaskUpdate]);
 
     // Cleanup event listeners on unmount
     useEffect(() => {
