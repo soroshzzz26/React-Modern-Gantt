@@ -11,6 +11,7 @@ interface TaskTooltipProps {
     endDate: Date;
     totalMonths: number;
     monthWidth: number;
+    showProgress?: boolean;
 }
 
 /**
@@ -25,20 +26,16 @@ const TaskTooltip: React.FC<TaskTooltipProps> = ({
     endDate,
     totalMonths,
     monthWidth,
+    showProgress = false,
 }) => {
-    // Default to task's original dates
     let displayStartDate = task.startDate;
     let displayEndDate = task.endDate;
 
-    // Always try to get live dates from the element's position
     try {
-        // Use taskId if provided (during drag) or the task's id (after drag)
         const id = taskId || task.id;
         const taskEl = document.querySelector(`[data-task-id="${id}"]`) as HTMLElement;
 
-        // If the element exists and has positioning styles applied
         if (taskEl && (dragType || taskEl.style.left || taskEl.style.width)) {
-            // Calculate dates based on the element's current position
             const dates = TaskManager.getLiveDatesFromElement(taskEl, startDate, endDate, totalMonths, monthWidth);
             displayStartDate = dates.startDate;
             displayEndDate = dates.endDate;
@@ -66,7 +63,7 @@ const TaskTooltip: React.FC<TaskTooltipProps> = ({
                 <div className="font-semibold">Duration:</div>
                 <div>{TaskManager.getDuration(displayStartDate, displayEndDate)} days</div>
 
-                {typeof task.percent === "number" && (
+                {showProgress && typeof task.percent === "number" && (
                     <>
                         <div className="font-semibold">Progress:</div>
                         <div>{task.percent}%</div>

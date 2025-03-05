@@ -12,6 +12,7 @@ interface TaskTooltipProps {
     endDate: Date;
     totalMonths: number;
     monthWidth: number;
+    showProgress?: boolean;
 }
 /**
  * Displays a tooltip with task information

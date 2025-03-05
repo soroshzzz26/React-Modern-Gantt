@@ -9,6 +9,7 @@ interface TaskRendererProps {
     isHovered: boolean;
     isDragging: boolean;
     editMode: boolean;
+    showProgress?: boolean;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -26,15 +27,14 @@ const TaskRenderer: React.FC<TaskRendererProps> = ({
     isHovered,
     isDragging,
     editMode,
+    showProgress = false,
     onMouseDown,
     onMouseEnter,
     onMouseLeave,
     onClick,
 }) => {
-    // Determine if we should show resize handles
     const showHandles = (isHovered || isDragging) && editMode;
 
-    // Ensure we have valid task data
     if (!task || !task.id) {
         console.warn("TaskRenderer: Invalid task data", task);
         return null;
@@ -56,7 +56,6 @@ const TaskRenderer: React.FC<TaskRendererProps> = ({
             onMouseLeave={onMouseLeave}
             data-testid={`task-${task.id}`}
             data-task-id={task.id}>
-            {/* Left resize handle - only visible on hover/drag */}
             {showHandles && (
                 <div
                     className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 cursor-ew-resize rounded-l"
@@ -69,14 +68,12 @@ const TaskRenderer: React.FC<TaskRendererProps> = ({
 
             <div className="truncate select-none">{task.name || "Unnamed Task"}</div>
 
-            {/* Progress bar */}
-            {typeof task.percent === "number" && (
+            {showProgress && typeof task.percent === "number" && (
                 <div className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 rounded-full overflow-hidden">
                     <div className="h-full bg-white rounded-full" style={{ width: `${task.percent}%` }} />
                 </div>
             )}
 
-            {/* Right resize handle - only visible on hover/drag */}
             {showHandles && (
                 <div
                     className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 cursor-ew-resize rounded-r"

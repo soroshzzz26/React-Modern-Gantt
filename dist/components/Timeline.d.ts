@@ -1,5 +1,10 @@
 import React from "react";
-import { TimelineProps } from "../models";
+import { GanttTheme } from "../models";
+export interface TimelineProps {
+    months: Date[];
+    currentMonthIndex: number;
+    theme?: GanttTheme;
+}
 /**
  * Timeline Component
  *

@@ -7,6 +7,7 @@ interface TaskRowProps {
     totalMonths: number;
     monthWidth: number;
     editMode?: boolean;
+    showProgress?: boolean;
     onTaskUpdate?: (personId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, person: Person) => void;
 }

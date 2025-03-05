@@ -12,6 +12,7 @@ interface TaskRowProps {
     totalMonths: number;
     monthWidth: number;
     editMode?: boolean;
+    showProgress?: boolean;
     onTaskUpdate?: (personId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, person: Person) => void;
 }
@@ -28,56 +29,45 @@ const TaskRow: React.FC<TaskRowProps> = ({
     totalMonths,
     monthWidth,
     editMode = true,
+    showProgress = false,
     onTaskUpdate,
     onTaskClick,
 }) => {
-    // Validate person and tasks
     if (!person || !person.id || !Array.isArray(person.tasks)) {
         console.warn("TaskRow: Invalid person data", person);
         return <div className="relative h-16">Invalid person data</div>;
     }
 
-    // Ensure dates are valid Date objects
     const validStartDate = startDate instanceof Date ? startDate : new Date();
     const validEndDate = endDate instanceof Date ? endDate : new Date();
 
-    // States for task interaction
     const [hoveredTask, setHoveredTask] = useState<Task | null>(null);
     const [draggingTask, setDraggingTask] = useState<Task | null>(null);
     const [dragType, setDragType] = useState<"move" | "resize-left" | "resize-right" | null>(null);
     const [dragStartX, setDragStartX] = useState(0);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-
-    // State for preview task while dragging
     const [previewTask, setPreviewTask] = useState<Task | null>(null);
 
-    // Reference to the row element
     const rowRef = useRef<HTMLDivElement>(null);
     const draggingTaskRef = useRef<Task | null>(null);
     const previewTaskRef = useRef<Task | null>(null);
 
-    // Update the state setters to also update the refs
-    const updateDraggingTask = (task: Task | null) => {
+    const updateDraggingTask = (task: Task) => {
         setDraggingTask(task);
         draggingTaskRef.current = task;
     };
 
-    const updatePreviewTask = (task: Task | null) => {
+    const updatePreviewTask = (task: Task) => {
         setPreviewTask(task);
         previewTaskRef.current = task;
     };
 
-    // Calculate task rows to avoid overlaps
-    // If we have a preview task, use it for dynamic collision detection
     const taskRows = previewTask
         ? CollisionManager.getPreviewArrangement(previewTask, person.tasks)
         : CollisionManager.detectOverlaps(person.tasks);
 
-    // Use 40px per row for height calculation, with a minimum of 60px
-    // Add some padding at the bottom (20px)
     const rowHeight = Math.max(60, taskRows.length * 40 + 20);
 
-    // Event handlers
     const handleTaskClick = (event: React.MouseEvent, task: Task) => {
         if (onTaskClick && !draggingTask) {
             onTaskClick(task, person);
@@ -108,8 +98,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
     };
 
     const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
-        // Update tooltip position
-
         if (e instanceof MouseEvent && e.type === "mousemove") {
             if (hoveredTask) {
                 const mouseEvent = e as MouseEvent;
@@ -125,21 +113,15 @@ const TaskRow: React.FC<TaskRowProps> = ({
             updateTooltipPosition(e as React.MouseEvent);
         }
 
-        // Handle task dragging
         if (draggingTask && dragType && rowRef.current) {
             try {
-                // Calculate deltaX - how far we've moved since last update
                 const deltaX = e.clientX - dragStartX;
-                if (deltaX === 0) return; // No movement
+                if (deltaX === 0) return;
 
-                // Get total container width
                 const totalWidth = totalMonths * monthWidth;
-
-                // Find the task element
                 const taskEl = document.querySelector(`[data-task-id="${draggingTask.id}"]`) as HTMLElement;
                 if (!taskEl) return;
 
-                // Get current position and dimensions
                 const currentLeft = parseFloat(taskEl.style.left || "0");
                 const currentWidth = parseFloat(taskEl.style.width || "0");
 
@@ -147,12 +129,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
                 let newWidth = currentWidth;
 
                 if (dragType === "move") {
-                    // Move the entire task
                     newLeft = Math.max(0, Math.min(totalWidth - currentWidth, currentLeft + deltaX));
                     taskEl.style.left = `${newLeft}px`;
                 } else if (dragType === "resize-left") {
-                    // Resize from left side
-                    const maxDelta = currentWidth - 20; // Minimum width of 20px
+                    const maxDelta = currentWidth - 20;
                     const constrainedDelta = Math.min(maxDelta, deltaX);
                     newLeft = Math.max(0, currentLeft + constrainedDelta);
                     newWidth = Math.max(20, currentWidth - constrainedDelta);
@@ -160,13 +140,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     taskEl.style.left = `${newLeft}px`;
                     taskEl.style.width = `${newWidth}px`;
                 } else if (dragType === "resize-right") {
-                    // Resize from right side
                     newWidth = Math.max(20, Math.min(totalWidth - currentLeft, currentWidth + deltaX));
                     taskEl.style.width = `${newWidth}px`;
                 }
 
-                // Update preview task for collision detection
-                // Calculate new dates based on position
                 const { newStartDate, newEndDate } = TaskManager.calculateDatesFromPosition(
                     newLeft,
                     newWidth,
@@ -176,10 +153,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     monthWidth
                 );
 
-                // Create the updated task for preview
                 const updatedTask = TaskManager.createUpdatedTask(draggingTask, newStartDate, newEndDate);
-
-                // Update the preview task state which triggers a re-render with new collision detection
                 setPreviewTask(updatedTask);
                 updatePreviewTask(updatedTask);
 
@@ -199,33 +173,26 @@ const TaskRow: React.FC<TaskRowProps> = ({
         setDraggingTask(task);
         setDragType(type);
         setDragStartX(event.clientX);
-
-        // Initialize preview task with current task
         setPreviewTask(task);
 
         updateDraggingTask(task);
         updatePreviewTask(task);
 
-        // Add document-level event listeners
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mousemove", handleMouseMove as unknown as EventListener);
     };
 
     const handleMouseUp = () => {
         try {
-            // Use the ref values which are always current
             const currentDraggingTask = draggingTaskRef.current;
             const currentPreviewTask = previewTaskRef.current;
 
-            if (currentDraggingTask && currentPreviewTask) {
-                if (onTaskUpdate) {
-                    onTaskUpdate(person.id, currentPreviewTask);
-                }
+            if (currentDraggingTask && currentPreviewTask && onTaskUpdate) {
+                onTaskUpdate(person.id, currentPreviewTask);
             }
         } catch (error) {
             console.error("Error in handleMouseUp:", error);
         } finally {
-            // Reset states and refs
             setDraggingTask(null);
             setDragType(null);
             setPreviewTask(null);
@@ -236,17 +203,13 @@ const TaskRow: React.FC<TaskRowProps> = ({
             document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
         }
     };
-    // Add this effect to react to changes in dragging state
+
     useEffect(() => {
-        if (!draggingTask && previewTask) {
-            // This triggers when dragging ends with a valid preview
-            if (onTaskUpdate) {
-                onTaskUpdate(person.id, previewTask);
-            }
+        if (!draggingTask && previewTask && onTaskUpdate) {
+            onTaskUpdate(person.id, previewTask);
         }
     }, [draggingTask, previewTask, person.id, onTaskUpdate]);
 
-    // Cleanup event listeners on unmount
     useEffect(() => {
         return () => {
             document.removeEventListener("mouseup", handleMouseUp);
@@ -254,7 +217,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
         };
     }, []);
 
-    // Handle empty task list
     if (!person.tasks || person.tasks.length === 0) {
         return <div className="relative h-16">No tasks available</div>;
     }
@@ -267,12 +229,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
             onMouseLeave={() => setHoveredTask(null)}
             ref={rowRef}
             data-testid={`task-row-${person.id}`}>
-            {/* Tasks by row to avoid overlaps */}
             {taskRows.map((rowTasks, rowIndex) => (
                 <React.Fragment key={`task-row-${rowIndex}`}>
                     {rowTasks.map(task => {
                         try {
-                            // Validate task data
                             if (
                                 !task ||
                                 !task.id ||
@@ -283,7 +243,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                 return null;
                             }
 
-                            // Calculate position in pixels
                             const { leftPx, widthPx } = TaskManager.calculateTaskPixelPosition(
                                 task,
                                 validStartDate,
@@ -292,12 +251,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                 monthWidth
                             );
 
-                            // Check interaction states
                             const isHovered = hoveredTask?.id === task.id;
                             const isDragging = draggingTask?.id === task.id;
-
-                            // Task render position
-                            const topPx = rowIndex * 40 + 10; // 40px per row with 10px offset
+                            const topPx = rowIndex * 40 + 10;
 
                             return (
                                 <TaskRenderer
@@ -309,6 +265,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                     isHovered={isHovered}
                                     isDragging={isDragging}
                                     editMode={editMode}
+                                    showProgress={showProgress}
                                     onMouseDown={handleMouseDown}
                                     onMouseEnter={handleTaskMouseEnter}
                                     onMouseLeave={handleTaskMouseLeave}
@@ -323,7 +280,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
                 </React.Fragment>
             ))}
 
-            {/* Tooltip */}
             {(hoveredTask || draggingTask) && (
                 <TaskTooltip
                     task={previewTask || draggingTask || hoveredTask!}
@@ -334,6 +290,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     endDate={validEndDate}
                     totalMonths={totalMonths}
                     monthWidth={monthWidth}
+                    showProgress={showProgress}
                 />
             )}
         </div>

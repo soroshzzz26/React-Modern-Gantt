@@ -38,8 +38,11 @@ export interface GanttChartProps {
     title?: string;
     currentDate?: Date;
     showCurrentDateMarker?: boolean;
+    todayLabel?: string;
     editMode?: boolean;
     theme?: GanttTheme;
+    headerLabel?: string;
+    showProgress?: boolean;
     onTaskUpdate?: (personId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, person: Person) => void;
 }

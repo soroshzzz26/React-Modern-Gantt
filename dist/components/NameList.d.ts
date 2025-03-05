@@ -1,5 +1,12 @@
 import React from "react";
-import { NameListProps } from "../models";
+import { Person, GanttTheme } from "../models";
+export interface NameListProps {
+    people: Person[];
+    headerLabel?: string;
+    showAvatar?: boolean;
+    showTaskCount?: boolean;
+    theme?: GanttTheme;
+}
 /**
  * NameList Component
  *

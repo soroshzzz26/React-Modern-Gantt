@@ -293,6 +293,7 @@ const GanttChartDemo = () => {
                     <GanttChart
                         people={people}
                         title="Project Timeline"
+                        headerLabel="Team Members"
                         currentDate={currentMonth}
                         editMode={editMode}
                         showCurrentDateMarker={true}
