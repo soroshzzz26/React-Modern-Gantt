@@ -183,8 +183,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
                 setPreviewTask(updatedTask);
                 updatePreviewTask(updatedTask);
 
-                console.log("Preview task updated:", updatedTask);
-
                 setDragStartX(e.clientX);
             } catch (error) {
                 console.error("Error in handleMouseMove:", error);
@@ -215,16 +213,12 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     const handleMouseUp = () => {
         try {
-            console.log("handleMouseUp");
             // Use the ref values which are always current
             const currentDraggingTask = draggingTaskRef.current;
             const currentPreviewTask = previewTaskRef.current;
-            console.log("draggingTask (ref):", currentDraggingTask);
-            console.log("previewTask (ref):", currentPreviewTask);
 
             if (currentDraggingTask && currentPreviewTask) {
                 if (onTaskUpdate) {
-                    console.log("Calling onTaskUpdate with:", currentPreviewTask);
                     onTaskUpdate(person.id, currentPreviewTask);
                 }
             }
@@ -244,7 +238,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
     };
     // Add this effect to react to changes in dragging state
     useEffect(() => {
-        console.log("Drag operation completed with:", previewTask);
         if (!draggingTask && previewTask) {
             // This triggers when dragging ends with a valid preview
             if (onTaskUpdate) {

@@ -32,17 +32,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Add logging for debugging
-    useEffect(() => {
-        console.log("GanttChart rendered with props:", {
-            peopleCount: people?.length,
-            startDate: customStartDate,
-            endDate: customEndDate,
-            onTaskUpdate: !!onTaskUpdate,
-            onTaskClick: !!onTaskClick,
-        });
-    }, [people, customStartDate, customEndDate, onTaskUpdate, onTaskClick]);
-
     // Validate people array to ensure it's valid
     const validPeople = Array.isArray(people) ? people : [];
 
@@ -91,7 +80,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
 
     // Handle task updates - this will trigger re-render and recalculate collisions
     const handleTaskUpdate = (personId: string, updatedTask: Task) => {
-        console.log("GanttChart: handleTaskUpdate called with:", { personId, updatedTask });
         if (onTaskUpdate) {
             try {
                 // Ensure we have Date objects
@@ -114,7 +102,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
 
     // Handle task clicks
     const handleTaskClick = (task: Task, person: Person) => {
-        console.log("GanttChart: handleTaskClick called with:", { task, person });
         if (onTaskClick) {
             try {
                 onTaskClick(task, person);

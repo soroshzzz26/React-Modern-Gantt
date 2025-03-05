@@ -26,21 +26,25 @@ const TaskTooltip: React.FC<TaskTooltipProps> = ({
     totalMonths,
     monthWidth,
 }) => {
-    // Get live dates if dragging
+    // Default to task's original dates
     let displayStartDate = task.startDate;
     let displayEndDate = task.endDate;
 
-    if (dragType && taskId) {
-        try {
-            const taskEl = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
-            if (taskEl) {
-                const dates = TaskManager.getLiveDatesFromElement(taskEl, startDate, endDate, totalMonths, monthWidth);
-                displayStartDate = dates.startDate;
-                displayEndDate = dates.endDate;
-            }
-        } catch (error) {
-            console.error("Error calculating live dates for tooltip:", error);
+    // Always try to get live dates from the element's position
+    try {
+        // Use taskId if provided (during drag) or the task's id (after drag)
+        const id = taskId || task.id;
+        const taskEl = document.querySelector(`[data-task-id="${id}"]`) as HTMLElement;
+
+        // If the element exists and has positioning styles applied
+        if (taskEl && (dragType || taskEl.style.left || taskEl.style.width)) {
+            // Calculate dates based on the element's current position
+            const dates = TaskManager.getLiveDatesFromElement(taskEl, startDate, endDate, totalMonths, monthWidth);
+            displayStartDate = dates.startDate;
+            displayEndDate = dates.endDate;
         }
+    } catch (error) {
+        console.error("Error calculating live dates for tooltip:", error);
     }
 
     return (
