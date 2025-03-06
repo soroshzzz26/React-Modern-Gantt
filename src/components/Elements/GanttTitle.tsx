@@ -6,5 +6,5 @@ interface GanttTitleProps {
 }
 
 export const GanttTitle: React.FC<GanttTitleProps> = ({ children = "Project Timeline", className = "" }) => {
-    return <h1 className={`text-2xl font-bold text-gray-800 ${className}`}>{children}</h1>;
+    return <h1 className={`text-2xl font-bold text-gantt-text ${className}`}>{children}</h1>;
 };

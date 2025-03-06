@@ -1,5 +1,6 @@
 import React from "react";
 import { GanttChartProps } from "@/utils/types";
+import "../gantt.css";
 /**
  * Enhanced GanttChart Component
  *

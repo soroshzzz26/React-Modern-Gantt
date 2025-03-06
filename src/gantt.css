@@ -1,0 +1,54 @@
+:root {
+    /* Light mode colors */
+    --gantt-bg: #ffffff;
+    --gantt-text: #1f2937;
+    --gantt-border: #e5e7eb;
+    --gantt-highlight: #eff6ff;
+    --gantt-marker: #ef4444;
+    --gantt-task: #3b82f6;
+    --gantt-task-text: #ffffff;
+}
+
+.dark {
+    /* Dark mode colors */
+    --gantt-bg: #1f2937;
+    --gantt-text: #f3f4f6;
+    --gantt-border: #374151;
+    --gantt-highlight: #374151;
+    --gantt-marker: #ef4444;
+    --gantt-task: #4f46e5;
+    --gantt-task-text: #ffffff;
+}
+
+/* Task colors for light and dark mode */
+.bg-task-blue {
+    @apply bg-blue-500 dark:bg-blue-600;
+}
+
+.bg-task-green {
+    @apply bg-emerald-500 dark:bg-emerald-600;
+}
+
+.bg-task-purple {
+    @apply bg-purple-500 dark:bg-purple-600;
+}
+
+.bg-task-orange {
+    @apply bg-orange-500 dark:bg-orange-600;
+}
+
+.bg-task-amber {
+    @apply bg-amber-500 dark:bg-amber-600;
+}
+
+.bg-task-indigo {
+    @apply bg-indigo-500 dark:bg-indigo-600;
+}
+
+.bg-task-cyan {
+    @apply bg-cyan-500 dark:bg-cyan-600;
+}
+
+.bg-task-pink {
+    @apply bg-pink-500 dark:bg-pink-600;
+}

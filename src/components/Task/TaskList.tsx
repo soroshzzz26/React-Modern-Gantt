@@ -1,5 +1,5 @@
 import React from "react";
-import { TaskGroup, GanttTheme, TaskListProps } from "@/utils/types";
+import { TaskGroup, TaskListProps } from "@/utils/types";
 import { detectTaskOverlaps } from "@/models";
 
 /**
@@ -12,7 +12,6 @@ const TaskList: React.FC<TaskListProps> = ({
     headerLabel = "Resources",
     showIcon = false,
     showTaskCount = false,
-    theme = {},
 }) => {
     // Validate task groups array
     const validTasks = Array.isArray(tasks) ? tasks : [];

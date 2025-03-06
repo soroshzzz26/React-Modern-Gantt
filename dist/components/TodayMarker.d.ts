@@ -2,8 +2,8 @@ import React from "react";
 interface TodayMarkerProps {
     currentMonthIndex: number;
     height: number;
-    markerClass?: string;
     label?: string;
+    dayOfMonth?: number;
 }
 /**
  * TodayMarker Component

@@ -1,16 +1,7 @@
 /**
  * Core utility functions for the Gantt chart
  */
-import { Task, TaskGroup, GanttTheme, DateDisplayFormat } from "./utils/types";
-
-// Default theme
-export const DEFAULT_THEME: GanttTheme = {
-    headerBackground: "bg-white",
-    headerText: "text-gray-700",
-    backgroundHighlight: "bg-blue-50",
-    borderColor: "border-gray-200",
-    todayMarkerColor: "bg-red-500",
-};
+import { Task, TaskGroup, DateDisplayFormat } from "./utils/types";
 
 /**
  * Formats a date to display just the month

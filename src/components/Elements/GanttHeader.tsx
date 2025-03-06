@@ -6,5 +6,5 @@ interface GanttHeaderProps {
 }
 
 export const GanttHeader: React.FC<GanttHeaderProps> = ({ children = "Resources", className = "" }) => {
-    return <div className={`font-semibold text-gray-700 ${className}`}>{children}</div>;
+    return <div className={`font-semibold text-gantt-text ${className}`}>{children}</div>;
 };

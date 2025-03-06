@@ -1,10 +1,12 @@
 import React, { useRef, useState, useEffect, ReactElement, Children, cloneElement, isValidElement } from "react";
-import { GanttChartProps, TaskGroup, Task, GanttTheme } from "@/utils/types";
-import { DEFAULT_THEME, getMonthsBetween, detectTaskOverlaps, findEarliestDate, findLatestDate } from "../models";
+import { GanttChartProps, TaskGroup, Task } from "@/utils/types";
+import { getMonthsBetween, detectTaskOverlaps, findEarliestDate, findLatestDate } from "../models";
 import TaskRow from "./Task/TaskRow";
 import Timeline from "./Timeline";
 import TodayMarker from "./TodayMarker";
 import TaskList from "./Task/TaskList";
+import "../gantt.css";
+
 import {
     GanttTitle,
     GanttHeader,
@@ -28,7 +30,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
     showCurrentDateMarker = true,
     todayLabel = "Today",
     editMode = true,
-    theme = DEFAULT_THEME,
     headerLabel = "Resources",
     showProgress = false,
 
@@ -39,9 +40,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Advanced event handlers
     onTaskSelect,
     onTaskDoubleClick,
-    onTaskDelete,
-    onTaskDateChange,
-    onTaskProgressChange,
 
     // Visual customization
     fontSize,
@@ -65,6 +63,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
 
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
+    const currentDay = currentDate.getDate();
     const currentMonthIndex = months.findIndex(
         month => month.getMonth() === currentMonth && month.getFullYear() === currentYear
     );
@@ -107,14 +106,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 };
 
                 onTaskUpdate(groupId, ensuredTask);
-
-                // Call additional handlers if provided
-                if (onTaskDateChange) {
-                    const group = tasks.find(g => g.id === groupId);
-                    if (group) {
-                        onTaskDateChange(updatedTask, group.tasks);
-                    }
-                }
             } catch (error) {
                 console.error("Error in handleTaskUpdate:", error);
             }
@@ -163,29 +154,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
-    const handleTaskDelete = (task: Task) => {
-        if (onTaskDelete) {
-            try {
-                onTaskDelete(task);
-            } catch (error) {
-                console.error("Error in onTaskDelete handler:", error);
-            }
-        }
-    };
-
-    const handleProgressChange = (task: Task, groupId: string) => {
-        if (onTaskProgressChange && task.percent !== undefined) {
-            try {
-                const group = tasks.find(g => g.id === groupId);
-                if (group) {
-                    onTaskProgressChange(task, group.tasks);
-                }
-            } catch (error) {
-                console.error("Error in onProgressChange handler:", error);
-            }
-        }
-    };
-
     const style: React.CSSProperties = {
         fontSize: fontSize || "inherit",
     };
@@ -193,10 +161,10 @@ const GanttChart: React.FC<GanttChartProps> = ({
     return (
         <div
             ref={containerRef}
-            className="w-full bg-white rounded-xl shadow-lg overflow-hidden"
+            className="w-full bg-gantt-bg text-gantt-text rounded-xl shadow-lg overflow-hidden"
             style={style}
             data-testid="gantt-chart">
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-gantt-border">
                 {/* Use custom title from children or default to prop */}
                 {titleElements.length > 0 ? cloneElement(titleElements[0]) : <GanttTitle>{title}</GanttTitle>}
             </div>
@@ -207,10 +175,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
                     React.cloneElement(taskListElements[0], {
                         tasks,
                         headerLabel,
-                        theme,
                     } as React.ComponentProps<typeof TaskList>)
                 ) : (
-                    <TaskList tasks={tasks} headerLabel={headerLabel} theme={theme} />
+                    <TaskList tasks={tasks} headerLabel={headerLabel} />
                 )}
 
                 <div ref={scrollContainerRef} className="flex-grow overflow-x-auto">
@@ -220,10 +187,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
                             React.cloneElement(timelineElements[0], {
                                 months: months,
                                 currentMonthIndex: currentMonthIndex,
-                                theme: theme,
                             } as React.ComponentProps<typeof Timeline>)
                         ) : (
-                            <Timeline months={months} currentMonthIndex={currentMonthIndex} theme={theme} />
+                            <Timeline months={months} currentMonthIndex={currentMonthIndex} />
                         )}
 
                         <div className="relative">
@@ -238,8 +204,8 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                     <TodayMarker
                                         currentMonthIndex={currentMonthIndex}
                                         height={getTotalHeight()}
-                                        markerClass={theme.todayMarkerColor}
                                         label={todayLabel}
+                                        dayOfMonth={currentDay}
                                     />
                                 ))}
 

@@ -23,7 +23,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 }) => {
     if (!taskGroup || !taskGroup.id || !Array.isArray(taskGroup.tasks)) {
         console.warn("TaskRow: Invalid task group data", taskGroup);
-        return <div className="relative h-16">Invalid task group data</div>;
+        return <div className="relative h-16 text-gantt-text">Invalid task group data</div>;
     }
 
     const validStartDate = startDate instanceof Date ? startDate : new Date();
@@ -39,6 +39,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
     const rowRef = useRef<HTMLDivElement>(null);
     const draggingTaskRef = useRef<Task | null>(null);
     const previewTaskRef = useRef<Task | null>(null);
+
+    // Create a unique identifier for this instance to prevent cross-chart effects
+    const instanceId = useRef(`task-row-${Math.random().toString(36).substring(2, 11)}`);
 
     const updateDraggingTask = (task: Task) => {
         setDraggingTask(task);
@@ -107,7 +110,11 @@ const TaskRow: React.FC<TaskRowProps> = ({
                 if (deltaX === 0) return;
 
                 const totalWidth = totalMonths * monthWidth;
-                const taskEl = document.querySelector(`[data-task-id="${draggingTask.id}"]`) as HTMLElement;
+
+                // Use instance ID to ensure we're only affecting elements in this chart
+                const taskEl = document.querySelector(
+                    `[data-task-id="${draggingTask.id}"][data-instance-id="${instanceId.current}"]`
+                ) as HTMLElement;
                 if (!taskEl) return;
 
                 const currentLeft = parseFloat(taskEl.style.left || "0");
@@ -206,17 +213,18 @@ const TaskRow: React.FC<TaskRowProps> = ({
     }, []);
 
     if (!taskGroup.tasks || taskGroup.tasks.length === 0) {
-        return <div className="relative h-16">No tasks available</div>;
+        return <div className="relative h-16 text-gantt-text">No tasks available</div>;
     }
 
     return (
         <div
-            className="relative border-b border-gray-200"
+            className="relative border-b border-gantt-border"
             style={{ height: `${rowHeight}px` }}
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}
             ref={rowRef}
-            data-testid={`task-row-${taskGroup.id}`}>
+            data-testid={`task-row-${taskGroup.id}`}
+            data-instance-id={instanceId.current}>
             {taskRows.map((rowTasks, rowIndex) => (
                 <React.Fragment key={`task-row-${rowIndex}`}>
                     {rowTasks.map(task => {
@@ -254,6 +262,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                     isDragging={isDragging}
                                     editMode={editMode}
                                     showProgress={showProgress}
+                                    instanceId={instanceId.current}
                                     onMouseDown={handleMouseDown}
                                     onMouseEnter={handleTaskMouseEnter}
                                     onMouseLeave={handleTaskMouseLeave}
@@ -279,6 +288,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     totalMonths={totalMonths}
                     monthWidth={monthWidth}
                     showProgress={showProgress}
+                    instanceId={instanceId.current}
                 />
             )}
         </div>

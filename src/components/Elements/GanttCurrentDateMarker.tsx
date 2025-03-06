@@ -9,10 +9,11 @@ interface GanttCurrentDateMarkerProps {
 export const GanttCurrentDateMarker: React.FC<GanttCurrentDateMarkerProps> = ({
     children = "Today",
     className = "",
-    markerClassName = "bg-red-500",
+    markerClassName = "bg-gantt-marker",
 }) => {
     return (
-        <div className={`px-1 py-0.5 rounded text-xs text-white whitespace-nowrap ${markerClassName} ${className}`}>
+        <div
+            className={`px-1 py-0.5 rounded text-xs text-white dark:text-gray-100 whitespace-nowrap ${markerClassName} ${className}`}>
             {children}
         </div>
     );

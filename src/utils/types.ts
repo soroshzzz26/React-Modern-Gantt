@@ -21,15 +21,6 @@ export interface TaskGroup {
     tasks: Task[];
 }
 
-// Theme configuration
-export interface GanttTheme {
-    headerBackground?: string;
-    headerText?: string;
-    backgroundHighlight?: string;
-    borderColor?: string;
-    todayMarkerColor?: string;
-}
-
 // Component props
 export interface GanttChartProps {
     tasks: TaskGroup[];
@@ -40,7 +31,6 @@ export interface GanttChartProps {
     showCurrentDateMarker?: boolean;
     todayLabel?: string;
     editMode?: boolean;
-    theme?: GanttTheme;
     headerLabel?: string;
     showProgress?: boolean;
 
@@ -51,9 +41,6 @@ export interface GanttChartProps {
     // Advanced event handlers
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     onTaskDoubleClick?: (task: Task) => void;
-    onTaskDelete?: (task: Task) => void | boolean | Promise<any>;
-    onTaskDateChange?: (task: Task, tasks: Task[]) => void | boolean | Promise<any>;
-    onTaskProgressChange?: (task: Task, tasks: Task[]) => void | boolean | Promise<any>;
 
     // Visual customization
     fontSize?: string;
@@ -81,16 +68,11 @@ export interface TaskListProps {
     headerLabel?: string;
     showIcon?: boolean;
     showTaskCount?: boolean;
-    theme?: GanttTheme;
 }
 
 export interface TimelineProps {
-    startDate: Date;
-    endDate: Date;
-    columnWidth: number;
-    theme?: GanttTheme;
-    children?: React.ReactNode;
-    scrollContainerRef?: React.RefObject<HTMLDivElement>;
+    months: Date[];
+    currentMonthIndex: number;
 }
 
 export enum DateDisplayFormat {

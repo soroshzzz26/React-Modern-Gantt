@@ -48,13 +48,14 @@ export const GanttTaskItem: React.FC<GanttTaskItemProps> = ({
         if (onDoubleClick) onDoubleClick(task);
     };
 
+    // Default to gantt-task class when no color is specified
+    const taskColorClass = task.color || "bg-gantt-task";
+
     return (
         <div
-            className={`absolute h-8 rounded ${
-                task.color || "bg-blue-500"
-            } flex items-center px-2 text-xs text-white font-medium ${editMode ? "cursor-move" : "cursor-pointer"} ${
-                isSelected ? "ring-2 ring-white" : ""
-            } ${className}`}
+            className={`absolute h-8 rounded ${taskColorClass} flex items-center px-2 text-xs text-gantt-task-text font-medium ${
+                editMode ? "cursor-move" : "cursor-pointer"
+            } ${isSelected ? "ring-2 ring-white dark:ring-gray-300" : ""} ${className}`}
             style={{
                 left: `${Math.max(0, leftPx)}px`,
                 width: `${Math.max(20, widthPx)}px`,
@@ -64,19 +65,22 @@ export const GanttTaskItem: React.FC<GanttTaskItemProps> = ({
             onDoubleClick={handleDoubleClick}
             data-task-id={task.id}>
             {editMode && (
-                <div className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 cursor-ew-resize rounded-l" />
+                <div className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l" />
             )}
 
             <div className="truncate select-none">{task.name || "Unnamed Task"}</div>
 
             {showProgress && typeof task.percent === "number" && (
-                <div className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: `${task.percent}%` }} />
+                <div className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-white dark:bg-gray-200 rounded-full"
+                        style={{ width: `${task.percent}%` }}
+                    />
                 </div>
             )}
 
             {editMode && (
-                <div className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 cursor-ew-resize rounded-r" />
+                <div className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r" />
             )}
         </div>
     );

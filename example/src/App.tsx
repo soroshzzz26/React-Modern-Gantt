@@ -107,17 +107,41 @@ const MONTHS = [
     { value: 11, label: "December" },
 ];
 
+// Custom themes
+const customLightTheme = {
+    headerBackground: "bg-indigo-50",
+    headerText: "text-indigo-800",
+    backgroundHighlight: "bg-blue-100",
+    borderColor: "border-indigo-100",
+    todayMarkerColor: "bg-pink-500",
+};
+
+const customDarkTheme = {
+    headerBackground: "bg-gray-800",
+    headerText: "text-indigo-300",
+    backgroundHighlight: "bg-gray-700",
+    borderColor: "border-gray-600",
+    todayMarkerColor: "bg-pink-500",
+    chartBackground: "bg-gray-900",
+    taskBackground: "bg-indigo-600",
+    taskText: "text-white",
+    tooltipBackground: "bg-gray-800",
+    tooltipText: "text-gray-200",
+};
+
 // Component for controls above each Gantt chart
 const Controls: React.FC<{
     editMode: boolean;
     setEditMode: (mode: boolean) => void;
+    darkMode: boolean;
+    setDarkMode: (mode: boolean) => void;
     currentMonth: number;
     setCurrentMonth: (month: number) => void;
     className?: string;
-}> = ({ editMode, setEditMode, currentMonth, setCurrentMonth, className = "" }) => (
+}> = ({ editMode, setEditMode, darkMode, setDarkMode, currentMonth, setCurrentMonth, className = "" }) => (
     <div className={`flex flex-wrap items-center gap-4 ${className}`}>
         <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Edit Mode:</span>
+            <span className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Edit Mode:</span>
             <button
                 onClick={() => setEditMode(!editMode)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
@@ -132,11 +156,30 @@ const Controls: React.FC<{
         </div>
 
         <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Current Month:</span>
+            <span className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Dark Mode:</span>
+            <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
+                    darkMode ? "bg-indigo-600" : "bg-gray-200"
+                }`}>
+                <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        darkMode ? "translate-x-6" : "translate-x-1"
+                    }`}
+                />
+            </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+            <span className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                Current Month:
+            </span>
             <select
                 value={currentMonth}
                 onChange={e => setCurrentMonth(parseInt(e.target.value))}
-                className="rounded border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                className={`rounded border ${
+                    darkMode ? "border-gray-600 bg-gray-800 text-gray-200" : "border-gray-300 bg-white text-gray-700"
+                } px-3 py-1 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500`}>
                 {MONTHS.map(month => (
                     <option key={month.value} value={month.value}>
                         {month.label}
@@ -161,6 +204,10 @@ const GanttChartDemo = () => {
     const [customEditMode, setCustomEditMode] = useState(true);
     const [basicCurrentMonth, setBasicCurrentMonth] = useState(currentMonthIndex);
     const [customCurrentMonth, setCustomCurrentMonth] = useState(currentMonthIndex);
+
+    // Dark mode states
+    const [basicDarkMode, setBasicDarkMode] = useState(false);
+    const [customDarkMode, setCustomDarkMode] = useState(true); // Start with dark mode for custom chart
 
     // Task update function for Basic Gantt
     const handleBasicTaskUpdate = (groupId: string, updatedTask: Task) => {
@@ -191,32 +238,40 @@ const GanttChartDemo = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8">
+        <div className={`min-h-screen p-8 ${basicDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"}`}>
             {/* Header */}
             <header className="mx-auto mb-12 max-w-6xl text-center">
-                <h1 className="mb-3 text-4xl font-bold text-gray-900">React Modern Gantt</h1>
-                <p className="text-lg text-gray-600">
+                <h1 className={`mb-3 text-4xl font-bold ${basicDarkMode ? "text-gray-100" : "text-gray-900"}`}>
+                    React Modern Gantt
+                </h1>
+                <p className={`text-lg ${basicDarkMode ? "text-gray-300" : "text-gray-600"}`}>
                     A modern, customizable Gantt chart component for React applications
                 </p>
             </header>
 
             <div className="mx-auto max-w-6xl space-y-16">
                 {/* Basic Gantt Chart */}
-                <section className="rounded-xl bg-white p-6 shadow-lg">
-                    <h2 className="mb-6 text-2xl font-bold text-gray-800">Basic Gantt Chart</h2>
-                    <p className="mb-6 text-gray-600">
-                        Simple implementation with standard props. Drag, resize, and progress display are enabled.
+                <section className={`rounded-xl ${basicDarkMode ? "bg-gray-800" : "bg-white"} p-6 shadow-lg`}>
+                    <h2 className={`mb-6 text-2xl font-bold ${basicDarkMode ? "text-gray-100" : "text-gray-800"}`}>
+                        Basic Gantt Chart
+                    </h2>
+                    <p className={`mb-6 ${basicDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                        Simple implementation with standard props. Drag, resize, progress display, and dark mode
+                        support.
                     </p>
 
                     <Controls
                         editMode={basicEditMode}
                         setEditMode={setBasicEditMode}
+                        darkMode={basicDarkMode}
+                        setDarkMode={setBasicDarkMode}
                         currentMonth={basicCurrentMonth}
                         setCurrentMonth={setBasicCurrentMonth}
                         className="mb-6"
                     />
 
-                    <div className="rounded-lg border border-gray-200 bg-white shadow">
+                    <div
+                        className={`rounded-lg border ${basicDarkMode ? "border-gray-700" : "border-gray-200"} shadow`}>
                         <GanttChart
                             tasks={basicTasks}
                             title="Project Roadmap 2025"
@@ -234,47 +289,74 @@ const GanttChartDemo = () => {
                 </section>
 
                 {/* Custom Gantt Chart */}
-                <section className="rounded-xl bg-white p-6 shadow-lg">
-                    <h2 className="mb-6 text-2xl font-bold text-gray-800">Customized Gantt Chart</h2>
-                    <p className="mb-6 text-gray-600">
-                        Advanced implementation with composition components for maximum customizability.
+                <section className={`rounded-xl ${customDarkMode ? "bg-gray-800" : "bg-white"} p-6 shadow-lg`}>
+                    <h2 className={`mb-6 text-2xl font-bold ${customDarkMode ? "text-gray-100" : "text-gray-800"}`}>
+                        Customized Gantt Chart
+                    </h2>
+                    <p className={`mb-6 ${customDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                        Advanced implementation with composition components and custom theme.
                     </p>
 
                     <Controls
                         editMode={customEditMode}
                         setEditMode={setCustomEditMode}
+                        darkMode={customDarkMode}
+                        setDarkMode={setCustomDarkMode}
                         currentMonth={customCurrentMonth}
                         setCurrentMonth={setCustomCurrentMonth}
                         className="mb-6"
                     />
 
-                    <div className="rounded-lg border border-gray-200 bg-white shadow">
+                    <div
+                        className={`rounded-lg border ${
+                            customDarkMode ? "border-gray-700" : "border-gray-200"
+                        } shadow`}>
                         <GanttChart
                             tasks={customTasks}
                             onTaskUpdate={handleCustomTaskUpdate}
                             onTaskDoubleClick={(task: Task) => alert(`Double-clicked: ${task.name}`)}
                             editMode={customEditMode}
+                            darkMode={customDarkMode}
+                            theme={customDarkMode ? customDarkTheme : customLightTheme} // Use theme based on dark mode
                             currentDate={new Date(2025, customCurrentMonth, 15)}
                             showCurrentDateMarker={true}
                             fontSize="14px"
                             rowHeight={45}>
-                            <GanttTitle className="text-2xl font-bold text-indigo-800">
+                            <GanttTitle
+                                className={`text-2xl font-bold ${
+                                    customDarkMode ? "text-indigo-300" : "text-indigo-800"
+                                }`}>
                                 Product Development 2025
                             </GanttTitle>
 
-                            <GanttHeader className="text-indigo-600 font-medium">Team Overview</GanttHeader>
+                            <GanttHeader
+                                className={`${customDarkMode ? "text-indigo-300" : "text-indigo-600"} font-medium`}>
+                                Team Overview
+                            </GanttHeader>
 
                             <GanttCurrentDateMarker className="bg-pink-500">Today</GanttCurrentDateMarker>
 
-                            <GanttTaskList showIcon={true} className="w-48 bg-gray-50 border-r border-indigo-100" />
+                            <GanttTaskList
+                                showIcon={true}
+                                className={`w-48 ${
+                                    customDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-indigo-100"
+                                } border-r`}
+                            />
 
-                            <GanttTimeline className="text-sm bg-gray-50 border-b border-indigo-100" />
+                            <GanttTimeline
+                                className={`text-sm ${
+                                    customDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-indigo-100"
+                                } border-b`}
+                            />
                         </GanttChart>
                     </div>
                 </section>
 
                 {/* Footer */}
-                <footer className="mt-12 border-t border-gray-200 pt-6 text-center text-sm text-gray-500">
+                <footer
+                    className={`mt-12 border-t ${
+                        basicDarkMode ? "border-gray-700" : "border-gray-200"
+                    } pt-6 text-center text-sm ${basicDarkMode ? "text-gray-400" : "text-gray-500"}`}>
                     <p>© 2025 React Modern Gantt - MIT License</p>
                 </footer>
             </div>

@@ -17,7 +17,6 @@ export {
 export type {
     Task,
     TaskGroup,
-    GanttTheme,
     GanttChartProps,
     TaskRowProps,
     TaskListProps,
@@ -27,7 +26,6 @@ export type {
 
 // Utility functions
 export {
-    DEFAULT_THEME,
     formatMonth,
     formatDate,
     getMonthsBetween,

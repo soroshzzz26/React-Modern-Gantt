@@ -12,6 +12,7 @@ interface TaskTooltipProps {
     totalMonths: number;
     monthWidth: number;
     showProgress?: boolean;
+    instanceId: string;
 }
 
 /**
@@ -27,13 +28,16 @@ const TaskTooltip: React.FC<TaskTooltipProps> = ({
     totalMonths,
     monthWidth,
     showProgress = false,
+    instanceId,
 }) => {
     let displayStartDate = task.startDate;
     let displayEndDate = task.endDate;
 
     try {
         const id = taskId || task.id;
-        const taskEl = document.querySelector(`[data-task-id="${id}"]`) as HTMLElement;
+        const taskEl = document.querySelector(
+            `[data-task-id="${id}"][data-instance-id="${instanceId}"]`
+        ) as HTMLElement;
 
         if (taskEl && (dragType || taskEl.style.left || taskEl.style.width)) {
             const dates = TaskManager.getLiveDatesFromElement(taskEl, startDate, endDate, totalMonths, monthWidth);
@@ -46,7 +50,7 @@ const TaskTooltip: React.FC<TaskTooltipProps> = ({
 
     return (
         <div
-            className="absolute z-20 bg-white border border-gray-200 rounded-md shadow-md p-2 text-xs select-none"
+            className="absolute z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md p-2 text-xs select-none text-gray-800 dark:text-gray-200"
             style={{
                 left: `${position.x}px`,
                 top: `${position.y - 40}px`,

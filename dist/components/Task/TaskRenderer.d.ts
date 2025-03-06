@@ -9,6 +9,7 @@ interface TaskRendererProps {
     isDragging: boolean;
     editMode: boolean;
     showProgress?: boolean;
+    instanceId: string;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;

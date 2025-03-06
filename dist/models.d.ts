@@ -1,8 +1,7 @@
 /**
  * Core utility functions for the Gantt chart
  */
-import { Task, TaskGroup, GanttTheme, DateDisplayFormat } from "./utils/types";
-export declare const DEFAULT_THEME: GanttTheme;
+import { Task, TaskGroup, DateDisplayFormat } from "./utils/types";
 /**
  * Formats a date to display just the month
  */
