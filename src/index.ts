@@ -12,21 +12,11 @@ export { default as Timeline } from "./components/Timeline";
 export { default as TodayMarker } from "./components/TodayMarker";
 export { default as Tooltip } from "./components/Tooltip";
 
-// Composable components for customization
-export {
-    GanttTitle,
-    GanttHeader,
-    GanttMarker,
-    GanttTaskList,
-    GanttTimeline,
-    GanttTaskItem,
-} from "./components/composable";
-
 // Types
 export type {
     Task,
     TaskGroup,
-    GanttTheme,
+    GanttStyles,
     GanttChartProps,
     TaskRowProps,
     TaskListProps,
@@ -55,6 +45,3 @@ export {
 // Manager classes
 export { CollisionManager } from "./utils/CollisionManager";
 export { TaskManager } from "./utils/TaskManager";
-
-// Default themes
-export { lightTheme, darkTheme, mergeTheme } from "./utils/ThemeManager";

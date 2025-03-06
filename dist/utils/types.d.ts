@@ -20,18 +20,16 @@ export interface TaskGroup {
     tasks: Task[];
     [key: string]: any;
 }
-export interface GanttTheme {
-    background?: string;
-    text?: string;
-    border?: string;
-    highlight?: string;
-    marker?: string;
-    task?: string;
-    taskText?: string;
+export interface GanttStyles {
+    container?: string;
+    title?: string;
+    header?: string;
+    taskList?: string;
+    timeline?: string;
+    todayMarker?: string;
+    taskRow?: string;
+    taskItem?: string;
     tooltip?: string;
-    progress?: string;
-    progressFill?: string;
-    [key: string]: string | undefined;
 }
 export interface GanttChartProps {
     tasks: TaskGroup[];
@@ -44,11 +42,11 @@ export interface GanttChartProps {
     editMode?: boolean;
     headerLabel?: string;
     showProgress?: boolean;
-    theme?: GanttTheme;
     darkMode?: boolean;
     locale?: string;
     showWeeks?: boolean;
     showDays?: boolean;
+    styles?: GanttStyles;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
@@ -57,7 +55,6 @@ export interface GanttChartProps {
     fontSize?: string;
     rowHeight?: number;
     timeStep?: number;
-    children?: React.ReactNode;
 }
 export interface TaskRowProps {
     taskGroup: TaskGroup;
@@ -67,6 +64,8 @@ export interface TaskRowProps {
     monthWidth: number;
     editMode?: boolean;
     showProgress?: boolean;
+    className?: string;
+    tooltipClassName?: string;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
@@ -99,6 +98,7 @@ export interface TaskItemProps {
     editMode: boolean;
     showProgress?: boolean;
     instanceId: string;
+    className?: string;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -126,6 +126,7 @@ export interface TodayMarkerProps {
     label?: string;
     dayOfMonth?: number;
     className?: string;
+    markerClass?: string;
 }
 export declare enum DateDisplayFormat {
     MONTH_YEAR = "month-year",

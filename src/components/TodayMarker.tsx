@@ -1,11 +1,5 @@
 import React from "react";
-
-interface TodayMarkerProps {
-    currentMonthIndex: number;
-    height: number;
-    markerClass?: string;
-    label?: string;
-}
+import { TodayMarkerProps } from "../utils/types";
 
 /**
  * TodayMarker Component
@@ -17,12 +11,13 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
     height,
     markerClass = "bg-red-500",
     label = "Today",
+    className = "",
 }) => {
     if (currentMonthIndex < 0) return null;
 
     return (
         <div
-            className={`absolute top-0 w-px ${markerClass} z-10`}
+            className={`absolute top-0 w-px ${markerClass} z-10 ${className}`}
             style={{
                 left: `${(currentMonthIndex + 0.5) * 150}px`,
                 height: `${height}px`,

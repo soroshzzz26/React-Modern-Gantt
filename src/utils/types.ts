@@ -26,20 +26,17 @@ export interface TaskGroup {
     [key: string]: any;
 }
 
-// Theme customization
-export interface GanttTheme {
-    background?: string;
-    text?: string;
-    border?: string;
-    highlight?: string;
-    marker?: string;
-    task?: string;
-    taskText?: string;
+// Component styles
+export interface GanttStyles {
+    container?: string;
+    title?: string;
+    header?: string;
+    taskList?: string;
+    timeline?: string;
+    todayMarker?: string;
+    taskRow?: string;
+    taskItem?: string;
     tooltip?: string;
-    progress?: string;
-    progressFill?: string;
-    // More theme options can be added here
-    [key: string]: string | undefined;
 }
 
 // Main component props
@@ -54,11 +51,11 @@ export interface GanttChartProps {
     editMode?: boolean;
     headerLabel?: string;
     showProgress?: boolean;
-    theme?: GanttTheme;
     darkMode?: boolean;
     locale?: string;
     showWeeks?: boolean;
     showDays?: boolean;
+    styles?: GanttStyles;
 
     // Event handlers
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
@@ -71,9 +68,6 @@ export interface GanttChartProps {
     fontSize?: string;
     rowHeight?: number;
     timeStep?: number;
-
-    // Children for composition
-    children?: React.ReactNode;
 }
 
 // Individual component props
@@ -85,6 +79,8 @@ export interface TaskRowProps {
     monthWidth: number;
     editMode?: boolean;
     showProgress?: boolean;
+    className?: string;
+    tooltipClassName?: string;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
@@ -120,6 +116,7 @@ export interface TaskItemProps {
     editMode: boolean;
     showProgress?: boolean;
     instanceId: string;
+    className?: string;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -146,6 +143,7 @@ export interface TodayMarkerProps {
     label?: string;
     dayOfMonth?: number;
     className?: string;
+    markerClass?: string;
 }
 
 // Date format options

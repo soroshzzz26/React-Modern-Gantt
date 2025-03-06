@@ -1,10 +1,5 @@
 import React from "react";
-interface TodayMarkerProps {
-    currentMonthIndex: number;
-    height: number;
-    markerClass?: string;
-    label?: string;
-}
+import { TodayMarkerProps } from "../utils/types";
 /**
  * TodayMarker Component
  *

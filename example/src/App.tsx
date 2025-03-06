@@ -1,17 +1,5 @@
 import React, { useState } from "react";
-import {
-    GanttChart,
-    GanttTitle,
-    GanttHeader,
-    GanttMarker,
-    GanttTaskList,
-    GanttTimeline,
-    TaskGroup,
-    Task,
-    mergeTheme,
-    lightTheme,
-    darkTheme,
-} from "react-modern-gantt";
+import { GanttChart, Task, TaskGroup } from "react-modern-gantt";
 import "./App.css";
 
 // Define initial task data
@@ -128,22 +116,6 @@ const generateInitialTasks = (): TaskGroup[] => {
         },
     ];
 };
-
-// Custom theme presets
-const customLightTheme = mergeTheme(lightTheme, {
-    highlight: "#f0f9ff",
-    marker: "#f43f5e",
-    task: "#3b82f6",
-});
-
-const customDarkTheme = mergeTheme(darkTheme, {
-    background: "#0f172a",
-    text: "#f8fafc",
-    border: "#1e293b",
-    highlight: "#1e3a8a",
-    marker: "#f43f5e",
-    task: "#4f46e5",
-});
 
 // Component for controls section
 const Controls: React.FC<{
@@ -291,39 +263,18 @@ const Controls: React.FC<{
 const GanttChartDemo = () => {
     // State for different variants
     const [basicTasks, setBasicTasks] = useState<TaskGroup[]>(generateInitialTasks());
-    const [customTasks, setCustomTasks] = useState<TaskGroup[]>(generateInitialTasks());
 
     // State for controls
     const [basicEditMode, setBasicEditMode] = useState(true);
-    const [customEditMode, setCustomEditMode] = useState(true);
     const [basicDarkMode, setBasicDarkMode] = useState(false);
-    const [customDarkMode, setCustomDarkMode] = useState(true);
     const [basicShowProgress, setBasicShowProgress] = useState(true);
-    const [customShowProgress, setCustomShowProgress] = useState(true);
     const [basicShowWeeks, setBasicShowWeeks] = useState(false);
-    const [customShowWeeks, setCustomShowWeeks] = useState(true);
     const [basicShowDays, setBasicShowDays] = useState(false);
-    const [customShowDays, setCustomShowDays] = useState(false);
-
-    // Selected task tracking
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
     // Task update handlers
     const handleBasicTaskUpdate = (groupId: string, updatedTask: Task) => {
         setBasicTasks(prevTasks =>
-            prevTasks.map(group =>
-                group.id === groupId
-                    ? {
-                          ...group,
-                          tasks: group.tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)),
-                      }
-                    : group
-            )
-        );
-    };
-
-    const handleCustomTaskUpdate = (groupId: string, updatedTask: Task) => {
-        setCustomTasks(prevTasks =>
             prevTasks.map(group =>
                 group.id === groupId
                     ? {
@@ -347,6 +298,14 @@ const GanttChartDemo = () => {
                 (task.endDate.getTime() - task.startDate.getTime()) / (1000 * 60 * 60 * 24)
             )} days\nProgress: ${task.percent || 0}%`
         );
+    };
+
+    // Basic styles
+    const basicStyles = {
+        container: "",
+        title: "text-xl font-bold",
+        taskList: "bg-gray-600 border-r border-gray-200",
+        timeline: "bg-gray-600",
     };
 
     return (
@@ -402,78 +361,8 @@ const GanttChartDemo = () => {
                             onTaskUpdate={handleBasicTaskUpdate}
                             onTaskSelect={handleTaskSelect}
                             onTaskDoubleClick={handleTaskDoubleClick}
+                            styles={basicStyles}
                         />
-                    </div>
-                </section>
-
-                {/* Custom Gantt Chart */}
-                <section className={`rounded-xl ${customDarkMode ? "bg-gray-800" : "bg-white"} p-6 shadow-lg`}>
-                    <h2 className={`mb-6 text-2xl font-bold ${customDarkMode ? "text-gray-100" : "text-gray-800"}`}>
-                        Custom Gantt Chart
-                    </h2>
-                    <p className={`mb-6 ${customDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                        Advanced implementation with composition components and custom theme. Double-click a task to
-                        view details.
-                    </p>
-
-                    <Controls
-                        editMode={customEditMode}
-                        setEditMode={setCustomEditMode}
-                        darkMode={customDarkMode}
-                        setDarkMode={setCustomDarkMode}
-                        showProgress={customShowProgress}
-                        setShowProgress={setCustomShowProgress}
-                        showWeeks={customShowWeeks}
-                        setShowWeeks={setCustomShowWeeks}
-                        showDays={customShowDays}
-                        setShowDays={setCustomShowDays}
-                        className="mb-6"
-                    />
-
-                    <div
-                        className={`rounded-lg border ${
-                            customDarkMode ? "border-gray-700" : "border-gray-200"
-                        } shadow`}>
-                        <GanttChart
-                            tasks={customTasks}
-                            onTaskUpdate={handleCustomTaskUpdate}
-                            onTaskDoubleClick={handleTaskDoubleClick}
-                            onTaskSelect={handleTaskSelect}
-                            editMode={customEditMode}
-                            darkMode={customDarkMode}
-                            theme={customDarkMode ? customDarkTheme : customLightTheme}
-                            showProgress={customShowProgress}
-                            showWeeks={customShowWeeks}
-                            showDays={customShowDays}
-                            rowHeight={45}>
-                            <GanttTitle
-                                className={`text-2xl font-bold ${
-                                    customDarkMode ? "text-indigo-300" : "text-indigo-800"
-                                }`}>
-                                Product Development Roadmap
-                            </GanttTitle>
-
-                            <GanttHeader
-                                className={`${customDarkMode ? "text-indigo-300" : "text-indigo-600"} font-medium`}>
-                                Team Overview
-                            </GanttHeader>
-
-                            <GanttMarker className="bg-pink-500">Today</GanttMarker>
-
-                            <GanttTaskList
-                                showIcon={true}
-                                showTaskCount={true}
-                                className={`w-48 ${
-                                    customDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-indigo-100"
-                                } border-r`}
-                            />
-
-                            <GanttTimeline
-                                className={`text-sm ${
-                                    customDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-indigo-100"
-                                } border-b`}
-                            />
-                        </GanttChart>
                     </div>
                 </section>
 
@@ -504,18 +393,11 @@ const GanttChartDemo = () => {
                                 Dark Mode Support
                             </h3>
                             <p className={`${basicDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                Built-in light and dark themes with easy customization
+                                Built-in light and dark themes with easy customization via Tailwind classes
                             </p>
                         </div>
 
                         <div className={`feature-card p-4 rounded-lg ${basicDarkMode ? "bg-gray-700" : "bg-gray-50"}`}>
-                            <h3
-                                className={`text-lg font-semibold mb-2 ${
-                                    basicDarkMode ? "text-white" : "text-gray-800"
-                                }`}>
-                                Progress Tracking
-                            </h3>
-
                             <h3
                                 className={`text-lg font-semibold mb-2 ${
                                     basicDarkMode ? "text-white" : "text-gray-800"
@@ -532,10 +414,10 @@ const GanttChartDemo = () => {
                                 className={`text-lg font-semibold mb-2 ${
                                     basicDarkMode ? "text-white" : "text-gray-800"
                                 }`}>
-                                Composition API
+                                Styling Flexibility
                             </h3>
                             <p className={`${basicDarkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                Flexible customization through composable components
+                                Easy customization with the styles prop and Tailwind utility classes
                             </p>
                         </div>
 
@@ -592,46 +474,53 @@ const GanttChartDemo = () => {
 
                     <div className={`code-example p-4 rounded-lg ${basicDarkMode ? "bg-gray-900" : "bg-gray-50"} mb-6`}>
                         <h3 className={`text-lg font-semibold mb-2 ${basicDarkMode ? "text-white" : "text-gray-800"}`}>
-                            Customization with Composition
+                            With Custom Styling
                         </h3>
                         <pre
                             className={`p-4 rounded ${
                                 basicDarkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
                             } overflow-x-auto`}>
-                            {`import { GanttChart, GanttTitle, GanttHeader } from 'react-modern-gantt';
+                            {`import { GanttChart } from 'react-modern-gantt';
 
-<GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate}>
-  <GanttTitle className="text-2xl text-indigo-800">
-    Custom Project Timeline
-  </GanttTitle>
-  <GanttHeader className="font-bold">
-    Teams & Resources
-  </GanttHeader>
-</GanttChart>`}
+<GanttChart
+  tasks={tasks}
+  title="Project Timeline"
+  showProgress={true}
+  onTaskUpdate={handleTaskUpdate}
+  styles={{
+    container: "border-2 border-blue-200 rounded-xl",
+    title: "text-2xl text-blue-800 font-bold",
+    taskList: "bg-blue-50 border-r border-blue-100",
+    timeline: "bg-blue-50",
+    tooltip: "bg-white border border-blue-200 shadow-lg"
+  }}
+/>`}
                         </pre>
                     </div>
 
                     <div className={`code-example p-4 rounded-lg ${basicDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
                         <h3 className={`text-lg font-semibold mb-2 ${basicDarkMode ? "text-white" : "text-gray-800"}`}>
-                            Theme Customization
+                            Dark Mode and Style Options
                         </h3>
                         <pre
                             className={`p-4 rounded ${
                                 basicDarkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"
                             } overflow-x-auto`}>
-                            {`import { GanttChart, mergeTheme, lightTheme } from 'react-modern-gantt';
-
-// Create a custom theme
-const customTheme = mergeTheme(lightTheme, {
-  highlight: '#eff6ff',
-  marker: '#ef4444',
-  task: '#3b82f6',
-});
+                            {`import { GanttChart } from 'react-modern-gantt';
 
 <GanttChart
   tasks={tasks}
-  theme={customTheme}
+  darkMode={true}
+  showProgress={true}
+  showWeeks={true}
   onTaskUpdate={handleTaskUpdate}
+  styles={{
+    title: "text-3xl text-indigo-300",
+    taskList: "bg-gray-800 border-r border-gray-700",
+    timeline: "bg-gray-800",
+    todayMarker: "bg-pink-500",
+    tooltip: "bg-gray-900 text-white border-0 shadow-lg"
+  }}
 />`}
                         </pre>
                     </div>
@@ -722,6 +611,10 @@ const customTheme = mergeTheme(lightTheme, {
   tasks={tasks}
   title="Project Timeline"
   showProgress={true}
+  styles={{
+    title: "text-2xl font-bold text-blue-800",
+    taskList: "bg-gray-50"
+  }}
   onTaskUpdate={(groupId, updatedTask) => {
     // Update your task data here
   }}

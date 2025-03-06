@@ -1,13 +1,5 @@
 import React from "react";
-
-export interface TimelineProps {
-    months: Date[];
-    currentMonthIndex: number;
-    showWeeks?: boolean;
-    showDays?: boolean;
-    locale?: string;
-    className?: string;
-}
+import { TimelineProps } from "../utils/types";
 
 /**
  * Timeline Component

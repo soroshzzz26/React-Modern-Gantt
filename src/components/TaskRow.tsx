@@ -19,6 +19,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
     monthWidth,
     editMode = true,
     showProgress = false,
+    className = "",
+    tooltipClassName = "",
     onTaskUpdate,
     onTaskClick,
     onTaskSelect,
@@ -247,7 +249,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     return (
         <div
-            className="relative border-b border-gantt-border"
+            className={`relative border-b border-gantt-border ${className}`}
             style={{ height: `${rowHeight}px` }}
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}
@@ -321,6 +323,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     monthWidth={monthWidth}
                     showProgress={showProgress}
                     instanceId={instanceId.current}
+                    className={tooltipClassName}
                 />
             )}
         </div>
