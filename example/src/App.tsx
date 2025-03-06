@@ -125,24 +125,8 @@ const Controls: React.FC<{
     setDarkMode: (mode: boolean) => void;
     showProgress: boolean;
     setShowProgress: (show: boolean) => void;
-    showWeeks: boolean;
-    setShowWeeks: (show: boolean) => void;
-    showDays: boolean;
-    setShowDays: (show: boolean) => void;
     className?: string;
-}> = ({
-    editMode,
-    setEditMode,
-    darkMode,
-    setDarkMode,
-    showProgress,
-    setShowProgress,
-    showWeeks,
-    setShowWeeks,
-    showDays,
-    setShowDays,
-    className = "",
-}) => (
+}> = ({ editMode, setEditMode, darkMode, setDarkMode, showProgress, setShowProgress, className = "" }) => (
     <div
         className={`controls flex flex-wrap items-center gap-4 ${
             darkMode ? "text-gray-300" : "text-gray-700"
@@ -212,50 +196,6 @@ const Controls: React.FC<{
                 </div>
             </label>
         </div>
-
-        <div className="control-item">
-            <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-sm font-medium">Show Weeks</span>
-                <div
-                    className={`toggle-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        showWeeks ? "bg-indigo-600" : "bg-gray-300"
-                    }`}>
-                    <span
-                        className={`switch-handle inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-                            showWeeks ? "translate-x-6" : "translate-x-1"
-                        }`}
-                    />
-                    <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={showWeeks}
-                        onChange={() => setShowWeeks(!showWeeks)}
-                    />
-                </div>
-            </label>
-        </div>
-
-        <div className="control-item">
-            <label className="flex items-center gap-2 cursor-pointer">
-                <span className="text-sm font-medium">Show Days</span>
-                <div
-                    className={`toggle-switch relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        showDays ? "bg-indigo-600" : "bg-gray-300"
-                    }`}>
-                    <span
-                        className={`switch-handle inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-                            showDays ? "translate-x-6" : "translate-x-1"
-                        }`}
-                    />
-                    <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={showDays}
-                        onChange={() => setShowDays(!showDays)}
-                    />
-                </div>
-            </label>
-        </div>
     </div>
 );
 
@@ -268,8 +208,6 @@ const GanttChartDemo = () => {
     const [basicEditMode, setBasicEditMode] = useState(true);
     const [basicDarkMode, setBasicDarkMode] = useState(false);
     const [basicShowProgress, setBasicShowProgress] = useState(true);
-    const [basicShowWeeks, setBasicShowWeeks] = useState(false);
-    const [basicShowDays, setBasicShowDays] = useState(false);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
     // Task update handlers
@@ -340,10 +278,6 @@ const GanttChartDemo = () => {
                         setDarkMode={setBasicDarkMode}
                         showProgress={basicShowProgress}
                         setShowProgress={setBasicShowProgress}
-                        showWeeks={basicShowWeeks}
-                        setShowWeeks={setBasicShowWeeks}
-                        showDays={basicShowDays}
-                        setShowDays={setBasicShowDays}
                         className="mb-6"
                     />
 
@@ -356,8 +290,6 @@ const GanttChartDemo = () => {
                             showProgress={basicShowProgress}
                             editMode={basicEditMode}
                             darkMode={basicDarkMode}
-                            showWeeks={basicShowWeeks}
-                            showDays={basicShowDays}
                             onTaskUpdate={handleBasicTaskUpdate}
                             onTaskSelect={handleTaskSelect}
                             onTaskDoubleClick={handleTaskDoubleClick}
@@ -512,7 +444,6 @@ const GanttChartDemo = () => {
   tasks={tasks}
   darkMode={true}
   showProgress={true}
-  showWeeks={true}
   onTaskUpdate={handleTaskUpdate}
   styles={{
     title: "text-3xl text-indigo-300",

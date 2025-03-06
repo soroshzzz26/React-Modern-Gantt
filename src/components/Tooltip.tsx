@@ -1,13 +1,14 @@
 import React from "react";
-import { Task } from "../utils/types";
+import { Task, ViewMode } from "../utils/types";
 import { TaskManager } from "../utils/TaskManager";
 import { TooltipProps } from "../utils/types";
+import { format } from "date-fns";
 
 /**
- * Tooltip Component
+ *  Tooltip Component
  *
  * Displays a tooltip with task information
- * Shows live updates during drag and resize operations
+ * Adapts date display based on view mode
  */
 const Tooltip: React.FC<TooltipProps> = ({
     task,
@@ -21,6 +22,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     showProgress = false,
     instanceId,
     className = "",
+    viewMode = ViewMode.MONTH,
 }) => {
     // Default values
     let displayStartDate = task.startDate;
@@ -34,7 +36,14 @@ const Tooltip: React.FC<TooltipProps> = ({
         ) as HTMLElement;
 
         if (taskEl && (dragType || taskEl.style.left || taskEl.style.width)) {
-            const dates = TaskManager.getLiveDatesFromElement(taskEl, startDate, endDate, totalMonths, monthWidth);
+            const dates = TaskManager.getLiveDatesFromElement(
+                taskEl,
+                startDate,
+                endDate,
+                totalMonths,
+                monthWidth,
+                viewMode
+            );
             displayStartDate = dates.startDate;
             displayEndDate = dates.endDate;
         }
@@ -42,12 +51,26 @@ const Tooltip: React.FC<TooltipProps> = ({
         console.error("Error calculating live dates for tooltip:", error);
     }
 
-    // Calculate duration in days
-    const duration = TaskManager.getDuration(displayStartDate, displayEndDate);
+    // Calculate duration based on view mode
+    const duration = TaskManager.getDuration(displayStartDate, displayEndDate, viewMode);
 
-    // Format dates
+    // Format dates based on view mode
     const formatDate = (date: Date) => {
-        return TaskManager.formatDate(date);
+        switch (viewMode) {
+            case ViewMode.DAY:
+                return format(date, "EEE, MMM d, yyyy");
+            case ViewMode.WEEK:
+                return format(date, "MMM d, yyyy");
+            case ViewMode.MONTH:
+                return format(date, "MMM yyyy");
+            case ViewMode.QUARTER:
+                const quarter = Math.floor(date.getMonth() / 3) + 1;
+                return `Q${quarter} ${date.getFullYear()}`;
+            case ViewMode.YEAR:
+                return date.getFullYear().toString();
+            default:
+                return format(date, "MMM d, yyyy");
+        }
     };
 
     // Get action text based on drag type
@@ -74,7 +97,7 @@ const Tooltip: React.FC<TooltipProps> = ({
             style={{
                 left: `${position.x}px`,
                 top: `${position.y - 40}px`,
-                minWidth: "150px",
+                minWidth: "200px",
             }}>
             {/* Task name */}
             <div className="font-bold mb-1">{task.name || "Unnamed Task"}</div>
@@ -92,7 +115,7 @@ const Tooltip: React.FC<TooltipProps> = ({
 
                 <div className="font-semibold">Duration:</div>
                 <div>
-                    {duration} day{duration !== 1 ? "s" : ""}
+                    {duration.value} {duration.unit}
                 </div>
 
                 {/* Show progress if enabled */}

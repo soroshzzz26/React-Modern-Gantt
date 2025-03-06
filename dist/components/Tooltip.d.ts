@@ -1,10 +1,10 @@
 import React from "react";
 import { TooltipProps } from "../utils/types";
 /**
- * Tooltip Component
+ *  Tooltip Component
  *
  * Displays a tooltip with task information
- * Shows live updates during drag and resize operations
+ * Adapts date display based on view mode
  */
 declare const Tooltip: React.FC<TooltipProps>;
 export default Tooltip;

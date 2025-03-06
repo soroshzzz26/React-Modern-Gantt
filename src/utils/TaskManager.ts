@@ -1,19 +1,43 @@
-import { Task } from "./types";
+import { Task, ViewMode } from "./types";
+import {
+    differenceInDays,
+    differenceInWeeks,
+    differenceInMonths,
+    differenceInQuarters,
+    differenceInYears,
+    addDays,
+    startOfDay,
+    endOfDay,
+    startOfWeek,
+    endOfWeek,
+    startOfMonth,
+    endOfMonth,
+    startOfQuarter,
+    endOfQuarter,
+    startOfYear,
+    endOfYear,
+    isWithinInterval,
+} from "date-fns";
 
 /**
+ * TaskManager with ViewMode support
+ *
  * Manages operations on tasks like calculating positions, dates, etc.
+ * Supports different view modes (day, week, month, quarter, year)
  */
 export class TaskManager {
     /**
      * Calculate the new dates for a task based on pixel position
+     * Takes view mode into account
      */
     public static calculateDatesFromPosition(
         left: number,
         width: number,
         startDate: Date,
         endDate: Date,
-        totalMonths: number,
-        monthWidth: number
+        totalUnits: number,
+        unitWidth: number,
+        viewMode: ViewMode = ViewMode.MONTH
     ): { newStartDate: Date; newEndDate: Date } {
         try {
             // Make sure we're working with valid numbers
@@ -26,15 +50,48 @@ export class TaskManager {
             const timelineDuration = timelineEndTime - timelineStartTime;
 
             // Calculate milliseconds per pixel
-            const msPerPixel = timelineDuration / (totalMonths * monthWidth);
+            const msPerPixel = timelineDuration / (totalUnits * unitWidth);
 
             // Convert pixel position to time offsets
             const startOffset = safeLeft * msPerPixel;
             const durationMs = safeWidth * msPerPixel;
 
             // Create new Date objects from the calculated times
-            const newStartDate = new Date(timelineStartTime + startOffset);
-            const newEndDate = new Date(timelineStartTime + startOffset + durationMs);
+            let newStartDate = new Date(timelineStartTime + startOffset);
+            let newEndDate = new Date(timelineStartTime + startOffset + durationMs);
+
+            // Depending on the view mode, we might want to snap to unit boundaries
+            switch (viewMode) {
+                case ViewMode.DAY:
+                    // For day view, snap to day boundaries
+                    newStartDate = startOfDay(newStartDate);
+                    newEndDate = endOfDay(newEndDate);
+                    break;
+
+                case ViewMode.WEEK:
+                    // For week view, snap to week boundaries
+                    newStartDate = startOfWeek(newStartDate);
+                    newEndDate = endOfWeek(newEndDate);
+                    break;
+
+                case ViewMode.MONTH:
+                    // For month view, snap to month boundaries
+                    newStartDate = startOfMonth(newStartDate);
+                    newEndDate = endOfMonth(newEndDate);
+                    break;
+
+                case ViewMode.QUARTER:
+                    // For quarter view, snap to quarter boundaries
+                    newStartDate = startOfQuarter(newStartDate);
+                    newEndDate = endOfQuarter(newEndDate);
+                    break;
+
+                case ViewMode.YEAR:
+                    // For year view, snap to year boundaries
+                    newStartDate = startOfYear(newStartDate);
+                    newEndDate = endOfYear(newEndDate);
+                    break;
+            }
 
             // Ensure dates don't extend beyond the timeline boundaries
             if (newStartDate < startDate) {
@@ -77,13 +134,15 @@ export class TaskManager {
 
     /**
      * Calculates position and width for a task in pixels
+     * Takes view mode into account
      */
     public static calculateTaskPixelPosition(
         task: Task,
         startDate: Date,
         endDate: Date,
-        totalMonths: number,
-        monthWidth: number
+        totalUnits: number,
+        unitWidth: number,
+        viewMode: ViewMode = ViewMode.MONTH
     ): { leftPx: number; widthPx: number } {
         try {
             // Ensure we have valid dates
@@ -93,21 +152,66 @@ export class TaskManager {
 
             // Clamp task dates to timeline boundaries
             const taskStartTime = Math.max(task.startDate.getTime(), startDate.getTime());
-
             const taskEndTime = Math.min(task.endDate.getTime(), endDate.getTime());
 
-            // Calculate the time range of the entire timeline
-            const timelineStartTime = startDate.getTime();
-            const timelineEndTime = endDate.getTime();
-            const timelineDuration = timelineEndTime - timelineStartTime;
+            let leftPercent = 0;
+            let widthPercent = 0;
 
-            // Calculate positioning ratios
-            const startOffsetPercent = ((taskStartTime - timelineStartTime) / timelineDuration) * 100;
-            const taskDurationPercent = ((taskEndTime - taskStartTime) / timelineDuration) * 100;
+            // Calculate positions based on the view mode
+            switch (viewMode) {
+                case ViewMode.DAY:
+                    // For day view, calculate based on days
+                    const dayDiff = differenceInDays(new Date(taskStartTime), startDate);
+                    const taskDurationDays = differenceInDays(new Date(taskEndTime), new Date(taskStartTime)) + 1;
+                    leftPercent = (dayDiff / totalUnits) * 100;
+                    widthPercent = (taskDurationDays / totalUnits) * 100;
+                    break;
 
-            // Convert to pixels
-            const leftPx = (startOffsetPercent / 100) * totalMonths * monthWidth;
-            const widthPx = Math.max(20, (taskDurationPercent / 100) * totalMonths * monthWidth);
+                case ViewMode.WEEK:
+                    // For week view, calculate based on weeks
+                    const weekDiff = differenceInWeeks(new Date(taskStartTime), startDate);
+                    const taskDurationWeeks = differenceInWeeks(new Date(taskEndTime), new Date(taskStartTime)) + 1;
+                    leftPercent = (weekDiff / totalUnits) * 100;
+                    widthPercent = (taskDurationWeeks / totalUnits) * 100;
+                    break;
+
+                case ViewMode.MONTH:
+                    // For month view, calculate based on months
+                    const monthDiff = differenceInMonths(new Date(taskStartTime), startDate);
+                    const taskDurationMonths = differenceInMonths(new Date(taskEndTime), new Date(taskStartTime)) + 1;
+                    leftPercent = (monthDiff / totalUnits) * 100;
+                    widthPercent = (taskDurationMonths / totalUnits) * 100;
+                    break;
+
+                case ViewMode.QUARTER:
+                    // For quarter view, calculate based on quarters
+                    const quarterDiff = differenceInQuarters(new Date(taskStartTime), startDate);
+                    const taskDurationQuarters =
+                        differenceInQuarters(new Date(taskEndTime), new Date(taskStartTime)) + 1;
+                    leftPercent = (quarterDiff / totalUnits) * 100;
+                    widthPercent = (taskDurationQuarters / totalUnits) * 100;
+                    break;
+
+                case ViewMode.YEAR:
+                    // For year view, calculate based on years
+                    const yearDiff = differenceInYears(new Date(taskStartTime), startDate);
+                    const taskDurationYears = differenceInYears(new Date(taskEndTime), new Date(taskStartTime)) + 1;
+                    leftPercent = (yearDiff / totalUnits) * 100;
+                    widthPercent = (taskDurationYears / totalUnits) * 100;
+                    break;
+
+                default:
+                    // Default to month view
+                    const defaultMonthDiff = differenceInMonths(new Date(taskStartTime), startDate);
+                    const defaultTaskDurationMonths =
+                        differenceInMonths(new Date(taskEndTime), new Date(taskStartTime)) + 1;
+                    leftPercent = (defaultMonthDiff / totalUnits) * 100;
+                    widthPercent = (defaultTaskDurationMonths / totalUnits) * 100;
+            }
+
+            // Convert percentages to pixels
+            const leftPx = (leftPercent / 100) * totalUnits * unitWidth;
+            const widthPx = Math.max(20, (widthPercent / 100) * totalUnits * unitWidth);
 
             return { leftPx, widthPx };
         } catch (error) {
@@ -124,8 +228,9 @@ export class TaskManager {
         taskEl: HTMLElement | null,
         startDate: Date,
         endDate: Date,
-        totalMonths: number,
-        monthWidth: number
+        totalUnits: number,
+        unitWidth: number,
+        viewMode: ViewMode = ViewMode.MONTH
     ): { startDate: Date; endDate: Date } {
         try {
             if (!taskEl) {
@@ -140,8 +245,9 @@ export class TaskManager {
                 width,
                 startDate,
                 endDate,
-                totalMonths,
-                monthWidth
+                totalUnits,
+                unitWidth,
+                viewMode
             );
 
             return { startDate: newStartDate, endDate: newEndDate };
@@ -154,67 +260,131 @@ export class TaskManager {
     /**
      * Format a date for display
      */
-    public static formatDate(date: Date, locale: string = "default"): string {
+    public static formatDate(date: Date, locale: string = "default", viewMode: ViewMode = ViewMode.MONTH): string {
         if (!(date instanceof Date) || isNaN(date.getTime())) {
             return "Invalid date";
         }
 
-        return date.toLocaleDateString(locale, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
+        // Different formats based on view mode
+        let options: Intl.DateTimeFormatOptions;
+
+        switch (viewMode) {
+            case ViewMode.DAY:
+                options = { year: "numeric", month: "short", day: "numeric" };
+                break;
+            case ViewMode.WEEK:
+                options = { year: "numeric", month: "short", day: "numeric" };
+                break;
+            case ViewMode.MONTH:
+                options = { year: "numeric", month: "short", day: "numeric" };
+                break;
+            case ViewMode.QUARTER:
+                options = { year: "numeric", month: "short" };
+                break;
+            case ViewMode.YEAR:
+                options = { year: "numeric" };
+                break;
+            default:
+                options = { year: "numeric", month: "short", day: "numeric" };
+        }
+
+        return date.toLocaleDateString(locale, options);
     }
 
     /**
-     * Calculate duration between dates in days
+     * Calculate duration between dates based on the view mode
      */
-    public static getDuration(start: Date, end: Date): number {
+    public static getDuration(
+        start: Date,
+        end: Date,
+        viewMode: ViewMode = ViewMode.MONTH
+    ): { value: number; unit: string } {
         try {
             // Ensure dates are valid
             if (!(start instanceof Date) || !(end instanceof Date) || isNaN(start.getTime()) || isNaN(end.getTime())) {
-                return 0;
+                return { value: 0, unit: "days" };
             }
 
             // Handle dates in the wrong order
             const earlierDate = start < end ? start : end;
             const laterDate = start < end ? end : start;
 
-            // Calculate days between
-            const diffTime = Math.abs(laterDate.getTime() - earlierDate.getTime());
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            // Calculate based on view mode
+            switch (viewMode) {
+                case ViewMode.DAY:
+                    const days = differenceInDays(laterDate, earlierDate) + 1;
+                    return { value: days, unit: days === 1 ? "day" : "days" };
+
+                case ViewMode.WEEK:
+                    const weeks = differenceInWeeks(laterDate, earlierDate) + 1;
+                    return { value: weeks, unit: weeks === 1 ? "week" : "weeks" };
+
+                case ViewMode.MONTH:
+                    const months = differenceInMonths(laterDate, earlierDate) + 1;
+                    return { value: months, unit: months === 1 ? "month" : "months" };
+
+                case ViewMode.QUARTER:
+                    const quarters = differenceInQuarters(laterDate, earlierDate) + 1;
+                    return { value: quarters, unit: quarters === 1 ? "quarter" : "quarters" };
+
+                case ViewMode.YEAR:
+                    const years = differenceInYears(laterDate, earlierDate) + 1;
+                    return { value: years, unit: years === 1 ? "year" : "years" };
+
+                default:
+                    const defaultDays = differenceInDays(laterDate, earlierDate) + 1;
+                    return { value: defaultDays, unit: defaultDays === 1 ? "day" : "days" };
+            }
         } catch (error) {
             console.error("Error calculating duration:", error);
-            return 0;
+            return { value: 0, unit: "days" };
         }
-    }
-
-    /**
-     * Get month name (formatted)
-     */
-    public static getMonthName(date: Date, locale: string = "default"): string {
-        if (!(date instanceof Date) || isNaN(date.getTime())) {
-            return "";
-        }
-
-        return date.toLocaleString(locale, { month: "short" });
-    }
-
-    /**
-     * Get days in month
-     */
-    public static getDaysInMonth(date: Date): number {
-        if (!(date instanceof Date) || isNaN(date.getTime())) {
-            return 30; // Default fallback
-        }
-
-        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     }
 
     /**
      * Check if two date ranges overlap
      */
     public static datesOverlap(startA: Date, endA: Date, startB: Date, endB: Date): boolean {
-        return startA <= endB && endA >= startB;
+        return (
+            isWithinInterval(startA, { start: startB, end: endB }) ||
+            isWithinInterval(endA, { start: startB, end: endB }) ||
+            isWithinInterval(startB, { start: startA, end: endA }) ||
+            isWithinInterval(endB, { start: startA, end: endA })
+        );
+    }
+
+    /**
+     * Get formatted unit label based on view mode
+     */
+    public static getUnitLabel(date: Date, viewMode: ViewMode = ViewMode.MONTH, locale: string = "default"): string {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return "Invalid date";
+        }
+
+        switch (viewMode) {
+            case ViewMode.DAY:
+                return date.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+
+            case ViewMode.WEEK:
+                const weekStart = startOfWeek(date);
+                const weekEnd = endOfWeek(date);
+                return `${weekStart.toLocaleDateString(locale, {
+                    day: "numeric",
+                    month: "short",
+                })} - ${weekEnd.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`;
+
+            case ViewMode.MONTH:
+                return date.toLocaleDateString(locale, { month: "short", year: "numeric" });
+
+            case ViewMode.QUARTER:
+                const quarter = Math.floor(date.getMonth() / 3) + 1;
+                return `Q${quarter} ${date.getFullYear()}`;
+
+            case ViewMode.YEAR:
+                return date.getFullYear().toString();
+
+            default:
+                return date.toLocaleDateString(locale, { month: "short", year: "numeric" });
+        }
     }
 }

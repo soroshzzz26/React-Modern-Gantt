@@ -1,5 +1,5 @@
 /**
- * Core type definitions for React Modern Gantt
+ * Type definitions for React Modern Gantt
  */
 import React from "react";
 
@@ -53,9 +53,8 @@ export interface GanttChartProps {
     showProgress?: boolean;
     darkMode?: boolean;
     locale?: string;
-    showWeeks?: boolean;
-    showDays?: boolean;
     styles?: GanttStyles;
+    viewMode?: ViewMode;
 
     // Event handlers
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
@@ -63,11 +62,13 @@ export interface GanttChartProps {
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     onTaskDoubleClick?: (task: Task) => void;
     onGroupClick?: (group: TaskGroup) => void;
+    onViewModeChange?: (viewMode: ViewMode) => void;
 
     // Visual customization
     fontSize?: string;
     rowHeight?: number;
     timeStep?: number;
+    unitWidth?: number;
 }
 
 // Individual component props
@@ -84,6 +85,7 @@ export interface TaskRowProps {
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
+    viewMode?: ViewMode;
 }
 
 export interface TaskListProps {
@@ -100,10 +102,10 @@ export interface TaskListProps {
 export interface TimelineProps {
     months: Date[];
     currentMonthIndex: number;
-    showWeeks?: boolean;
-    showDays?: boolean;
     locale?: string;
     className?: string;
+    viewMode?: ViewMode;
+    unitWidth?: number;
 }
 
 export interface TaskItemProps {
@@ -135,6 +137,7 @@ export interface TooltipProps {
     showProgress?: boolean;
     instanceId: string;
     className?: string;
+    viewMode?: ViewMode; // Added viewMode prop
 }
 
 export interface TodayMarkerProps {
@@ -144,6 +147,17 @@ export interface TodayMarkerProps {
     dayOfMonth?: number;
     className?: string;
     markerClass?: string;
+    viewMode?: ViewMode; // Added viewMode prop
+    unitWidth?: number; // Added unitWidth prop
+}
+
+// View Mode enum
+export enum ViewMode {
+    DAY = "day",
+    WEEK = "week",
+    MONTH = "month",
+    QUARTER = "quarter",
+    YEAR = "year",
 }
 
 // Date format options
@@ -151,15 +165,6 @@ export enum DateDisplayFormat {
     MONTH_YEAR = "month-year",
     FULL_DATE = "full-date",
     SHORT_DATE = "short-date",
-}
-
-// View options
-export enum ViewMode {
-    DAY = "day",
-    WEEK = "week",
-    MONTH = "month",
-    QUARTER = "quarter",
-    YEAR = "year",
 }
 
 // Interaction states for custom hooks

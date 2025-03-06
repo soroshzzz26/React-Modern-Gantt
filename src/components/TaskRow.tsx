@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Task, TaskGroup, TaskRowProps } from "../utils/types";
+import { Task, TaskGroup, TaskRowProps, ViewMode } from "../utils/types";
 import { CollisionManager } from "../utils/CollisionManager";
 import { TaskManager } from "../utils/TaskManager";
 import TaskItem from "./TaskItem";
 import Tooltip from "./Tooltip";
 
 /**
- * TaskRow Component
+ *  TaskRow Component
  *
  * Displays and manages the tasks for a single task group
- * Handles task interactions (drag, resize, selection)
+ * Supports different view modes
  */
 const TaskRow: React.FC<TaskRowProps> = ({
     taskGroup,
@@ -24,6 +24,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
     onTaskUpdate,
     onTaskClick,
     onTaskSelect,
+    viewMode = ViewMode.MONTH,
 }) => {
     if (!taskGroup || !taskGroup.id || !Array.isArray(taskGroup.tasks)) {
         console.warn("TaskRow: Invalid task group data", taskGroup);
@@ -166,7 +167,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     validStartDate,
                     validEndDate,
                     totalMonths,
-                    monthWidth
+                    monthWidth,
+                    viewMode
                 );
 
                 // Update the preview task with new dates
@@ -277,7 +279,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                 validStartDate,
                                 validEndDate,
                                 totalMonths,
-                                monthWidth
+                                monthWidth,
+                                viewMode
                             );
 
                             const isHovered = hoveredTask?.id === task.id;
@@ -324,6 +327,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     showProgress={showProgress}
                     instanceId={instanceId.current}
                     className={tooltipClassName}
+                    viewMode={viewMode}
                 />
             )}
         </div>

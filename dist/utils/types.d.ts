@@ -1,5 +1,5 @@
 /**
- * Core type definitions for React Modern Gantt
+ * Type definitions for React Modern Gantt
  */
 import React from "react";
 export interface Task {
@@ -44,17 +44,18 @@ export interface GanttChartProps {
     showProgress?: boolean;
     darkMode?: boolean;
     locale?: string;
-    showWeeks?: boolean;
-    showDays?: boolean;
     styles?: GanttStyles;
+    viewMode?: ViewMode;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     onTaskDoubleClick?: (task: Task) => void;
     onGroupClick?: (group: TaskGroup) => void;
+    onViewModeChange?: (viewMode: ViewMode) => void;
     fontSize?: string;
     rowHeight?: number;
     timeStep?: number;
+    unitWidth?: number;
 }
 export interface TaskRowProps {
     taskGroup: TaskGroup;
@@ -69,6 +70,7 @@ export interface TaskRowProps {
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
+    viewMode?: ViewMode;
 }
 export interface TaskListProps {
     tasks: TaskGroup[];
@@ -83,10 +85,10 @@ export interface TaskListProps {
 export interface TimelineProps {
     months: Date[];
     currentMonthIndex: number;
-    showWeeks?: boolean;
-    showDays?: boolean;
     locale?: string;
     className?: string;
+    viewMode?: ViewMode;
+    unitWidth?: number;
 }
 export interface TaskItemProps {
     task: Task;
@@ -119,6 +121,7 @@ export interface TooltipProps {
     showProgress?: boolean;
     instanceId: string;
     className?: string;
+    viewMode?: ViewMode;
 }
 export interface TodayMarkerProps {
     currentMonthIndex: number;
@@ -127,11 +130,8 @@ export interface TodayMarkerProps {
     dayOfMonth?: number;
     className?: string;
     markerClass?: string;
-}
-export declare enum DateDisplayFormat {
-    MONTH_YEAR = "month-year",
-    FULL_DATE = "full-date",
-    SHORT_DATE = "short-date"
+    viewMode?: ViewMode;
+    unitWidth?: number;
 }
 export declare enum ViewMode {
     DAY = "day",
@@ -139,6 +139,11 @@ export declare enum ViewMode {
     MONTH = "month",
     QUARTER = "quarter",
     YEAR = "year"
+}
+export declare enum DateDisplayFormat {
+    MONTH_YEAR = "month-year",
+    FULL_DATE = "full-date",
+    SHORT_DATE = "short-date"
 }
 export interface TaskInteraction {
     draggingTask: Task | null;
