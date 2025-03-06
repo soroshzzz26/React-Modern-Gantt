@@ -17,8 +17,8 @@ const TaskList: React.FC<TaskListProps> = ({
     const validTasks = Array.isArray(tasks) ? tasks : [];
 
     return (
-        <div className="w-40 flex-shrink-0 z-10 bg-white shadow-sm">
-            <div className="p-2 font-semibold text-gray-700 border-r border-b border-gray-200 h-10.5">
+        <div className="w-40 flex-shrink-0 z-10 bg-gantt-bg shadow-sm">
+            <div className="p-2 font-semibold text-gantt-text border-r border-b border-gray-200 h-10.5">
                 {headerLabel}
             </div>
 
