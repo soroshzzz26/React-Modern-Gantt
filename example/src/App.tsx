@@ -36,7 +36,7 @@ const generateInitialTasks = (): TaskGroup[] => {
                     name: "Database Schema",
                     startDate: new Date(currentYear, currentMonth + 1, 15),
                     endDate: new Date(currentYear, currentMonth + 2, 30),
-                    color: "bg-task-cyan",
+                    color: "bg-purple-500",
                     percent: 35,
                     dependencies: ["task-2"],
                 },
@@ -84,7 +84,7 @@ const generateInitialTasks = (): TaskGroup[] => {
                     name: "Visual Design",
                     startDate: new Date(currentYear, currentMonth, 25),
                     endDate: new Date(currentYear, currentMonth + 2, 5),
-                    color: "bg-orange-500",
+                    color: "bg-amber-500",
                     percent: 70,
                     dependencies: ["task-6"],
                 },
@@ -100,7 +100,7 @@ const generateInitialTasks = (): TaskGroup[] => {
                     name: "Requirements",
                     startDate: new Date(currentYear, currentMonth - 2, 1),
                     endDate: new Date(currentYear, currentMonth - 1, 30),
-                    color: "bg-task-indigo",
+                    color: "bg-blue-500",
                     percent: 100,
                 },
                 {
@@ -108,7 +108,7 @@ const generateInitialTasks = (): TaskGroup[] => {
                     name: "User Testing",
                     startDate: new Date(currentYear, currentMonth + 2, 10),
                     endDate: new Date(currentYear, currentMonth + 3, 25),
-                    color: "bg-task-indigo",
+                    color: "bg-amber-500",
                     percent: 0,
                     dependencies: ["task-1", "task-3", "task-7"],
                 },
@@ -304,8 +304,8 @@ const GanttChartDemo = () => {
     const basicStyles = {
         container: "",
         title: "text-xl font-bold",
-        taskList: "bg-gray-600 border-r border-gray-200",
-        timeline: "bg-gray-600",
+        taskList: "border-r border-gray-200",
+        timeline: "",
     };
 
     return (
