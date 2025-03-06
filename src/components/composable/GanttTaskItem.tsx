@@ -1,7 +1,7 @@
 import React from "react";
-import { Task, TaskGroup } from "@/utils/types";
+import { Task, TaskGroup } from "../../utils/types";
 
-interface GanttTaskItemProps {
+export interface GanttTaskItemProps {
     task: Task;
     group: TaskGroup;
     leftPx?: number;
@@ -18,7 +18,20 @@ interface GanttTaskItemProps {
     onDragEnd?: (task: Task) => void;
 }
 
-export const GanttTaskItem: React.FC<GanttTaskItemProps> = ({
+/**
+ * GanttTaskItem Component
+ *
+ * Customizable task bar component
+ *
+ * @example
+ * <GanttTaskItem
+ *   task={task}
+ *   group={group}
+ *   className="ring-2 ring-red-500"
+ *   showProgress={true}
+ * />
+ */
+const GanttTaskItem: React.FC<GanttTaskItemProps> = ({
     task,
     group,
     leftPx = 0,
@@ -53,7 +66,7 @@ export const GanttTaskItem: React.FC<GanttTaskItemProps> = ({
 
     return (
         <div
-            className={`absolute h-8 rounded ${taskColorClass} flex items-center px-2 text-xs text-gantt-task-text font-medium ${
+            className={`rmg-gantt-task-item absolute h-8 rounded ${taskColorClass} flex items-center px-2 text-xs text-gantt-task-text font-medium ${
                 editMode ? "cursor-move" : "cursor-pointer"
             } ${isSelected ? "ring-2 ring-white dark:ring-gray-300" : ""} ${className}`}
             style={{
@@ -85,3 +98,5 @@ export const GanttTaskItem: React.FC<GanttTaskItemProps> = ({
         </div>
     );
 };
+
+export default GanttTaskItem;

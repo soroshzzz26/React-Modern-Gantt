@@ -1,25 +1,52 @@
 import React, { useRef, useState, useEffect, ReactElement, Children, cloneElement, isValidElement } from "react";
-import { GanttChartProps, TaskGroup, Task } from "@/utils/types";
+import { GanttChartProps, TaskGroup, Task } from "../utils/types";
 import { getMonthsBetween, detectTaskOverlaps, findEarliestDate, findLatestDate } from "../models";
-import TaskRow from "./Task/TaskRow";
+import TaskRow from "./TaskRow";
 import Timeline from "./Timeline";
 import TodayMarker from "./TodayMarker";
-import TaskList from "./Task/TaskList";
-import "../gantt.css";
+import TaskList from "./TaskList";
+import "../styles/gantt.css";
 
-import {
-    GanttTitle,
-    GanttHeader,
-    GanttCurrentDateMarker,
-    GanttTaskList,
-    GanttTimeline,
-    GanttTaskItem,
-} from "./Elements";
+// Import composable components
+import { GanttTitle, GanttHeader, GanttMarker, GanttTaskList, GanttTimeline, GanttTaskItem } from "./composable";
+
+// Import types for composable components
+import type { GanttTitleProps } from "./composable/GanttTitle";
+import type { GanttHeaderProps } from "./composable/GanttHeader";
+import type { GanttMarkerProps } from "./composable/GanttMarker";
+import type { GanttTaskListProps } from "./composable/GanttTaskList";
+import type { GanttTimelineProps } from "./composable/GanttTimeline";
+import type { GanttTaskItemProps } from "./composable/GanttTaskItem";
+
+// Interface for component types to use in getChildrenByType
+interface ComponentTypesMap {
+    title: React.ComponentType<GanttTitleProps>;
+    header: React.ComponentType<GanttHeaderProps>;
+    marker: React.ComponentType<GanttMarkerProps>;
+    taskList: React.ComponentType<GanttTaskListProps>;
+    timeline: React.ComponentType<GanttTimelineProps>;
+    taskItem: React.ComponentType<GanttTaskItemProps>;
+}
 
 /**
- * Enhanced GanttChart Component
+ * GanttChart Component
  *
  * A modern, customizable Gantt chart for project timelines with both props and composable API
+ *
+ * @example
+ * // Basic usage
+ * <GanttChart
+ *   tasks={tasks}
+ *   onTaskUpdate={handleUpdate}
+ *   showProgress={true}
+ * />
+ *
+ * // Composition-based usage
+ * <GanttChart tasks={tasks} onTaskUpdate={handleUpdate}>
+ *   <GanttTitle>Custom Project Timeline</GanttTitle>
+ *   <GanttHeader>Resources</GanttHeader>
+ *   <GanttMarker>Today</GanttMarker>
+ * </GanttChart>
  */
 const GanttChart: React.FC<GanttChartProps> = ({
     tasks = [],
@@ -32,6 +59,11 @@ const GanttChart: React.FC<GanttChartProps> = ({
     editMode = true,
     headerLabel = "Resources",
     showProgress = false,
+    theme = {},
+    darkMode = false,
+    showWeeks = false,
+    showDays = false,
+    locale = "default",
 
     // Core event handlers
     onTaskUpdate,
@@ -40,6 +72,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Advanced event handlers
     onTaskSelect,
     onTaskDoubleClick,
+    onGroupClick,
 
     // Visual customization
     fontSize,
@@ -55,12 +88,14 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // State for selected tasks
     const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
 
+    // Calculate timeline bounds
     const derivedStartDate = customStartDate || findEarliestDate(tasks);
     const derivedEndDate = customEndDate || findLatestDate(tasks);
 
     const months = getMonthsBetween(derivedStartDate, derivedEndDate);
     const totalMonths = months.length;
 
+    // Find current month index for highlighting
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
     const currentDay = currentDate.getDate();
@@ -68,20 +103,32 @@ const GanttChart: React.FC<GanttChartProps> = ({
         month => month.getMonth() === currentMonth && month.getFullYear() === currentYear
     );
 
-    // Get child components by type
-    const getChildrenByType = (type: React.ComponentType<any>) => {
-        return Children.toArray(children).filter(
-            child => isValidElement(child) && child.type === type
-        ) as ReactElement[];
+    // Component types map for getChildrenByType
+    const componentTypes: ComponentTypesMap = {
+        title: GanttTitle,
+        header: GanttHeader,
+        marker: GanttMarker,
+        taskList: GanttTaskList,
+        timeline: GanttTimeline,
+        taskItem: GanttTaskItem,
     };
 
-    const titleElements = getChildrenByType(GanttTitle);
-    const headerElements = getChildrenByType(GanttHeader);
-    const currentDateMarkerElements = getChildrenByType(GanttCurrentDateMarker);
-    const taskListElements = getChildrenByType(GanttTaskList);
-    const timelineElements = getChildrenByType(GanttTimeline);
-    const taskItemElements = getChildrenByType(GanttTaskItem);
+    // Type-safe get children by component type
+    const getChildrenByType = <T extends keyof ComponentTypesMap>(type: T): ReactElement<any>[] => {
+        return Children.toArray(children).filter(
+            (child): child is ReactElement<any> => isValidElement(child) && child.type === componentTypes[type]
+        ) as ReactElement<any>[];
+    };
 
+    // Find composable child elements
+    const titleElements = getChildrenByType("title");
+    const headerElements = getChildrenByType("header");
+    const markerElements = getChildrenByType("marker");
+    const taskListElements = getChildrenByType("taskList");
+    const timelineElements = getChildrenByType("timeline");
+    const taskItemElements = getChildrenByType("taskItem");
+
+    // Calculate total height based on task rows
     const getTotalHeight = () => {
         let height = 0;
         tasks.forEach(group => {
@@ -95,6 +142,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
         return height;
     };
 
+    // Task interaction handlers
     const handleTaskUpdate = (groupId: string, updatedTask: Task) => {
         if (onTaskUpdate) {
             try {
@@ -109,8 +157,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
             } catch (error) {
                 console.error("Error in handleTaskUpdate:", error);
             }
-        } else {
-            console.warn("onTaskUpdate is not defined");
         }
     };
 
@@ -154,52 +200,80 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
+    const handleGroupClick = (group: TaskGroup) => {
+        if (onGroupClick) {
+            try {
+                onGroupClick(group);
+            } catch (error) {
+                console.error("Error in onGroupClick handler:", error);
+            }
+        }
+    };
+
     const style: React.CSSProperties = {
         fontSize: fontSize || "inherit",
     };
 
+    // Apply dark mode class if enabled
+    const themeClass = darkMode ? "dark" : "";
+
     return (
         <div
             ref={containerRef}
-            className="w-full bg-gantt-bg text-gantt-text rounded-xl shadow-lg overflow-hidden"
+            className={`rmg-gantt-chart w-full bg-gantt-bg text-gantt-text rounded-xl shadow-lg overflow-hidden ${themeClass}`}
             style={style}
             data-testid="gantt-chart">
             <div className="p-6 border-b border-gantt-border">
                 {/* Use custom title from children or default to prop */}
-                {titleElements.length > 0 ? cloneElement(titleElements[0]) : <GanttTitle>{title}</GanttTitle>}
+                {titleElements.length > 0 ? (
+                    cloneElement<GanttTitleProps>(titleElements[0])
+                ) : (
+                    <GanttTitle>{title}</GanttTitle>
+                )}
             </div>
 
             <div className="relative flex">
-                {/* Use custom taskList from children or default to TaskList component */}
+                {/* Task List (left sidebar) */}
                 {taskListElements.length > 0 ? (
-                    React.cloneElement(taskListElements[0], {
+                    cloneElement<GanttTaskListProps>(taskListElements[0], {
                         tasks,
                         headerLabel,
-                    } as React.ComponentProps<typeof TaskList>)
+                        onGroupClick: handleGroupClick,
+                    })
                 ) : (
-                    <TaskList tasks={tasks} headerLabel={headerLabel} />
+                    <TaskList tasks={tasks} headerLabel={headerLabel} onGroupClick={handleGroupClick} />
                 )}
 
+                {/* Timeline and Tasks (right content) */}
                 <div ref={scrollContainerRef} className="flex-grow overflow-x-auto">
                     <div className="min-w-max">
-                        {/* Use custom timeline from children or default to Timeline component */}
+                        {/* Timeline header */}
                         {timelineElements.length > 0 ? (
-                            React.cloneElement(timelineElements[0], {
-                                months: months,
-                                currentMonthIndex: currentMonthIndex,
-                            } as React.ComponentProps<typeof Timeline>)
+                            cloneElement<GanttTimelineProps>(timelineElements[0], {
+                                months,
+                                currentMonthIndex,
+                                showWeeks,
+                                showDays,
+                                locale,
+                            })
                         ) : (
-                            <Timeline months={months} currentMonthIndex={currentMonthIndex} />
+                            <Timeline
+                                months={months}
+                                currentMonthIndex={currentMonthIndex}
+                                showWeeks={showWeeks}
+                                showDays={showDays}
+                                locale={locale}
+                            />
                         )}
 
                         <div className="relative">
-                            {/* Use custom currentDateMarker or default TodayMarker */}
+                            {/* Today marker */}
                             {showCurrentDateMarker &&
                                 currentMonthIndex >= 0 &&
-                                (currentDateMarkerElements.length > 0 ? (
-                                    React.cloneElement(currentDateMarkerElements[0], {
-                                        label: todayLabel,
-                                    } as React.HTMLAttributes<HTMLElement>)
+                                (markerElements.length > 0 ? (
+                                    cloneElement<GanttMarkerProps>(markerElements[0], {
+                                        children: todayLabel,
+                                    })
                                 ) : (
                                     <TodayMarker
                                         currentMonthIndex={currentMonthIndex}
@@ -209,31 +283,25 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                     />
                                 ))}
 
-                            {/* Render tasks - either from taskItems or using TaskRow component */}
+                            {/* Tasks - either custom items or standard rows */}
                             {taskItemElements.length > 0 ? (
-                                // Custom task items
                                 <div className="relative">
                                     {taskItemElements.map((element, index) => {
-                                        // Create a properly typed props object
-                                        const elementProps = element.props as any;
-                                        const taskId = elementProps?.task?.id;
+                                        const elementProps = element.props as GanttTaskItemProps;
+                                        const task = elementProps.task;
+                                        const taskId = task?.id;
 
-                                        // Create new props with original props maintained
-                                        const newProps = {
-                                            ...elementProps,
+                                        // Safe creation of new props
+                                        return cloneElement<GanttTaskItemProps>(element, {
                                             key: `custom-task-item-${index}`,
                                             isSelected: taskId ? selectedTaskIds.includes(taskId) : false,
                                             onSelect: handleTaskSelect,
                                             onClick: handleTaskClick,
                                             onDoubleClick: handleTaskDoubleClick,
-                                        };
-
-                                        // Clone with all props preserved
-                                        return React.cloneElement(element, newProps);
+                                        });
                                     })}
                                 </div>
                             ) : (
-                                // Default task rows
                                 tasks.map(group => {
                                     if (!group || !group.id) return null;
 
@@ -249,6 +317,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                             showProgress={showProgress}
                                             onTaskUpdate={handleTaskUpdate}
                                             onTaskClick={handleTaskClick}
+                                            onTaskSelect={handleTaskSelect}
                                         />
                                     );
                                 })

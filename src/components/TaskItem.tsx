@@ -1,7 +1,7 @@
 import React from "react";
-import { Task } from "@/utils/types";
+import { Task } from "../utils/types";
 
-interface TaskRendererProps {
+interface TaskItemProps {
     task: Task;
     leftPx: number;
     widthPx: number;
@@ -10,7 +10,7 @@ interface TaskRendererProps {
     isDragging: boolean;
     editMode: boolean;
     showProgress?: boolean;
-    instanceId: string; // Add instance ID for unique identification
+    instanceId: string;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -18,9 +18,12 @@ interface TaskRendererProps {
 }
 
 /**
+ * TaskItem Component
+ *
  * Renders a single task bar in the Gantt chart
+ * Supports dragging, resizing, and progress display
  */
-const TaskRenderer: React.FC<TaskRendererProps> = ({
+const TaskItem: React.FC<TaskItemProps> = ({
     task,
     leftPx,
     widthPx,
@@ -35,15 +38,27 @@ const TaskRenderer: React.FC<TaskRendererProps> = ({
     onMouseLeave,
     onClick,
 }) => {
+    // Show handles only when hovered or dragging and in edit mode
     const showHandles = (isHovered || isDragging) && editMode;
 
     if (!task || !task.id) {
-        console.warn("TaskRenderer: Invalid task data", task);
+        console.warn("TaskItem: Invalid task data", task);
         return null;
     }
 
-    // Get task color or default to gantt-task variable
+    // Get task color or default to gantt-task CSS variable
     const taskColorClass = task.color || "bg-gantt-task";
+
+    // Handle resize interactions
+    const handleResizeLeft = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onMouseDown(e, task, "resize-left");
+    };
+
+    const handleResizeRight = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onMouseDown(e, task, "resize-right");
+    };
 
     return (
         <div
@@ -62,18 +77,18 @@ const TaskRenderer: React.FC<TaskRendererProps> = ({
             data-testid={`task-${task.id}`}
             data-task-id={task.id}
             data-instance-id={instanceId}>
+            {/* Left resize handle */}
             {showHandles && (
                 <div
                     className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l"
-                    onMouseDown={e => {
-                        e.stopPropagation();
-                        onMouseDown(e, task, "resize-left");
-                    }}
+                    onMouseDown={handleResizeLeft}
                 />
             )}
 
+            {/* Task name */}
             <div className="truncate select-none">{task.name || "Unnamed Task"}</div>
 
+            {/* Progress bar */}
             {showProgress && typeof task.percent === "number" && (
                 <div className="absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden">
                     <div
@@ -83,17 +98,15 @@ const TaskRenderer: React.FC<TaskRendererProps> = ({
                 </div>
             )}
 
+            {/* Right resize handle */}
             {showHandles && (
                 <div
                     className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r"
-                    onMouseDown={e => {
-                        e.stopPropagation();
-                        onMouseDown(e, task, "resize-right");
-                    }}
+                    onMouseDown={handleResizeRight}
                 />
             )}
         </div>
     );
 };
 
-export default TaskRenderer;
+export default TaskItem;

@@ -1,4 +1,4 @@
-import { Task } from "@/utils/types";
+import { Task } from "./types";
 
 /**
  * Manages operations on tasks like calculating positions, dates, etc.
@@ -20,18 +20,38 @@ export class TaskManager {
             const safeLeft = isNaN(left) ? 0 : left;
             const safeWidth = isNaN(width) || width < 20 ? 20 : width;
 
-            // Convert pixel position to date
+            // Calculate the time range of the entire timeline
             const timelineStartTime = startDate.getTime();
             const timelineEndTime = endDate.getTime();
             const timelineDuration = timelineEndTime - timelineStartTime;
+
+            // Calculate milliseconds per pixel
             const msPerPixel = timelineDuration / (totalMonths * monthWidth);
 
+            // Convert pixel position to time offsets
             const startOffset = safeLeft * msPerPixel;
             const durationMs = safeWidth * msPerPixel;
 
-            // Calculate new dates
+            // Create new Date objects from the calculated times
             const newStartDate = new Date(timelineStartTime + startOffset);
             const newEndDate = new Date(timelineStartTime + startOffset + durationMs);
+
+            // Ensure dates don't extend beyond the timeline boundaries
+            if (newStartDate < startDate) {
+                const duration = newEndDate.getTime() - newStartDate.getTime();
+                return {
+                    newStartDate: new Date(startDate),
+                    newEndDate: new Date(startDate.getTime() + duration),
+                };
+            }
+
+            if (newEndDate > endDate) {
+                const duration = newEndDate.getTime() - newStartDate.getTime();
+                return {
+                    newStartDate: new Date(endDate.getTime() - duration),
+                    newEndDate: new Date(endDate),
+                };
+            }
 
             return { newStartDate, newEndDate };
         } catch (error) {
@@ -71,14 +91,17 @@ export class TaskManager {
                 throw new Error("Invalid dates in task");
             }
 
-            // Calculate task position
-            const taskStartTime = task.startDate.getTime();
-            const taskEndTime = task.endDate.getTime();
+            // Clamp task dates to timeline boundaries
+            const taskStartTime = Math.max(task.startDate.getTime(), startDate.getTime());
+
+            const taskEndTime = Math.min(task.endDate.getTime(), endDate.getTime());
+
+            // Calculate the time range of the entire timeline
             const timelineStartTime = startDate.getTime();
             const timelineEndTime = endDate.getTime();
             const timelineDuration = timelineEndTime - timelineStartTime;
 
-            // Calculate percentages
+            // Calculate positioning ratios
             const startOffsetPercent = ((taskStartTime - timelineStartTime) / timelineDuration) * 100;
             const taskDurationPercent = ((taskEndTime - taskStartTime) / timelineDuration) * 100;
 
@@ -131,11 +154,12 @@ export class TaskManager {
     /**
      * Format a date for display
      */
-    public static formatDate(date: Date): string {
+    public static formatDate(date: Date, locale: string = "default"): string {
         if (!(date instanceof Date) || isNaN(date.getTime())) {
             return "Invalid date";
         }
-        return date.toLocaleDateString("en-US", {
+
+        return date.toLocaleDateString(locale, {
             year: "numeric",
             month: "short",
             day: "numeric",
@@ -147,11 +171,50 @@ export class TaskManager {
      */
     public static getDuration(start: Date, end: Date): number {
         try {
-            const diffTime = Math.abs(end.getTime() - start.getTime());
+            // Ensure dates are valid
+            if (!(start instanceof Date) || !(end instanceof Date) || isNaN(start.getTime()) || isNaN(end.getTime())) {
+                return 0;
+            }
+
+            // Handle dates in the wrong order
+            const earlierDate = start < end ? start : end;
+            const laterDate = start < end ? end : start;
+
+            // Calculate days between
+            const diffTime = Math.abs(laterDate.getTime() - earlierDate.getTime());
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         } catch (error) {
             console.error("Error calculating duration:", error);
             return 0;
         }
+    }
+
+    /**
+     * Get month name (formatted)
+     */
+    public static getMonthName(date: Date, locale: string = "default"): string {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return "";
+        }
+
+        return date.toLocaleString(locale, { month: "short" });
+    }
+
+    /**
+     * Get days in month
+     */
+    public static getDaysInMonth(date: Date): number {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return 30; // Default fallback
+        }
+
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    }
+
+    /**
+     * Check if two date ranges overlap
+     */
+    public static datesOverlap(startA: Date, endA: Date, startB: Date, endB: Date): boolean {
+        return startA <= endB && endA >= startB;
     }
 }

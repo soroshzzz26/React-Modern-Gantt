@@ -1,6 +1,18 @@
+/**
+ * React Modern Gantt
+ * A flexible, customizable Gantt chart component for React applications
+ */
 export { default as GanttChart } from "./components/GanttChart";
-export { default as TaskRow } from "./components/Task/TaskRow";
-export { default as TaskList } from "./components/Task/TaskList";
-export { GanttTitle, GanttHeader, GanttCurrentDateMarker, GanttTaskList, GanttTimeline, GanttTaskItem, } from "./components/Elements";
-export type { Task, TaskGroup, GanttChartProps, TaskRowProps, TaskListProps, TimelineProps, DateDisplayFormat, } from "@/utils/types";
-export { formatMonth, formatDate, getMonthsBetween, getDaysInMonth, getStandardDayMarkers, calculateTaskPosition, detectTaskOverlaps, findEarliestDate, findLatestDate, } from "./models";
+export { default as TaskRow } from "./components/TaskRow";
+export { default as TaskItem } from "./components/TaskItem";
+export { default as TaskList } from "./components/TaskList";
+export { default as Timeline } from "./components/Timeline";
+export { default as TodayMarker } from "./components/TodayMarker";
+export { default as Tooltip } from "./components/Tooltip";
+export { GanttTitle, GanttHeader, GanttMarker, GanttTaskList, GanttTimeline, GanttTaskItem, } from "./components/composable";
+export type { Task, TaskGroup, GanttTheme, GanttChartProps, TaskRowProps, TaskListProps, TimelineProps, TaskItemProps, TaskInteraction, } from "./utils/types";
+export { DateDisplayFormat, ViewMode } from "./utils/types";
+export { formatMonth, formatDate, formatDateRange, getMonthsBetween, getDaysInMonth, getStandardDayMarkers, calculateTaskPosition, calculateDuration, detectTaskOverlaps, findEarliestDate, findLatestDate, } from "./models";
+export { CollisionManager } from "./utils/CollisionManager";
+export { TaskManager } from "./utils/TaskManager";
+export { lightTheme, darkTheme, mergeTheme } from "./utils/ThemeManager";

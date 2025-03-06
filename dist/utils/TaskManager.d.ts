@@ -1,4 +1,4 @@
-import { Task } from "@/utils/types";
+import { Task } from "./types";
 /**
  * Manages operations on tasks like calculating positions, dates, etc.
  */
@@ -31,9 +31,21 @@ export declare class TaskManager {
     /**
      * Format a date for display
      */
-    static formatDate(date: Date): string;
+    static formatDate(date: Date, locale?: string): string;
     /**
      * Calculate duration between dates in days
      */
     static getDuration(start: Date, end: Date): number;
+    /**
+     * Get month name (formatted)
+     */
+    static getMonthName(date: Date, locale?: string): string;
+    /**
+     * Get days in month
+     */
+    static getDaysInMonth(date: Date): number;
+    /**
+     * Check if two date ranges overlap
+     */
+    static datesOverlap(startA: Date, endA: Date, startB: Date, endB: Date): boolean;
 }

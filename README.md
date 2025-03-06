@@ -1,167 +1,222 @@
-# React Modern Gantt
+],
+},
+{
+id: "team-2",
+name: "Marketing",
+description: "Marketing Team",
+tasks: [
+{
+id: "task-3",
+name: "Content Creation",
+startDate: new Date(2023, 0, 15),
+endDate: new Date(2023, 1, 28),
+color: "bg-violet-500",
+percent: 100,
+},
+{
+id: "task-4",
+name: "Campaign Launch",
+startDate: new Date(2023, 2, 1),
+endDate: new Date(2023, 3, 15),
+color: "bg-amber-500",
+percent: 20,
+},
+],
+},
+]);
 
-A modern, customizable Gantt chart component for React applications. This package provides an intuitive interface for creating interactive project timelines with drag and resize capabilities.
-
-![React Modern Gantt Screenshot](https://via.placeholder.com/800x400?text=React+Modern+Gantt)
-
-## Features
-
--   📅 Interactive timeline with drag and resize capabilities
--   🎨 Fully customizable appearance with Tailwind CSS
--   🌓 Built-in dark mode support
--   📱 Responsive design that works on all screen sizes
--   🔄 Event-based architecture for easy integration
--   📊 Support for task progress indicators
--   🏷️ Tooltips with detailed task information
--   🏃‍♂️ High-performance rendering even with large datasets
--   📦 Lightweight with minimal dependencies
-
-## Installation
-
-```bash
-npm install react-modern-gantt
-# or
-yarn add react-modern-gantt
-```
-
-## Basic Usage
-
-```jsx
-import React, { useState } from "react";
-import { GanttChart } from "react-modern-gantt";
-
-const BasicGantt = () => {
-    const [taskGroups, setTaskGroups] = useState([
-        {
-            id: "1",
-            name: "Development Team",
-            description: "Frontend Developers",
-            tasks: [
-                {
-                    id: "task-1",
-                    name: "Website Redesign",
-                    startDate: new Date(2023, 0, 1),
-                    endDate: new Date(2023, 2, 15),
-                    color: "bg-blue-500",
-                    percent: 75,
-                },
-            ],
-        },
-        // Add more task groups here
-    ]);
-
-    const handleTaskUpdate = (groupId, updatedTask) => {
-        setTaskGroups(currentGroups =>
-            currentGroups.map(group =>
-                group.id === groupId
-                    ? {
-                          ...group,
-                          tasks: group.tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)),
-                      }
-                    : group
-            )
-        );
-    };
-
-    return <GanttChart tasks={taskGroups} title="Project Timeline" onTaskUpdate={handleTaskUpdate} />;
+const handleTaskUpdate = (groupId, updatedTask) => {
+setTasks(prevTasks =>
+prevTasks.map(group =>
+group.id === groupId
+? {
+...group,
+tasks: group.tasks.map(task =>
+task.id === updatedTask.id ? updatedTask : task
+),
+}
+: group
+)
+);
 };
 
-export default BasicGantt;
-```
+return (
+<GanttChart
+      tasks={tasks}
+      title="Project Timeline"
+      showProgress={true}
+      onTaskUpdate={handleTaskUpdate}
+    />
+);
+};
 
-## Dark Mode Support
+export default SimpleGantt;
 
-React Modern Gantt fully supports dark mode through Tailwind CSS's dark mode class. Simply add the `dark` class to any parent element to activate dark mode:
+````
 
-```jsx
-<div className="dark">
-    <GanttChart tasks={taskGroups} title="Project Timeline" onTaskUpdate={handleTaskUpdate} />
-</div>
-```
+## Core Concepts
 
-## Advanced Configuration
+React Modern Gantt is built around a few key concepts:
 
-### Props
+1. **Task Groups** - Collections of tasks, typically representing teams or departments
+2. **Tasks** - Individual work items with start and end dates
+3. **Timeline** - Horizontal representation of time, typically in months
+4. **Interactions** - Drag, resize, click, and other user interactions
 
-The `GanttChart` component accepts the following props:
+## Component Props
 
-| Prop                    | Type          | Default              | Description                                        |
-| ----------------------- | ------------- | -------------------- | -------------------------------------------------- |
-| `tasks`                 | `TaskGroup[]` | Required             | Array of task groups with their tasks              |
-| `startDate`             | `Date`        | Auto                 | Start date of the chart (earliest task by default) |
-| `endDate`               | `Date`        | Auto                 | End date of the chart (latest task by default)     |
-| `title`                 | `string`      | `"Project Timeline"` | Title displayed at the top of the chart            |
-| `currentDate`           | `Date`        | Current date         | Date to show the "today" marker                    |
-| `showCurrentDateMarker` | `boolean`     | `true`               | Whether to show the current date marker            |
-| `todayLabel`            | `string`      | `"Today"`            | Label for the current date marker                  |
-| `editMode`              | `boolean`     | `true`               | Whether tasks can be dragged and resized           |
-| `headerLabel`           | `string`      | `"Resources"`        | Label for the task list header                     |
-| `showProgress`          | `boolean`     | `false`              | Whether to show task completion percentage         |
-| `fontSize`              | `string`      | `"inherit"`          | Font size for the chart                            |
-| `rowHeight`             | `number`      | `40`                 | Height of each task row in pixels                  |
-| `timeStep`              | `number`      | -                    | Step size for time increments                      |
-| `children`              | `ReactNode`   | -                    | Custom components for composition                  |
+### GanttChart
+
+The main component for rendering a Gantt chart.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `tasks` | `TaskGroup[]` | `[]` | Array of task groups |
+| `startDate` | `Date` | Auto | Start date of the chart (defaults to earliest task date) |
+| `endDate` | `Date` | Auto | End date of the chart (defaults to latest task date) |
+| `title` | `string` | `"Project Timeline"` | Title displayed at the top of the chart |
+| `currentDate` | `Date` | `new Date()` | Current date for the today marker |
+| `showCurrentDateMarker` | `boolean` | `true` | Whether to show the today marker |
+| `todayLabel` | `string` | `"Today"` | Label for today marker |
+| `editMode` | `boolean` | `true` | Whether tasks can be dragged/resized |
+| `headerLabel` | `string` | `"Resources"` | Header label for the task list column |
+| `showProgress` | `boolean` | `false` | Whether to show progress indicators |
+| `theme` | `GanttTheme` | Light theme | Theme customization object |
+| `darkMode` | `boolean` | `false` | Whether to use dark mode |
+| `locale` | `string` | `'default'` | Locale for date formatting |
+| `fontSize` | `string` | `'inherit'` | Base font size |
+| `rowHeight` | `number` | `40` | Height of task rows in pixels |
+| `showWeeks` | `boolean` | `false` | Whether to show week markers |
+| `showDays` | `boolean` | `false` | Whether to show day markers |
 
 ### Event Handlers
 
-| Prop                | Type                                           | Description                            |
-| ------------------- | ---------------------------------------------- | -------------------------------------- |
-| `onTaskUpdate`      | `(groupId: string, updatedTask: Task) => void` | Called when a task is moved or resized |
-| `onTaskClick`       | `(task: Task, group: TaskGroup) => void`       | Called when a task is clicked          |
-| `onTaskSelect`      | `(task: Task, isSelected: boolean) => void`    | Called when a task is selected         |
-| `onTaskDoubleClick` | `(task: Task) => void`                         | Called when a task is double-clicked   |
+| Prop | Type | Description |
+|------|------|-------------|
+| `onTaskUpdate` | `(groupId: string, updatedTask: Task) => void` | Called when a task is moved or resized |
+| `onTaskClick` | `(task: Task, group: TaskGroup) => void` | Called when a task is clicked |
+| `onTaskSelect` | `(task: Task, isSelected: boolean) => void` | Called when a task is selected |
+| `onTaskDoubleClick` | `(task: Task) => void` | Called when a task is double-clicked |
+| `onGroupClick` | `(group: TaskGroup) => void` | Called when a group is clicked |
 
-### Data Types
+## Customization
+
+### Using Themes
+
+React Modern Gantt supports easy theme customization:
+
+```jsx
+import { GanttChart, mergeTheme, lightTheme } from 'react-modern-gantt';
+
+// Create a custom theme
+const customTheme = mergeTheme(lightTheme, {
+  highlight: '#eff6ff',  // Custom highlight color
+  marker: '#ef4444',     // Custom marker color
+  task: '#3b82f6',       // Custom task color
+});
+
+// Use it in your component
+<GanttChart
+  tasks={tasks}
+  theme={customTheme}
+  onTaskUpdate={handleTaskUpdate}
+/>
+````
+
+### Dark Mode
+
+Dark mode is built-in and easy to enable:
+
+```jsx
+<GanttChart tasks={tasks} darkMode={true} onTaskUpdate={handleTaskUpdate} />
+```
+
+### Using Composition API
+
+For advanced customization, use the composition API:
+
+```jsx
+import { GanttChart, GanttTitle, GanttHeader, GanttMarker, GanttTaskList } from "react-modern-gantt";
+
+// In your component
+<GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate}>
+    <GanttTitle className="text-2xl text-indigo-800">Custom Project Timeline</GanttTitle>
+
+    <GanttHeader className="font-bold text-indigo-600">Teams & Resources</GanttHeader>
+
+    <GanttMarker className="bg-pink-500">Current Date</GanttMarker>
+
+    <GanttTaskList showIcon={true} showTaskCount={true} className="w-48 bg-gray-50" />
+</GanttChart>;
+```
+
+## Task Properties
+
+The Task interface supports the following properties:
 
 ```typescript
 interface Task {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
-    color: string;
-    percent?: number; // Optional: task completion percentage
-    dependencies?: string[]; // Optional: IDs of tasks this depends on
-}
-
-interface TaskGroup {
-    id: string;
-    name: string;
-    description?: string;
-    icon?: string;
-    tasks: Task[];
+    id: string; // Unique identifier
+    name: string; // Task name
+    startDate: Date; // Start date
+    endDate: Date; // End date
+    color?: string; // Task color (Tailwind class or CSS color)
+    percent?: number; // Completion percentage (0-100)
+    dependencies?: string[]; // IDs of dependent tasks
+    [key: string]: any; // Additional custom properties
 }
 ```
 
-## Customizing with Composition
+## Advanced Usage
 
-You can use composition to customize the Gantt chart by passing components as children:
+### Custom Task Rendering
+
+You can customize individual task rendering:
 
 ```jsx
-import { GanttChart, GanttTitle, GanttHeader, GanttCurrentDateMarker } from "react-modern-gantt";
+import { GanttChart, GanttTaskItem } from "react-modern-gantt";
 
-const CustomGantt = () => {
-    return (
-        <GanttChart tasks={taskGroups} onTaskUpdate={handleTaskUpdate}>
-            <GanttTitle>Custom Project Timeline</GanttTitle>
-            <GanttHeader>Team Members</GanttHeader>
-            <GanttCurrentDateMarker>Today</GanttCurrentDateMarker>
-        </GanttChart>
-    );
-};
+<GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate}>
+    {/* Custom task rendering */}
+    {tasks.map(group =>
+        group.tasks.map(task => (
+            <GanttTaskItem
+                key={task.id}
+                task={task}
+                group={group}
+                className={task.priority === "high" ? "ring-2 ring-red-500" : ""}
+            />
+        ))
+    )}
+</GanttChart>;
 ```
 
-## Handling Events
+### Handling Task Updates
 
-### Task Updates (Move & Resize)
+Handle task updates with custom logic:
 
 ```jsx
 const handleTaskUpdate = (groupId, updatedTask) => {
-    console.log(`Task ${updatedTask.id} was updated`);
+    // Validate dates
+    if (updatedTask.startDate > updatedTask.endDate) {
+        alert("Start date cannot be after end date");
+        return;
+    }
 
-    // Update your state with the new task dates
-    setTaskGroups(currentGroups =>
-        currentGroups.map(group =>
+    // Check for conflicts
+    const group = tasks.find(g => g.id === groupId);
+    const hasConflict = group.tasks.some(
+        t => t.id !== updatedTask.id && !(updatedTask.startDate >= t.endDate || updatedTask.endDate <= t.startDate)
+    );
+
+    if (hasConflict) {
+        alert("Task conflicts with another task");
+        return;
+    }
+
+    // Update state
+    setTasks(prevTasks =>
+        prevTasks.map(group =>
             group.id === groupId
                 ? {
                       ...group,
@@ -170,31 +225,39 @@ const handleTaskUpdate = (groupId, updatedTask) => {
                 : group
         )
     );
-
-    // Optionally save to backend
-    saveTaskToBackend(groupId, updatedTask);
 };
 ```
 
-### Task Clicks and Selection
+### Custom Date Formatting
+
+You can customize date formatting:
 
 ```jsx
-const handleTaskClick = (task, group) => {
-    console.log(`Clicked on task ${task.name} belonging to ${group.name}`);
+import { GanttChart, formatDate, DateDisplayFormat } from "react-modern-gantt";
+
+// Custom date formatter
+const myDateFormatter = date => {
+    return formatDate(date, DateDisplayFormat.SHORT_DATE, "de-DE");
 };
 
-const handleTaskSelect = (task, isSelected) => {
-    console.log(`Task ${task.name} is now ${isSelected ? "selected" : "deselected"}`);
-    setSelectedTasks(prev => (isSelected ? [...prev, task.id] : prev.filter(id => id !== task.id)));
-};
-
-const handleTaskDoubleClick = task => {
-    console.log(`Double-clicked on task ${task.name}`);
-    // You could show a modal with task details
-    setSelectedTask(task);
-    setTaskDetailsModalOpen(true);
-};
+// Use formatter in your tooltips or elsewhere
 ```
+
+## Utility Functions
+
+React Modern Gantt exports several utility functions:
+
+| Function                | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| `formatDate`            | Format a date with different display options |
+| `getMonthsBetween`      | Get array of months between two dates        |
+| `getDaysInMonth`        | Get number of days in a month                |
+| `detectTaskOverlaps`    | Detect and group overlapping tasks           |
+| `calculateTaskPosition` | Calculate position of a task                 |
+| `formatDateRange`       | Format a date range as a string              |
+| `calculateDuration`     | Calculate duration between two dates         |
+| `findEarliestDate`      | Find earliest date in task groups            |
+| `findLatestDate`        | Find latest date in task groups              |
 
 ## Browser Support
 
@@ -203,85 +266,16 @@ const handleTaskDoubleClick = task => {
 -   Safari (latest)
 -   Edge (latest)
 
-## Styling and Customization
-
-### Task Colors
-
-You can customize task colors using Tailwind CSS classes. The component includes several predefined task color classes that work in both light and dark modes:
-
-```jsx
-// Example task with predefined color class
-{
-    id: "task-1",
-    name: "Frontend Development",
-    startDate: new Date(2023, 0, 1),
-    endDate: new Date(2023, 1, 15),
-    color: "bg-task-blue", // Uses the predefined color class
-    percent: 75
-}
-```
-
-Predefined color classes include:
-
--   `bg-task-blue`
--   `bg-task-green`
--   `bg-task-purple`
--   `bg-task-orange`
--   `bg-task-amber`
--   `bg-task-indigo`
--   `bg-task-cyan`
--   `bg-task-pink`
-
-You can also use any standard Tailwind CSS background color class:
-
-```jsx
-{
-    id: "task-2",
-    name: "Backend Development",
-    startDate: new Date(2023, 1, 1),
-    endDate: new Date(2023, 2, 15),
-    color: "bg-emerald-500", // Standard Tailwind color
-    percent: 60
-}
-```
-
-### Customizing CSS Variables
-
-For more advanced customization, you can override the CSS variables:
-
-```css
-:root {
-    /* Light mode customization */
-    --gantt-bg: #ffffff;
-    --gantt-text: #1f2937;
-    --gantt-border: #e5e7eb;
-    --gantt-highlight: #f0f9ff; /* Custom highlight color */
-    --gantt-marker: #f43f5e; /* Custom marker color */
-    --gantt-task: #3b82f6;
-    --gantt-task-text: #ffffff;
-}
-
-.dark {
-    /* Dark mode customization */
-    --gantt-bg: #111827;
-    --gantt-text: #f9fafb;
-    --gantt-border: #374151;
-    --gantt-highlight: #1e3a8a; /* Custom dark highlight */
-    --gantt-marker: #f43f5e;
-    --gantt-task: #4f46e5;
-    --gantt-task-text: #ffffff;
-}
-```
-
-## License
-
-MIT License
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Todo
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
--   Fix Scrollable Task Table (If too many tasks appear)
--   More precise day indicator in Timeline
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
