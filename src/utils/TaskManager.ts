@@ -60,7 +60,7 @@ export class TaskManager {
             let newStartDate = new Date(timelineStartTime + startOffset);
             let newEndDate = new Date(timelineStartTime + startOffset + durationMs);
 
-            // Depending on the view mode, we might want to snap to unit boundaries
+            // Apply snapping based on view mode
             switch (viewMode) {
                 case ViewMode.DAY:
                     // For day view, snap to day boundaries
@@ -95,19 +95,11 @@ export class TaskManager {
 
             // Ensure dates don't extend beyond the timeline boundaries
             if (newStartDate < startDate) {
-                const duration = newEndDate.getTime() - newStartDate.getTime();
-                return {
-                    newStartDate: new Date(startDate),
-                    newEndDate: new Date(startDate.getTime() + duration),
-                };
+                newStartDate = new Date(startDate);
             }
 
             if (newEndDate > endDate) {
-                const duration = newEndDate.getTime() - newStartDate.getTime();
-                return {
-                    newStartDate: new Date(endDate.getTime() - duration),
-                    newEndDate: new Date(endDate),
-                };
+                newEndDate = new Date(endDate);
             }
 
             return { newStartDate, newEndDate };
@@ -119,7 +111,6 @@ export class TaskManager {
             };
         }
     }
-
     /**
      * Create an updated task with new dates
      */
@@ -154,64 +145,41 @@ export class TaskManager {
             const taskStartTime = Math.max(task.startDate.getTime(), startDate.getTime());
             const taskEndTime = Math.min(task.endDate.getTime(), endDate.getTime());
 
-            let leftPercent = 0;
-            let widthPercent = 0;
+            // Calculate the full timeline range
+            const timelineStartTime = startDate.getTime();
+            const timelineEndTime = endDate.getTime();
+            const totalTimelineRange = timelineEndTime - timelineStartTime;
 
-            // Calculate positions based on the view mode
-            switch (viewMode) {
-                case ViewMode.DAY:
-                    // For day view, calculate based on days
-                    const dayDiff = differenceInDays(new Date(taskStartTime), startDate);
-                    const taskDurationDays = differenceInDays(new Date(taskEndTime), new Date(taskStartTime)) + 1;
-                    leftPercent = (dayDiff / totalUnits) * 100;
-                    widthPercent = (taskDurationDays / totalUnits) * 100;
-                    break;
+            // Convert time differences to pixel positions
+            const distanceFromStart = taskStartTime - timelineStartTime;
+            const taskDuration = taskEndTime - taskStartTime;
 
-                case ViewMode.WEEK:
-                    // For week view, calculate based on weeks
-                    const weekDiff = differenceInWeeks(new Date(taskStartTime), startDate);
-                    const taskDurationWeeks = differenceInWeeks(new Date(taskEndTime), new Date(taskStartTime)) + 1;
-                    leftPercent = (weekDiff / totalUnits) * 100;
-                    widthPercent = (taskDurationWeeks / totalUnits) * 100;
-                    break;
+            // Calculate percentages of total timeline
+            const leftPercent = distanceFromStart / totalTimelineRange;
+            const widthPercent = taskDuration / totalTimelineRange;
 
-                case ViewMode.MONTH:
-                    // For month view, calculate based on months
-                    const monthDiff = differenceInMonths(new Date(taskStartTime), startDate);
-                    const taskDurationMonths = differenceInMonths(new Date(taskEndTime), new Date(taskStartTime)) + 1;
-                    leftPercent = (monthDiff / totalUnits) * 100;
-                    widthPercent = (taskDurationMonths / totalUnits) * 100;
-                    break;
+            // Calculate pixel positions
+            const totalPixelWidth = totalUnits * unitWidth;
+            const leftPx = leftPercent * totalPixelWidth;
+            let widthPx = widthPercent * totalPixelWidth;
 
-                case ViewMode.QUARTER:
-                    // For quarter view, calculate based on quarters
-                    const quarterDiff = differenceInQuarters(new Date(taskStartTime), startDate);
-                    const taskDurationQuarters =
-                        differenceInQuarters(new Date(taskEndTime), new Date(taskStartTime)) + 1;
-                    leftPercent = (quarterDiff / totalUnits) * 100;
-                    widthPercent = (taskDurationQuarters / totalUnits) * 100;
-                    break;
+            // Apply view mode specific adjustments for minimum width
+            // Different view modes should have different minimum visible widths
+            const minWidthByViewMode = {
+                [ViewMode.DAY]: 20, // Min width for day view
+                [ViewMode.WEEK]: 20, // Min width for week view
+                [ViewMode.MONTH]: 20, // Min width for month view
+                [ViewMode.QUARTER]: 30, // Min width for quarter view
+                [ViewMode.YEAR]: 40, // Min width for year view
+            };
 
-                case ViewMode.YEAR:
-                    // For year view, calculate based on years
-                    const yearDiff = differenceInYears(new Date(taskStartTime), startDate);
-                    const taskDurationYears = differenceInYears(new Date(taskEndTime), new Date(taskStartTime)) + 1;
-                    leftPercent = (yearDiff / totalUnits) * 100;
-                    widthPercent = (taskDurationYears / totalUnits) * 100;
-                    break;
+            // Ensure minimum width
+            const minWidth = minWidthByViewMode[viewMode] || 20;
+            widthPx = Math.max(minWidth, widthPx);
 
-                default:
-                    // Default to month view
-                    const defaultMonthDiff = differenceInMonths(new Date(taskStartTime), startDate);
-                    const defaultTaskDurationMonths =
-                        differenceInMonths(new Date(taskEndTime), new Date(taskStartTime)) + 1;
-                    leftPercent = (defaultMonthDiff / totalUnits) * 100;
-                    widthPercent = (defaultTaskDurationMonths / totalUnits) * 100;
-            }
-
-            // Convert percentages to pixels
-            const leftPx = (leftPercent / 100) * totalUnits * unitWidth;
-            const widthPx = Math.max(20, (widthPercent / 100) * totalUnits * unitWidth);
+            // Ensure not extending beyond timeline
+            const maxWidth = totalPixelWidth - leftPx;
+            widthPx = Math.min(maxWidth, widthPx);
 
             return { leftPx, widthPx };
         } catch (error) {

@@ -42,6 +42,12 @@ const TaskRow: React.FC<TaskRowProps> = ({
     const [dragStartX, setDragStartX] = useState(0);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
     const [previewTask, setPreviewTask] = useState<Task | null>(null);
+    const [initialTaskState, setInitialTaskState] = useState<{
+        left: number;
+        width: number;
+        startDate: Date;
+        endDate: Date;
+    } | null>(null);
 
     // Refs for task interactions
     const rowRef = useRef<HTMLDivElement>(null);
@@ -62,10 +68,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
         previewTaskRef.current = task;
     };
 
-    // Calculate task rows based on collision detection
+    // Calculate task rows based on collision detection and view mode
     const taskRows = previewTask
-        ? CollisionManager.getPreviewArrangement(previewTask, taskGroup.tasks)
-        : CollisionManager.detectOverlaps(taskGroup.tasks);
+        ? CollisionManager.getPreviewArrangement(previewTask, taskGroup.tasks, viewMode)
+        : CollisionManager.detectOverlaps(taskGroup.tasks, viewMode);
 
     // Calculate row height based on task arrangement
     const rowHeight = Math.max(60, taskRows.length * 40 + 20);
@@ -104,91 +110,26 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
-    const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
-        // Update tooltip position on mouse move
-        if (e instanceof MouseEvent && e.type === "mousemove") {
-            if (hoveredTask && rowRef.current) {
-                const mouseEvent = e as MouseEvent;
-                const rect = rowRef.current.getBoundingClientRect();
-                setTooltipPosition({
-                    x: mouseEvent.clientX - rect.left + 20,
-                    y: mouseEvent.clientY - rect.top,
-                });
-            }
-        } else {
-            updateTooltipPosition(e as React.MouseEvent);
-        }
-
-        // Handle task dragging and resizing
-        if (draggingTask && dragType && rowRef.current) {
-            try {
-                const deltaX = e.clientX - dragStartX;
-                if (deltaX === 0) return;
-
-                const totalWidth = totalMonths * monthWidth;
-
-                // Find the task element being dragged
-                const taskEl = document.querySelector(
-                    `[data-task-id="${draggingTask.id}"][data-instance-id="${instanceId.current}"]`
-                ) as HTMLElement;
-
-                if (!taskEl) return;
-
-                const currentLeft = parseFloat(taskEl.style.left || "0");
-                const currentWidth = parseFloat(taskEl.style.width || "0");
-
-                let newLeft = currentLeft;
-                let newWidth = currentWidth;
-
-                // Handle different drag types
-                if (dragType === "move") {
-                    // Move task (constrain to timeline bounds)
-                    newLeft = Math.max(0, Math.min(totalWidth - currentWidth, currentLeft + deltaX));
-                    taskEl.style.left = `${newLeft}px`;
-                } else if (dragType === "resize-left") {
-                    // Resize from left (minimum width = 20px)
-                    const maxDelta = currentWidth - 20;
-                    const constrainedDelta = Math.min(maxDelta, deltaX);
-                    newLeft = Math.max(0, currentLeft + constrainedDelta);
-                    newWidth = Math.max(20, currentWidth - constrainedDelta);
-
-                    taskEl.style.left = `${newLeft}px`;
-                    taskEl.style.width = `${newWidth}px`;
-                } else if (dragType === "resize-right") {
-                    // Resize from right (minimum width = 20px)
-                    newWidth = Math.max(20, Math.min(totalWidth - currentLeft, currentWidth + deltaX));
-                    taskEl.style.width = `${newWidth}px`;
-                }
-
-                // Calculate new dates based on position
-                const { newStartDate, newEndDate } = TaskManager.calculateDatesFromPosition(
-                    newLeft,
-                    newWidth,
-                    validStartDate,
-                    validEndDate,
-                    totalMonths,
-                    monthWidth,
-                    viewMode
-                );
-
-                // Update the preview task with new dates
-                const updatedTask = TaskManager.createUpdatedTask(draggingTask, newStartDate, newEndDate);
-                setPreviewTask(updatedTask);
-                updatePreviewTask(updatedTask);
-
-                // Update drag start position for next move
-                setDragStartX(e.clientX);
-            } catch (error) {
-                console.error("Error in handleMouseMove:", error);
-            }
-        }
-    };
-
     const handleMouseDown = (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => {
         if (!editMode) return;
 
         event.preventDefault();
         event.stopPropagation();
+
+        // Find the task element
+        const taskEl = document.querySelector(
+            `[data-task-id="${task.id}"][data-instance-id="${instanceId.current}"]`
+        ) as HTMLElement;
+
+        if (!taskEl) return;
+
+        // Store the initial state
+        setInitialTaskState({
+            left: parseFloat(taskEl.style.left || "0"),
+            width: parseFloat(taskEl.style.width || "0"),
+            startDate: new Date(task.startDate),
+            endDate: new Date(task.endDate),
+        });
 
         // Set up dragging state
         setDraggingTask(task);
@@ -202,6 +143,174 @@ const TaskRow: React.FC<TaskRowProps> = ({
         // Add global event listeners
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mousemove", handleMouseMove as unknown as EventListener);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
+        // Update tooltip position
+        if (e instanceof MouseEvent && hoveredTask && rowRef.current) {
+            const mouseEvent = e as MouseEvent;
+            const rect = rowRef.current.getBoundingClientRect();
+            setTooltipPosition({
+                x: mouseEvent.clientX - rect.left + 20,
+                y: mouseEvent.clientY - rect.top,
+            });
+        } else if (!(e instanceof MouseEvent)) {
+            updateTooltipPosition(e as React.MouseEvent);
+        }
+
+        // Handle task dragging and resizing
+        if (draggingTask && dragType && initialTaskState && rowRef.current) {
+            try {
+                const taskEl = document.querySelector(
+                    `[data-task-id="${draggingTask.id}"][data-instance-id="${instanceId.current}"]`
+                ) as HTMLElement;
+
+                if (!taskEl) return;
+
+                // Calculate the total movement since drag started
+                const totalDeltaX = e.clientX - dragStartX;
+
+                // Get the timeline's total width
+                const totalWidth = totalMonths * monthWidth;
+
+                let newLeft = initialTaskState.left;
+                let newWidth = initialTaskState.width;
+
+                // Apply movement based on drag type
+                switch (dragType) {
+                    case "move":
+                        // Move task
+                        newLeft = Math.max(
+                            0,
+                            Math.min(totalWidth - initialTaskState.width, initialTaskState.left + totalDeltaX)
+                        );
+
+                        // Apply snapping based on view mode
+                        if (viewMode === ViewMode.DAY) {
+                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
+                        }
+
+                        taskEl.style.left = `${newLeft}px`;
+                        break;
+
+                    case "resize-left":
+                        // Resize from left (min width = 20px)
+                        const maxLeftDelta = initialTaskState.width - 20;
+                        const leftDelta = Math.min(maxLeftDelta, totalDeltaX);
+
+                        newLeft = Math.max(0, initialTaskState.left + leftDelta);
+
+                        // Apply snapping based on view mode
+                        if (viewMode === ViewMode.DAY) {
+                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
+                        }
+
+                        // Calculate width to maintain right edge position
+                        const rightEdge = initialTaskState.left + initialTaskState.width;
+                        newWidth = Math.max(20, rightEdge - newLeft);
+
+                        taskEl.style.left = `${newLeft}px`;
+                        taskEl.style.width = `${newWidth}px`;
+                        break;
+
+                    case "resize-right":
+                        // Resize from right (min width = 20px)
+                        newWidth = Math.max(
+                            20,
+                            Math.min(totalWidth - initialTaskState.left, initialTaskState.width + totalDeltaX)
+                        );
+
+                        // Apply snapping based on view mode
+                        if (viewMode === ViewMode.DAY) {
+                            const rightEdge = initialTaskState.left + newWidth;
+                            const snappedRightEdge = Math.round(rightEdge / monthWidth) * monthWidth;
+                            newWidth = Math.max(20, snappedRightEdge - initialTaskState.left);
+                        }
+
+                        taskEl.style.width = `${newWidth}px`;
+                        break;
+                }
+
+                // Calculate the time range for the different view modes
+                const timelineRange = getTimelineRangeForViewMode(validStartDate, validEndDate, viewMode);
+                const msPerPixel = timelineRange / totalWidth;
+
+                let newStartMs = validStartDate.getTime() + newLeft * msPerPixel;
+                let newEndMs = validStartDate.getTime() + (newLeft + newWidth) * msPerPixel;
+
+                // Apply date normalization based on view mode
+                const { newStartDate, newEndDate } = normalizeDatesForViewMode(
+                    new Date(newStartMs),
+                    new Date(newEndMs),
+                    viewMode
+                );
+
+                // Create updated task with the new dates
+                const updatedTask = {
+                    ...draggingTask,
+                    startDate: newStartDate,
+                    endDate: newEndDate,
+                };
+
+                // Update preview state
+                setPreviewTask(updatedTask);
+                updatePreviewTask(updatedTask);
+            } catch (error) {
+                console.error("Error in handleMouseMove:", error);
+            }
+        }
+    };
+
+    // Helper function to get timeline range based on view mode
+    const getTimelineRangeForViewMode = (start: Date, end: Date, viewMode: ViewMode): number => {
+        const startTime = start.getTime();
+        const endTime = end.getTime();
+        const fullRange = endTime - startTime;
+
+        // For some view modes, we might want to adjust the perceived range
+        switch (viewMode) {
+            case ViewMode.YEAR:
+                // For year view, consider the range to be exact years
+                return fullRange;
+            default:
+                return fullRange;
+        }
+    };
+
+    // Helper function to normalize dates based on view mode
+    const normalizeDatesForViewMode = (
+        startDate: Date,
+        endDate: Date,
+        viewMode: ViewMode
+    ): { newStartDate: Date; newEndDate: Date } => {
+        let newStartDate = new Date(startDate);
+        let newEndDate = new Date(endDate);
+
+        switch (viewMode) {
+            case ViewMode.DAY:
+                // For day view, snap to day boundaries
+                newStartDate.setHours(0, 0, 0, 0);
+                newEndDate.setHours(23, 59, 59, 999);
+                break;
+
+            case ViewMode.WEEK:
+                // For week view, could snap to week boundaries but often not needed
+                break;
+
+            case ViewMode.MONTH:
+                // For month view, leave the day within month as is
+                break;
+
+            case ViewMode.QUARTER:
+                // For quarter view, keep the month within quarter
+                break;
+
+            case ViewMode.YEAR:
+                // For year view, keep the month within year
+                break;
+        }
+
+        return { newStartDate, newEndDate };
     };
 
     const handleMouseUp = () => {
@@ -220,6 +329,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
             setDraggingTask(null);
             setDragType(null);
             setPreviewTask(null);
+            setInitialTaskState(null);
             draggingTaskRef.current = null;
             previewTaskRef.current = null;
 
@@ -228,13 +338,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
             document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
         }
     };
-
-    // Apply task updates when not dragging
-    useEffect(() => {
-        if (!draggingTask && previewTask && onTaskUpdate) {
-            onTaskUpdate(taskGroup.id, previewTask);
-        }
-    }, [draggingTask, previewTask, taskGroup.id, onTaskUpdate]);
 
     // Clean up event listeners on unmount
     useEffect(() => {
