@@ -1,5 +1,5 @@
 import { CollisionManager } from "../../src/utils/CollisionManager";
-import { Task } from "../../src/utils/types";
+import { Task, ViewMode } from "../../src/utils/types";
 
 describe("CollisionManager", () => {
     describe("detectOverlaps", () => {
@@ -109,7 +109,8 @@ describe("CollisionManager", () => {
                 },
             ];
 
-            const wouldCollide = CollisionManager.wouldCollide(task, existingTasks, "2");
+            // Fixed: Add ViewMode as the third parameter and "2" as the fourth parameter
+            const wouldCollide = CollisionManager.wouldCollide(task, existingTasks, ViewMode.MONTH, "2");
 
             expect(wouldCollide).toBe(false);
         });
