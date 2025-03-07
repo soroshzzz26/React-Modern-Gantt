@@ -1,47 +1,35 @@
 import { Task, ViewMode } from "@/utils/types";
-import {
-    isSameDay,
-    isSameWeek,
-    isSameMonth,
-    isSameQuarter,
-    isSameYear,
-    startOfDay,
-    startOfWeek,
-    startOfMonth,
-    startOfQuarter,
-    startOfYear,
-    endOfDay,
-    endOfWeek,
-    endOfMonth,
-    endOfQuarter,
-    endOfYear,
-} from "date-fns";
 
 /**
  * Manages the detection and resolution of task collisions
- * Now with ViewMode support
+ * Enhanced with pixel-precise collision detection
  */
 export class CollisionManager {
     /**
      * Detects overlapping tasks and organizes them into rows
-     * Takes view mode into account for proper collision detection
+     * Using precise visual overlap detection
      */
     public static detectOverlaps(tasks: Task[], viewMode: ViewMode = ViewMode.MONTH): Task[][] {
         if (!Array.isArray(tasks) || tasks.length === 0) {
             return [];
         }
 
+        // Sort tasks by start date to optimize row placement
+        const sortedTasks = [...tasks].sort((a, b) => {
+            if (!a.startDate || !b.startDate) return 0;
+            return a.startDate.getTime() - b.startDate.getTime();
+        });
+
         const rows: Task[][] = [];
 
-        tasks.forEach(task => {
+        sortedTasks.forEach(task => {
             let placed = false;
 
             // Check each existing row for collisions
             for (let i = 0; i < rows.length; i++) {
                 // A task can be placed in this row if it doesn't overlap with ANY task in the row
                 const hasCollision = rows[i].some(existingTask => {
-                    // Check for overlap based on view mode
-                    return this.checkTasksOverlap(task, existingTask, viewMode);
+                    return this.tasksVisuallyOverlap(task, existingTask, viewMode);
                 });
 
                 // If no collision in this row, place the task here
@@ -62,72 +50,55 @@ export class CollisionManager {
     }
 
     /**
-     * Check if tasks overlap considering the view mode
+     * Check if tasks visually overlap
+     * Uses a more precise algorithm that matches visual representation
      */
-    public static checkTasksOverlap(taskA: Task, taskB: Task, viewMode: ViewMode = ViewMode.MONTH): boolean {
+    public static tasksVisuallyOverlap(taskA: Task, taskB: Task, viewMode: ViewMode = ViewMode.MONTH): boolean {
         if (!taskA.startDate || !taskA.endDate || !taskB.startDate || !taskB.endDate) {
             return false;
         }
 
-        // Normalize dates to be consistently handled per view mode
-        const { start: startA, end: endA } = this.getNormalizedDateRange(taskA.startDate, taskA.endDate, viewMode);
-        const { start: startB, end: endB } = this.getNormalizedDateRange(taskB.startDate, taskB.endDate, viewMode);
+        // Get timestamps for comparison - no normalization to avoid over-detection
+        const startA = taskA.startDate.getTime();
+        const endA = taskA.endDate.getTime();
+        const startB = taskB.startDate.getTime();
+        const endB = taskB.endDate.getTime();
 
-        // Check if date ranges overlap using the standard overlap check
-        return !(startA >= endB || endA <= startB);
+        // Apply a small buffer based on view mode to prevent over-eager collision detection
+        const timeBuffer = this.getCollisionBufferByViewMode(viewMode);
+
+        // Modified overlap check with buffer
+        return (
+            // Check if A overlaps with B (with buffer)
+            (startA + timeBuffer < endB - timeBuffer && endA - timeBuffer > startB + timeBuffer) ||
+            // Special case: very short tasks that could be visually overlapping due to minimum width
+            Math.abs(startA - startB) < timeBuffer * 2 ||
+            Math.abs(endA - endB) < timeBuffer * 2
+        );
     }
 
     /**
-     * Get normalized date range based on view mode
+     * Get appropriate collision buffer based on view mode
+     * Smaller buffer for day view, larger for year view
      */
-    private static getNormalizedDateRange(
-        startDate: Date,
-        endDate: Date,
-        viewMode: ViewMode
-    ): { start: Date; end: Date } {
-        // Convert dates to timestamps for easier comparison
-        let start = startDate.getTime();
-        let end = endDate.getTime();
+    private static getCollisionBufferByViewMode(viewMode: ViewMode): number {
+        // Define buffers in milliseconds
+        const hour = 3600 * 1000;
+        const day = 24 * hour;
 
-        // Normalize based on view mode
         switch (viewMode) {
             case ViewMode.DAY:
-                // For day view, use exact day boundaries
-                return {
-                    start: startOfDay(startDate).getTime(),
-                    end: endOfDay(endDate).getTime(),
-                };
-
+                return hour; // 1 hour buffer for day view
             case ViewMode.WEEK:
-                // For week view, use week boundaries
-                return {
-                    start: startOfWeek(startDate).getTime(),
-                    end: endOfWeek(endDate).getTime(),
-                };
-
+                return 4 * hour; // 4 hour buffer for week view
             case ViewMode.MONTH:
-                // For month view, use month boundaries
-                return {
-                    start: startOfMonth(startDate).getTime(),
-                    end: endOfMonth(endDate).getTime(),
-                };
-
+                return 12 * hour; // 12 hour buffer for month view
             case ViewMode.QUARTER:
-                // For quarter view, use quarter boundaries
-                return {
-                    start: startOfQuarter(startDate).getTime(),
-                    end: endOfQuarter(endDate).getTime(),
-                };
-
+                return day; // 1 day buffer for quarter view
             case ViewMode.YEAR:
-                // For year view, use year boundaries
-                return {
-                    start: startOfYear(startDate).getTime(),
-                    end: endOfYear(endDate).getTime(),
-                };
-
+                return 2 * day; // 2 day buffer for year view
             default:
-                return { start, end };
+                return 12 * hour; // Default
         }
     }
 
@@ -146,8 +117,8 @@ export class CollisionManager {
                 return false;
             }
 
-            // Check if tasks overlap
-            return this.checkTasksOverlap(task, existingTask, viewMode);
+            // Check visual overlap
+            return this.tasksVisuallyOverlap(task, existingTask, viewMode);
         });
     }
 

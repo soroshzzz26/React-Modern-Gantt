@@ -1,22 +1,24 @@
 import { Task, ViewMode } from "@/utils/types";
 /**
  * Manages the detection and resolution of task collisions
- * Now with ViewMode support
+ * Enhanced with pixel-precise collision detection
  */
 export declare class CollisionManager {
     /**
      * Detects overlapping tasks and organizes them into rows
-     * Takes view mode into account for proper collision detection
+     * Using precise visual overlap detection
      */
     static detectOverlaps(tasks: Task[], viewMode?: ViewMode): Task[][];
     /**
-     * Check if tasks overlap considering the view mode
+     * Check if tasks visually overlap
+     * Uses a more precise algorithm that matches visual representation
      */
-    static checkTasksOverlap(taskA: Task, taskB: Task, viewMode?: ViewMode): boolean;
+    static tasksVisuallyOverlap(taskA: Task, taskB: Task, viewMode?: ViewMode): boolean;
     /**
-     * Get normalized date range based on view mode
+     * Get appropriate collision buffer based on view mode
+     * Smaller buffer for day view, larger for year view
      */
-    private static getNormalizedDateRange;
+    private static getCollisionBufferByViewMode;
     /**
      * Check if a task would collide with any other tasks in the list
      */
