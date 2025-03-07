@@ -1,6 +1,6 @@
 import React from "react";
 import { TimelineProps, ViewMode } from "../utils/types";
-import { format, getDaysInMonth, getDate, getMonth, getYear, isFirstDayOfMonth } from "date-fns";
+import { format, getDaysInMonth } from "date-fns";
 
 /**
  * Timeline Component
@@ -138,9 +138,6 @@ const Timeline: React.FC<TimelineProps> = ({
                     </div>
                 ))}
             </div>
-
-            {/* Sub-headers for weeks and days */}
-            {/* {renderSubheader()} */}
         </div>
     );
 };

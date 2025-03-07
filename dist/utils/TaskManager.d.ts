@@ -48,8 +48,4 @@ export declare class TaskManager {
      * Check if two date ranges overlap
      */
     static datesOverlap(startA: Date, endA: Date, startB: Date, endB: Date): boolean;
-    /**
-     * Get formatted unit label based on view mode
-     */
-    static getUnitLabel(date: Date, viewMode?: ViewMode, locale?: string): string;
 }

@@ -320,39 +320,4 @@ export class TaskManager {
             isWithinInterval(endB, { start: startA, end: endA })
         );
     }
-
-    /**
-     * Get formatted unit label based on view mode
-     */
-    public static getUnitLabel(date: Date, viewMode: ViewMode = ViewMode.MONTH, locale: string = "default"): string {
-        if (!(date instanceof Date) || isNaN(date.getTime())) {
-            return "Invalid date";
-        }
-
-        switch (viewMode) {
-            case ViewMode.DAY:
-                return date.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
-
-            case ViewMode.WEEK:
-                const weekStart = startOfWeek(date);
-                const weekEnd = endOfWeek(date);
-                return `${weekStart.toLocaleDateString(locale, {
-                    day: "numeric",
-                    month: "short",
-                })} - ${weekEnd.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`;
-
-            case ViewMode.MONTH:
-                return date.toLocaleDateString(locale, { month: "short", year: "numeric" });
-
-            case ViewMode.QUARTER:
-                const quarter = Math.floor(date.getMonth() / 3) + 1;
-                return `Q${quarter} ${date.getFullYear()}`;
-
-            case ViewMode.YEAR:
-                return date.getFullYear().toString();
-
-            default:
-                return date.toLocaleDateString(locale, { month: "short", year: "numeric" });
-        }
-    }
 }

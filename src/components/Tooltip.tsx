@@ -54,8 +54,12 @@ const Tooltip: React.FC<TooltipProps> = ({
     // Calculate duration based on view mode
     const duration = TaskManager.getDuration(displayStartDate, displayEndDate, viewMode);
 
-    // Format dates based on view mode
+    // Format dates based on view mode - Simplified to use a single format function
     const formatDate = (date: Date) => {
+        if (!(date instanceof Date) || isNaN(date.getTime())) {
+            return "Invalid date";
+        }
+
         switch (viewMode) {
             case ViewMode.DAY:
                 return format(date, "EEE, MMM d, yyyy");

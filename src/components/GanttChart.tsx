@@ -1,29 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
 import { GanttChartProps, TaskGroup, Task, ViewMode } from "../utils/types";
-import { getMonthsBetween, detectTaskOverlaps, findEarliestDate, findLatestDate, getDaysInMonth } from "../models";
+import { getMonthsBetween, detectTaskOverlaps, findEarliestDate, findLatestDate } from "../models";
 import TaskRow from "./TaskRow";
 import Timeline from "./Timeline";
 import TodayMarker from "./TodayMarker";
 import TaskList from "./TaskList";
-import {
-    addDays,
-    addWeeks,
-    startOfWeek,
-    endOfWeek,
-    addMonths,
-    startOfMonth,
-    endOfMonth,
-    addQuarters,
-    startOfQuarter,
-    endOfQuarter,
-    addYears,
-    startOfYear,
-    endOfYear,
-    differenceInDays,
-    differenceInWeeks,
-    differenceInMonths,
-    differenceInYears,
-} from "date-fns";
+import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
 import "../styles/gantt.css";
 
 /**
