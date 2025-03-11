@@ -11,14 +11,14 @@ export interface TaskListProps {
     rowHeight?: number;
     className?: string;
     onGroupClick?: (group: TaskGroup) => void;
-    viewMode?: ViewMode; // Add viewMode to know when to show double-height header
+    viewMode?: ViewMode; // Add viewMode to know when to adjust header height
 }
 
 /**
  * TaskList Component
  *
  * Displays the list of task groups on the left side of the Gantt chart
- * Now with support for matching the hierarchical timeline header height
+ * Now with proper header height alignment and padding
  */
 const TaskList: React.FC<TaskListProps> = ({
     tasks = [],
@@ -51,26 +51,24 @@ const TaskList: React.FC<TaskListProps> = ({
         }
     };
 
-    // Check if we need a double-height header (for hierarchical timeline)
-    const needsDoubleHeight = viewMode === ViewMode.DAY || viewMode === ViewMode.WEEK;
+    // Determine if we need an adjustment for hierarchical timeline header
+    const needsHierarchicalDisplay = viewMode === ViewMode.DAY || viewMode === ViewMode.WEEK;
 
     return (
         <div className={`rmg-task-list w-40 flex-shrink-0 z-10 bg-gantt-bg shadow-sm ${className}`}>
-            {/* Header with support for matching hierarchical timeline */}
-            {needsDoubleHeight ? (
-                // Double-height header to match hierarchical timeline
-                <div>
-                    {/* Top placeholder to match hierarchical header */}
-                    <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border">
-                        {/* Empty div to match the higher-level header */}
-                    </div>
-                    {/* Actual header label */}
+            {/* Header with adjusted structure for view mode */}
+            {needsHierarchicalDisplay ? (
+                // For day/week view, we need a double-height header
+                <>
+                    {/* First row - empty to match the month/year header */}
+                    <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border h-10"></div>
+                    {/* Second row - actual header label */}
                     <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border h-10">
                         {headerLabel}
                     </div>
-                </div>
+                </>
             ) : (
-                // Standard single-height header
+                // Standard single-height header for other views
                 <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border h-10">
                     {headerLabel}
                 </div>

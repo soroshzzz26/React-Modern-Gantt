@@ -5,7 +5,7 @@ import TaskRow from "./TaskRow";
 import Timeline from "./Timeline";
 import TodayMarker from "./TodayMarker";
 import TaskList from "./TaskList";
-import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
+import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear, getWeek } from "date-fns";
 import "../styles/gantt.css";
 
 /**
@@ -96,14 +96,18 @@ const GanttChart: React.FC<GanttChartProps> = ({
         return days;
     };
 
-    // Get weeks between dates
+    // Get weeks between dates - Completely rewritten to ensure it starts with week 1
     const getWeeksBetween = (start: Date, end: Date): Date[] => {
         const weeks: Date[] = [];
-        let currentDate = startOfWeek(new Date(start));
 
+        // We want to make sure we start on the actual start date
+        // Rather than using startOfWeek which could go into December 2024
+        let currentDate = new Date(start);
+
+        // Manually create week dates at weekly intervals
         while (currentDate <= end) {
             weeks.push(new Date(currentDate));
-            currentDate = addWeeks(currentDate, 1);
+            currentDate = addDays(currentDate, 7);
         }
 
         return weeks;

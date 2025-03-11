@@ -1,6 +1,6 @@
 import React from "react";
 import { TimelineProps, ViewMode } from "../utils/types";
-import { format, getDaysInMonth } from "date-fns";
+import { format, getWeek } from "date-fns";
 
 /**
  * Timeline Component with hierarchical display
@@ -35,8 +35,8 @@ const Timeline: React.FC<TimelineProps> = ({
                 // For day view, just show day number
                 return format(date, "d", { locale: getLocale() });
             case ViewMode.WEEK:
-                // For week view, show week number
-                const weekNum = Math.ceil(date.getDate() / 7);
+                // For week view, use proper ISO week number from date-fns
+                const weekNum = getWeek(date);
                 return `W${weekNum}`;
             case ViewMode.MONTH:
                 // Format as "Jan 2023"
@@ -115,7 +115,7 @@ const Timeline: React.FC<TimelineProps> = ({
                     {higherLevelMonths.map((item, index) => (
                         <div
                             key={`higher-level-${index}`}
-                            className={`flex-shrink-0 p-2 font-semibold text-center text-gantt-text border-r border-gantt-border`}
+                            className={`flex-shrink-0 p-2 font-semibold text-center text-gantt-text border-r border-gantt-border h-10`}
                             style={{ width: `${item.span * unitWidth}px` }}
                             data-timeunit-higher={item.date.toISOString()}>
                             {formatHigherLevelHeader(item.date)}
@@ -125,13 +125,13 @@ const Timeline: React.FC<TimelineProps> = ({
             )}
 
             {/* Main time unit headers */}
-            <div className="flex border-b border-gantt-border h-10">
+            <div className="flex border-b border-gantt-border">
                 {months.map((timeUnit, index) => (
                     <div
                         key={`timeunit-${index}`}
                         className={`${timeUnitWidthClass} flex-shrink-0 p-2 font-semibold text-center text-gantt-text ${
                             index === currentMonthIndex ? "bg-gantt-highlight" : ""
-                        } ${needsHierarchicalDisplay ? "border-r border-gantt-border" : ""}`}
+                        } ${needsHierarchicalDisplay ? "border-r border-gantt-border" : ""} h-10`}
                         data-timeunit={timeUnit.toISOString()}>
                         {formatDateHeader(timeUnit)}
                     </div>

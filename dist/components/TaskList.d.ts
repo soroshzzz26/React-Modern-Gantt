@@ -15,7 +15,7 @@ export interface TaskListProps {
  * TaskList Component
  *
  * Displays the list of task groups on the left side of the Gantt chart
- * Now with support for matching the hierarchical timeline header height
+ * Now with proper header height alignment and padding
  */
 declare const TaskList: React.FC<TaskListProps>;
 export default TaskList;
