@@ -1,5 +1,5 @@
 import React from "react";
-import { TaskGroup } from "../utils/types";
+import { TaskGroup, ViewMode } from "../utils/types";
 import { detectTaskOverlaps } from "../models";
 
 export interface TaskListProps {
@@ -11,12 +11,14 @@ export interface TaskListProps {
     rowHeight?: number;
     className?: string;
     onGroupClick?: (group: TaskGroup) => void;
+    viewMode?: ViewMode; // Add viewMode to know when to show double-height header
 }
 
 /**
  * TaskList Component
  *
  * Displays the list of task groups on the left side of the Gantt chart
+ * Now with support for matching the hierarchical timeline header height
  */
 const TaskList: React.FC<TaskListProps> = ({
     tasks = [],
@@ -27,6 +29,7 @@ const TaskList: React.FC<TaskListProps> = ({
     rowHeight = 40,
     className = "",
     onGroupClick,
+    viewMode,
 }) => {
     // Validate task groups array
     const validTasks = Array.isArray(tasks) ? tasks : [];
@@ -48,12 +51,30 @@ const TaskList: React.FC<TaskListProps> = ({
         }
     };
 
+    // Check if we need a double-height header (for hierarchical timeline)
+    const needsDoubleHeight = viewMode === ViewMode.DAY || viewMode === ViewMode.WEEK;
+
     return (
         <div className={`rmg-task-list w-40 flex-shrink-0 z-10 bg-gantt-bg shadow-sm ${className}`}>
-            {/* Header */}
-            <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border h-10.5">
-                {headerLabel}
-            </div>
+            {/* Header with support for matching hierarchical timeline */}
+            {needsDoubleHeight ? (
+                // Double-height header to match hierarchical timeline
+                <div>
+                    {/* Top placeholder to match hierarchical header */}
+                    <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border">
+                        {/* Empty div to match the higher-level header */}
+                    </div>
+                    {/* Actual header label */}
+                    <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border h-10">
+                        {headerLabel}
+                    </div>
+                </div>
+            ) : (
+                // Standard single-height header
+                <div className="p-2 font-semibold text-gantt-text border-r border-b border-gantt-border h-10">
+                    {headerLabel}
+                </div>
+            )}
 
             {/* Task Groups */}
             {validTasks.map(taskGroup => {

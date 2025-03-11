@@ -1,5 +1,5 @@
 import React from "react";
-import { TaskGroup } from "../utils/types";
+import { TaskGroup, ViewMode } from "../utils/types";
 export interface TaskListProps {
     tasks: TaskGroup[];
     headerLabel?: string;
@@ -9,11 +9,13 @@ export interface TaskListProps {
     rowHeight?: number;
     className?: string;
     onGroupClick?: (group: TaskGroup) => void;
+    viewMode?: ViewMode;
 }
 /**
  * TaskList Component
  *
  * Displays the list of task groups on the left side of the Gantt chart
+ * Now with support for matching the hierarchical timeline header height
  */
 declare const TaskList: React.FC<TaskListProps>;
 export default TaskList;

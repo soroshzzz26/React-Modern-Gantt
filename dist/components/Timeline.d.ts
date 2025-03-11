@@ -1,11 +1,12 @@
 import React from "react";
 import { TimelineProps } from "../utils/types";
 /**
- * Timeline Component
+ * Timeline Component with hierarchical display
  *
- * Displays the time headers for the Gantt chart based on the current view mode
- * Supports day, week, month, quarter, and year view modes
- * Always shows the year for better context
+ * Displays time headers for the Gantt chart based on the current view mode
+ * Now supports a hierarchical display with two levels:
+ * - Top level: Months/Years/Quarters
+ * - Bottom level: Days/Weeks when appropriate
  */
 declare const Timeline: React.FC<TimelineProps>;
 export default Timeline;

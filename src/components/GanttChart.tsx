@@ -320,6 +320,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                     headerLabel={headerLabel}
                     onGroupClick={onGroupClick}
                     className={mergedStyles.taskList}
+                    viewMode={activeViewMode}
                 />
 
                 {/* Timeline and Tasks (right content) */}
