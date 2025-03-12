@@ -1,18 +1,23 @@
 import React, { useRef, useState, useEffect } from "react";
 import { GanttChartProps, TaskGroup, Task, ViewMode } from "../utils/types";
-import { getMonthsBetween, detectTaskOverlaps, findEarliestDate, findLatestDate } from "../models";
+import {
+    getMonthsBetween as modelsGetMonthsBetween,
+    detectTaskOverlaps,
+    findEarliestDate,
+    findLatestDate,
+} from "../models";
 import TaskRow from "./TaskRow";
 import Timeline from "./Timeline";
 import TodayMarker from "./TodayMarker";
 import TaskList from "./TaskList";
-import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear, getWeek } from "date-fns";
+import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
 import "../styles/gantt.css";
 
 /**
  * GanttChart Component with ViewMode support
  *
  * A modern, customizable Gantt chart for project timelines
- * Supports different view modes: day, week, month, quarter, year
+ * Supports different view modes while maintaining precise task positioning
  *
  * @example
  * // Basic usage with view mode
@@ -73,17 +78,17 @@ const GanttChart: React.FC<GanttChartProps> = ({
             case ViewMode.WEEK:
                 return getWeeksBetween(derivedStartDate, derivedEndDate);
             case ViewMode.MONTH:
-                return getMonthsBetween(derivedStartDate, derivedEndDate);
+                return modelsGetMonthsBetween(derivedStartDate, derivedEndDate);
             case ViewMode.QUARTER:
                 return getQuartersBetween(derivedStartDate, derivedEndDate);
             case ViewMode.YEAR:
                 return getYearsBetween(derivedStartDate, derivedEndDate);
             default:
-                return getMonthsBetween(derivedStartDate, derivedEndDate);
+                return modelsGetMonthsBetween(derivedStartDate, derivedEndDate);
         }
     };
 
-    // Get days between dates
+    // Get days between dates - Always use exact days for consistent alignment
     const getDaysBetween = (start: Date, end: Date): Date[] => {
         const days: Date[] = [];
         let currentDate = new Date(start);
@@ -96,15 +101,13 @@ const GanttChart: React.FC<GanttChartProps> = ({
         return days;
     };
 
-    // Get weeks between dates - Completely rewritten to ensure it starts with week 1
+    // Get weeks between dates - Fixed to start from the right date
     const getWeeksBetween = (start: Date, end: Date): Date[] => {
         const weeks: Date[] = [];
 
-        // We want to make sure we start on the actual start date
-        // Rather than using startOfWeek which could go into December 2024
+        // Start from exactly the start date, no adjustment
         let currentDate = new Date(start);
 
-        // Manually create week dates at weekly intervals
         while (currentDate <= end) {
             weeks.push(new Date(currentDate));
             currentDate = addDays(currentDate, 7);
@@ -156,8 +159,12 @@ const GanttChart: React.FC<GanttChartProps> = ({
                         date.getFullYear() === today.getFullYear()
                 );
             case ViewMode.WEEK:
-                const todayWeekStart = startOfWeek(today);
-                return timeUnits.findIndex(date => date.getTime() === todayWeekStart.getTime());
+                // This needs to compare actual dates, not just week starts
+                return timeUnits.findIndex(date => {
+                    const weekEndDate = new Date(date);
+                    weekEndDate.setDate(date.getDate() + 6);
+                    return today >= date && today <= weekEndDate;
+                });
             case ViewMode.MONTH:
                 return timeUnits.findIndex(
                     date => date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()

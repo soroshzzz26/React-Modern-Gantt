@@ -60,38 +60,8 @@ export class TaskManager {
             let newStartDate = new Date(timelineStartTime + startOffset);
             let newEndDate = new Date(timelineStartTime + startOffset + durationMs);
 
-            // Apply snapping based on view mode
-            switch (viewMode) {
-                case ViewMode.DAY:
-                    // For day view, snap to day boundaries
-                    newStartDate = startOfDay(newStartDate);
-                    newEndDate = endOfDay(newEndDate);
-                    break;
-
-                case ViewMode.WEEK:
-                    // For week view, snap to week boundaries
-                    newStartDate = startOfWeek(newStartDate);
-                    newEndDate = endOfWeek(newEndDate);
-                    break;
-
-                case ViewMode.MONTH:
-                    // For month view, snap to month boundaries
-                    newStartDate = startOfMonth(newStartDate);
-                    newEndDate = endOfMonth(newEndDate);
-                    break;
-
-                case ViewMode.QUARTER:
-                    // For quarter view, snap to quarter boundaries
-                    newStartDate = startOfQuarter(newStartDate);
-                    newEndDate = endOfQuarter(newEndDate);
-                    break;
-
-                case ViewMode.YEAR:
-                    // For year view, snap to year boundaries
-                    newStartDate = startOfYear(newStartDate);
-                    newEndDate = endOfYear(newEndDate);
-                    break;
-            }
+            newStartDate = startOfDay(newStartDate);
+            newEndDate = endOfDay(newEndDate);
 
             // Ensure dates don't extend beyond the timeline boundaries
             if (newStartDate < startDate) {

@@ -41,8 +41,8 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
 
             case ViewMode.MONTH: {
                 // In month view, position marker based on current day within the month
-                const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-                const dayPosition = (currentDay - 1) / daysInMonth;
+                const dayOfWeek = today.getDay(); // 0-6, where 0 is Sunday
+                const dayPosition = dayOfWeek / 7; // Position within the week (0-1)
                 return currentMonthIndex * unitWidth + unitWidth * dayPosition;
             }
 

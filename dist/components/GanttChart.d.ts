@@ -5,7 +5,7 @@ import "../styles/gantt.css";
  * GanttChart Component with ViewMode support
  *
  * A modern, customizable Gantt chart for project timelines
- * Supports different view modes: day, week, month, quarter, year
+ * Supports different view modes while maintaining precise task positioning
  *
  * @example
  * // Basic usage with view mode

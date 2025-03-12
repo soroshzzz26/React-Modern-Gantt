@@ -63,15 +63,6 @@ const Tooltip: React.FC<TooltipProps> = ({
         switch (viewMode) {
             case ViewMode.DAY:
                 return format(date, "EEE, MMM d, yyyy");
-            case ViewMode.WEEK:
-                return format(date, "MMM d, yyyy");
-            case ViewMode.MONTH:
-                return format(date, "MMM yyyy");
-            case ViewMode.QUARTER:
-                const quarter = Math.floor(date.getMonth() / 3) + 1;
-                return `Q${quarter} ${date.getFullYear()}`;
-            case ViewMode.YEAR:
-                return date.getFullYear().toString();
             default:
                 return format(date, "MMM d, yyyy");
         }

@@ -64,7 +64,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 return format(date, "MMM yyyy", { locale: getLocale() });
             default:
                 // For other views, this isn't needed
-                return "";
+                return format(date, "MMM yyyy", { locale: getLocale() });
         }
     };
 
