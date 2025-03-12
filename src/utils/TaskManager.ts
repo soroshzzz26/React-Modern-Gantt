@@ -62,27 +62,24 @@ export class TaskManager {
 
             // Special handling for day view mode to ensure proper day boundaries
             if (viewMode === ViewMode.DAY) {
-                // Set to the start of the day
-                newStartDate = new Date(
-                    newStartDate.getFullYear(),
-                    newStartDate.getMonth(),
-                    newStartDate.getDate(),
-                    0,
-                    0,
-                    0,
-                    0
-                );
+                // Calculate how many units (days) from the start
+                const daysFromStart = Math.round(left / unitWidth);
 
-                // Set to the end of the day
-                newEndDate = new Date(
-                    newEndDate.getFullYear(),
-                    newEndDate.getMonth(),
-                    newEndDate.getDate(),
-                    23,
-                    59,
-                    59,
-                    999
-                );
+                // Calculate how many days the task spans
+                const daySpan = Math.max(1, Math.round(width / unitWidth));
+
+                // Create new dates based on exact day offsets from the start date
+                const baseDate = new Date(startDate);
+                baseDate.setHours(0, 0, 0, 0);
+
+                // Apply precise day calculations to avoid any off-by-one errors
+                newStartDate = new Date(baseDate);
+                newStartDate.setDate(baseDate.getDate() + daysFromStart);
+                newStartDate.setHours(0, 0, 0, 0);
+
+                newEndDate = new Date(newStartDate);
+                newEndDate.setDate(newStartDate.getDate() + daySpan - 1);
+                newEndDate.setHours(23, 59, 59, 999);
             } else {
                 newStartDate = startOfDay(newStartDate);
                 newEndDate = endOfDay(newEndDate);
@@ -144,15 +141,52 @@ export class TaskManager {
 
             // Apply special handling for day view mode
             if (viewMode === ViewMode.DAY) {
-                // Ensure consistent day boundaries
-                const startOfDayTime = new Date(startDate).setHours(0, 0, 0, 0);
-                const endOfDayTime = new Date(endDate).setHours(23, 59, 59, 999);
+                // Ensure consistent day boundaries using midnight as reference
+                // This aligns with how days are generated in GanttChart
+                const startOfDayTime = new Date(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                ).getTime();
+
+                const endOfDayTime = new Date(
+                    endDate.getFullYear(),
+                    endDate.getMonth(),
+                    endDate.getDate(),
+                    23,
+                    59,
+                    59,
+                    999
+                ).getTime();
+
                 timelineStartTime = startOfDayTime;
                 timelineEndTime = endOfDayTime;
 
-                // Also normalize task times to day boundaries for proper alignment
-                const taskStartDay = new Date(taskStartTime).setHours(0, 0, 0, 0);
-                const taskEndDay = new Date(taskEndTime).setHours(23, 59, 59, 999);
+                // Normalize task dates to align with day boundaries
+                const taskStartDay = new Date(
+                    new Date(taskStartTime).getFullYear(),
+                    new Date(taskStartTime).getMonth(),
+                    new Date(taskStartTime).getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                ).getTime();
+
+                const taskEndDay = new Date(
+                    new Date(taskEndTime).getFullYear(),
+                    new Date(taskEndTime).getMonth(),
+                    new Date(taskEndTime).getDate(),
+                    23,
+                    59,
+                    59,
+                    999
+                ).getTime();
+
                 taskStartTime = taskStartDay;
                 taskEndTime = taskEndDay;
             }
@@ -175,11 +209,12 @@ export class TaskManager {
 
             // Add day view specific adjustments for proper alignment
             if (viewMode === ViewMode.DAY) {
-                // Ensure tasks snap to day boundaries
-                leftPx = Math.floor(leftPx / unitWidth) * unitWidth;
+                // Fix the day offset issue by using proper rounding
+                // Round down to ensure we start at the beginning of the day cell
+                leftPx = Math.round(leftPx / unitWidth) * unitWidth;
 
-                // Ensure minimum day width and adjust to day boundaries
-                widthPx = Math.max(unitWidth, Math.ceil(widthPx / unitWidth) * unitWidth);
+                // Ensure width spans full day units
+                widthPx = Math.max(unitWidth, Math.round(widthPx / unitWidth) * unitWidth);
             }
 
             // Apply view mode specific adjustments for minimum width

@@ -32,7 +32,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
         switch (viewMode) {
             case ViewMode.DAY:
-                // For day view, show day number and weekday
+                // For day view, show day number and weekday for better clarity
                 return format(date, "d", { locale: getLocale() });
             case ViewMode.WEEK:
                 // For week view, use proper ISO week number from date-fns

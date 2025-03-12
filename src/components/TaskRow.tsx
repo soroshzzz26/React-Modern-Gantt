@@ -187,8 +187,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
                         // Apply snapping based on view mode - improved for day view
                         if (viewMode === ViewMode.DAY) {
-                            // Snap exactly to day boundaries
-                            newLeft = Math.floor(newLeft / monthWidth) * monthWidth;
+                            // Use round instead of floor for more accurate day snapping
+                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
                         }
 
                         taskEl.style.left = `${newLeft}px`;
@@ -203,7 +203,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
                         // Apply snapping based on view mode - improved for day view
                         if (viewMode === ViewMode.DAY) {
-                            newLeft = Math.floor(newLeft / monthWidth) * monthWidth;
+                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
                         }
 
                         // Calculate width to maintain right edge position
@@ -224,7 +224,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                         // Apply snapping based on view mode - improved for day view
                         if (viewMode === ViewMode.DAY) {
                             const rightEdge = initialTaskState.left + newWidth;
-                            const snappedRightEdge = Math.ceil(rightEdge / monthWidth) * monthWidth;
+                            const snappedRightEdge = Math.round(rightEdge / monthWidth) * monthWidth;
                             newWidth = Math.max(20, snappedRightEdge - initialTaskState.left);
                         }
 
@@ -232,30 +232,59 @@ const TaskRow: React.FC<TaskRowProps> = ({
                         break;
                 }
 
-                // Calculate the time range for the different view modes
-                const timelineRange = getTimelineRangeForViewMode(validStartDate, validEndDate, viewMode);
-                const msPerPixel = timelineRange / totalWidth;
+                // For day view, apply precise date calculation to avoid off-by-one errors
+                if (viewMode === ViewMode.DAY) {
+                    // Calculate days from start position
+                    const daysFromStart = Math.round(newLeft / monthWidth);
 
-                let newStartMs = validStartDate.getTime() + newLeft * msPerPixel;
-                let newEndMs = validStartDate.getTime() + (newLeft + newWidth) * msPerPixel;
+                    // Calculate exact days span
+                    const daysSpan = Math.max(1, Math.round(newWidth / monthWidth));
 
-                // Apply date normalization based on view mode
-                const { newStartDate, newEndDate } = normalizeDatesForViewMode(
-                    new Date(newStartMs),
-                    new Date(newEndMs),
-                    viewMode
-                );
+                    // Apply precise day calculations
+                    const baseDate = new Date(validStartDate);
+                    baseDate.setHours(0, 0, 0, 0);
 
-                // Create updated task with the new dates
-                const updatedTask = {
-                    ...draggingTask,
-                    startDate: newStartDate,
-                    endDate: newEndDate,
-                };
+                    const newStartDate = new Date(baseDate);
+                    newStartDate.setDate(baseDate.getDate() + daysFromStart);
+                    newStartDate.setHours(0, 0, 0, 0);
 
-                // Update preview state
-                setPreviewTask(updatedTask);
-                updatePreviewTask(updatedTask);
+                    const newEndDate = new Date(newStartDate);
+                    newEndDate.setDate(newStartDate.getDate() + daysSpan - 1);
+                    newEndDate.setHours(23, 59, 59, 999);
+
+                    // Create updated task with the new dates
+                    const updatedTask = {
+                        ...draggingTask,
+                        startDate: newStartDate,
+                        endDate: newEndDate,
+                    };
+
+                    // Update preview state
+                    setPreviewTask(updatedTask);
+                    updatePreviewTask(updatedTask);
+                } else {
+                    // Regular calculation for other view modes
+                    const timelineRange = getTimelineRangeForViewMode(validStartDate, validEndDate, viewMode);
+                    const msPerPixel = timelineRange / totalWidth;
+
+                    let newStartMs = validStartDate.getTime() + newLeft * msPerPixel;
+                    let newEndMs = validStartDate.getTime() + (newLeft + newWidth) * msPerPixel;
+
+                    const { newStartDate, newEndDate } = normalizeDatesForViewMode(
+                        new Date(newStartMs),
+                        new Date(newEndMs),
+                        viewMode
+                    );
+
+                    const updatedTask = {
+                        ...draggingTask,
+                        startDate: newStartDate,
+                        endDate: newEndDate,
+                    };
+
+                    setPreviewTask(updatedTask);
+                    updatePreviewTask(updatedTask);
+                }
             } catch (error) {
                 console.error("Error in handleMouseMove:", error);
             }
