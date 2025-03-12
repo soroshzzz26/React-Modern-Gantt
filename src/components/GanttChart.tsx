@@ -88,12 +88,19 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
-    // Get days between dates - Always use exact days for consistent alignment
+    // Get days between dates - Use consistent start of day for proper alignment
     const getDaysBetween = (start: Date, end: Date): Date[] => {
         const days: Date[] = [];
-        let currentDate = new Date(start);
 
-        while (currentDate <= end) {
+        // Ensure we work with the start of day for proper alignment
+        let currentDate = new Date(start);
+        currentDate.setHours(0, 0, 0, 0);
+
+        const endDateAdjusted = new Date(end);
+        endDateAdjusted.setHours(23, 59, 59, 999);
+
+        while (currentDate <= endDateAdjusted) {
+            // Create a new date object to avoid reference issues
             days.push(new Date(currentDate));
             currentDate = addDays(currentDate, 1);
         }
@@ -252,7 +259,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
         // Adjust unit width based on view mode
         switch (newMode) {
             case ViewMode.DAY:
-                setViewUnitWidth(40); // Narrower for days
+                setViewUnitWidth(50); // Slightly wider for days to accommodate weekday
                 break;
             case ViewMode.WEEK:
                 setViewUnitWidth(80); // Narrow for weeks

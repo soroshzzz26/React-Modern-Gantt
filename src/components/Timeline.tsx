@@ -1,6 +1,6 @@
 import React from "react";
 import { TimelineProps, ViewMode } from "../utils/types";
-import { format, getWeek } from "date-fns";
+import { format, getWeek, isValid } from "date-fns";
 
 /**
  * Timeline Component with hierarchical display
@@ -28,11 +28,11 @@ const Timeline: React.FC<TimelineProps> = ({
 
     // Format date based on view mode for the main timeline
     const formatDateHeader = (date: Date): string => {
-        if (!(date instanceof Date)) return "";
+        if (!(date instanceof Date) || !isValid(date)) return "";
 
         switch (viewMode) {
             case ViewMode.DAY:
-                // For day view, just show day number
+                // For day view, show day number and weekday
                 return format(date, "d", { locale: getLocale() });
             case ViewMode.WEEK:
                 // For week view, use proper ISO week number from date-fns
@@ -105,6 +105,14 @@ const Timeline: React.FC<TimelineProps> = ({
     // Determine CSS width property based on viewMode
     const timeUnitWidthClass = `w-[var(--gantt-unit-width)]`;
 
+    // Debug function to verify date alignment (can be removed in production)
+    const debugDate = (date: Date) => {
+        if (viewMode === ViewMode.DAY) {
+            return date.toISOString().slice(0, 10); // YYYY-MM-DD format
+        }
+        return "";
+    };
+
     return (
         <div
             className={`rmg-timeline ${className}`}
@@ -132,7 +140,8 @@ const Timeline: React.FC<TimelineProps> = ({
                         className={`${timeUnitWidthClass} flex-shrink-0 p-2 font-semibold text-center text-gantt-text ${
                             index === currentMonthIndex ? "bg-gantt-highlight" : ""
                         } ${needsHierarchicalDisplay ? "border-r border-gantt-border" : ""} h-10`}
-                        data-timeunit={timeUnit.toISOString()}>
+                        data-timeunit={timeUnit.toISOString()}
+                        data-date={debugDate(timeUnit)}>
                         {formatDateHeader(timeUnit)}
                     </div>
                 ))}

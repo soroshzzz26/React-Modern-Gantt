@@ -60,8 +60,33 @@ export class TaskManager {
             let newStartDate = new Date(timelineStartTime + startOffset);
             let newEndDate = new Date(timelineStartTime + startOffset + durationMs);
 
-            newStartDate = startOfDay(newStartDate);
-            newEndDate = endOfDay(newEndDate);
+            // Special handling for day view mode to ensure proper day boundaries
+            if (viewMode === ViewMode.DAY) {
+                // Set to the start of the day
+                newStartDate = new Date(
+                    newStartDate.getFullYear(),
+                    newStartDate.getMonth(),
+                    newStartDate.getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+                // Set to the end of the day
+                newEndDate = new Date(
+                    newEndDate.getFullYear(),
+                    newEndDate.getMonth(),
+                    newEndDate.getDate(),
+                    23,
+                    59,
+                    59,
+                    999
+                );
+            } else {
+                newStartDate = startOfDay(newStartDate);
+                newEndDate = endOfDay(newEndDate);
+            }
 
             // Ensure dates don't extend beyond the timeline boundaries
             if (newStartDate < startDate) {
@@ -111,13 +136,28 @@ export class TaskManager {
                 throw new Error("Invalid dates in task");
             }
 
-            // Clamp task dates to timeline boundaries
-            const taskStartTime = Math.max(task.startDate.getTime(), startDate.getTime());
-            const taskEndTime = Math.min(task.endDate.getTime(), endDate.getTime());
+            // Normalize dates based on view mode for consistent calculations
+            let timelineStartTime = startDate.getTime();
+            let timelineEndTime = endDate.getTime();
+            let taskStartTime = Math.max(task.startDate.getTime(), startDate.getTime());
+            let taskEndTime = Math.min(task.endDate.getTime(), endDate.getTime());
+
+            // Apply special handling for day view mode
+            if (viewMode === ViewMode.DAY) {
+                // Ensure consistent day boundaries
+                const startOfDayTime = new Date(startDate).setHours(0, 0, 0, 0);
+                const endOfDayTime = new Date(endDate).setHours(23, 59, 59, 999);
+                timelineStartTime = startOfDayTime;
+                timelineEndTime = endOfDayTime;
+
+                // Also normalize task times to day boundaries for proper alignment
+                const taskStartDay = new Date(taskStartTime).setHours(0, 0, 0, 0);
+                const taskEndDay = new Date(taskEndTime).setHours(23, 59, 59, 999);
+                taskStartTime = taskStartDay;
+                taskEndTime = taskEndDay;
+            }
 
             // Calculate the full timeline range
-            const timelineStartTime = startDate.getTime();
-            const timelineEndTime = endDate.getTime();
             const totalTimelineRange = timelineEndTime - timelineStartTime;
 
             // Convert time differences to pixel positions
@@ -130,8 +170,17 @@ export class TaskManager {
 
             // Calculate pixel positions
             const totalPixelWidth = totalUnits * unitWidth;
-            const leftPx = leftPercent * totalPixelWidth;
+            let leftPx = leftPercent * totalPixelWidth;
             let widthPx = widthPercent * totalPixelWidth;
+
+            // Add day view specific adjustments for proper alignment
+            if (viewMode === ViewMode.DAY) {
+                // Ensure tasks snap to day boundaries
+                leftPx = Math.floor(leftPx / unitWidth) * unitWidth;
+
+                // Ensure minimum day width and adjust to day boundaries
+                widthPx = Math.max(unitWidth, Math.ceil(widthPx / unitWidth) * unitWidth);
+            }
 
             // Apply view mode specific adjustments for minimum width
             // Different view modes should have different minimum visible widths

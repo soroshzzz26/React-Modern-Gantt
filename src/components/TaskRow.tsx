@@ -185,9 +185,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
                             Math.min(totalWidth - initialTaskState.width, initialTaskState.left + totalDeltaX)
                         );
 
-                        // Apply snapping based on view mode
+                        // Apply snapping based on view mode - improved for day view
                         if (viewMode === ViewMode.DAY) {
-                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
+                            // Snap exactly to day boundaries
+                            newLeft = Math.floor(newLeft / monthWidth) * monthWidth;
                         }
 
                         taskEl.style.left = `${newLeft}px`;
@@ -200,9 +201,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
                         newLeft = Math.max(0, initialTaskState.left + leftDelta);
 
-                        // Apply snapping based on view mode
+                        // Apply snapping based on view mode - improved for day view
                         if (viewMode === ViewMode.DAY) {
-                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
+                            newLeft = Math.floor(newLeft / monthWidth) * monthWidth;
                         }
 
                         // Calculate width to maintain right edge position
@@ -220,10 +221,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
                             Math.min(totalWidth - initialTaskState.left, initialTaskState.width + totalDeltaX)
                         );
 
-                        // Apply snapping based on view mode
+                        // Apply snapping based on view mode - improved for day view
                         if (viewMode === ViewMode.DAY) {
                             const rightEdge = initialTaskState.left + newWidth;
-                            const snappedRightEdge = Math.round(rightEdge / monthWidth) * monthWidth;
+                            const snappedRightEdge = Math.ceil(rightEdge / monthWidth) * monthWidth;
                             newWidth = Math.max(20, snappedRightEdge - initialTaskState.left);
                         }
 
@@ -263,18 +264,17 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     // Helper function to get timeline range based on view mode
     const getTimelineRangeForViewMode = (start: Date, end: Date, viewMode: ViewMode): number => {
-        const startTime = start.getTime();
-        const endTime = end.getTime();
+        // Ensure consistent time boundaries
+        const startTime = new Date(start).setHours(0, 0, 0, 0);
+        const endTime = new Date(end).setHours(23, 59, 59, 999);
         const fullRange = endTime - startTime;
 
-        // For some view modes, we might want to adjust the perceived range
-        switch (viewMode) {
-            case ViewMode.YEAR:
-                // For year view, consider the range to be exact years
-                return fullRange;
-            default:
-                return fullRange;
+        // For day view, ensure exact day-based calculation
+        if (viewMode === ViewMode.DAY) {
+            return fullRange;
         }
+
+        return fullRange;
     };
 
     // Helper function to normalize dates based on view mode
@@ -288,9 +288,25 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
         switch (viewMode) {
             case ViewMode.DAY:
-                // For day view, snap to day boundaries
-                newStartDate.setHours(0, 0, 0, 0);
-                newEndDate.setHours(23, 59, 59, 999);
+                // Set exact day boundaries for consistent behavior
+                newStartDate = new Date(
+                    newStartDate.getFullYear(),
+                    newStartDate.getMonth(),
+                    newStartDate.getDate(),
+                    0,
+                    0,
+                    0,
+                    0
+                );
+                newEndDate = new Date(
+                    newEndDate.getFullYear(),
+                    newEndDate.getMonth(),
+                    newEndDate.getDate(),
+                    23,
+                    59,
+                    59,
+                    999
+                );
                 break;
 
             case ViewMode.WEEK:
