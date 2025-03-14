@@ -166,3 +166,34 @@
         --gantt-month-width: 100px;
     }
 }
+
+/**
+ * Additional styles for task dragging with smooth transitions
+ */
+
+/* Add transition for smoother task movement */
+.rmg-gantt-task-item {
+    transition: box-shadow 0.2s ease;
+}
+
+/* Style for tasks while being dragged */
+.rmg-task-dragging {
+    /* Disable transition for direct dragging */
+    transition: none !important;
+    /* Elevated appearance */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+    z-index: 100 !important;
+    opacity: 0.95;
+    cursor: grabbing !important;
+}
+
+/* Add a helper class for smooth transition when auto-scrolling */
+.rmg-autoscroll-active .rmg-timeline {
+    scroll-behavior: smooth;
+}
+
+/* Reduce jitter by using hardware acceleration for tasks */
+.rmg-gantt-task-item {
+    transform: translateZ(0);
+    will-change: left, width;
+}

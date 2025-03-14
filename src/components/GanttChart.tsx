@@ -389,6 +389,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                         className={mergedStyles.taskRow}
                                         tooltipClassName={mergedStyles.tooltip}
                                         viewMode={activeViewMode}
+                                        scrollContainerRef={scrollContainerRef} // Pass the scroll container ref
                                     />
                                 );
                             })}

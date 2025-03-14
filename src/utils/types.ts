@@ -86,6 +86,7 @@ export interface TaskRowProps {
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     viewMode?: ViewMode;
+    scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
 }
 
 export interface TaskListProps {

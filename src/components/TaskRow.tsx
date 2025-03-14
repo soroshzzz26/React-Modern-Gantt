@@ -25,6 +25,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
     onTaskClick,
     onTaskSelect,
     viewMode = ViewMode.MONTH,
+    scrollContainerRef, // New prop for the scroll container reference
 }) => {
     if (!taskGroup || !taskGroup.id || !Array.isArray(taskGroup.tasks)) {
         console.warn("TaskRow: Invalid task group data", taskGroup);
@@ -48,6 +49,12 @@ const TaskRow: React.FC<TaskRowProps> = ({
         startDate: Date;
         endDate: Date;
     } | null>(null);
+
+    // Auto-scrolling refs
+    const autoScrollActive = useRef<boolean>(false);
+    const autoScrollTimerRef = useRef<number | null>(null);
+    const autoScrollSpeedRef = useRef<number>(0);
+    const autoScrollDirectionRef = useRef<"left" | "right" | null>(null);
 
     // Refs for task interactions
     const rowRef = useRef<HTMLDivElement>(null);
@@ -75,6 +82,83 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     // Calculate row height based on task arrangement
     const rowHeight = Math.max(60, taskRows.length * 40 + 20);
+
+    // Auto-scroll function
+    const checkForAutoScroll = (clientX: number) => {
+        if (!scrollContainerRef?.current || !draggingTask) return;
+
+        const container = scrollContainerRef.current;
+        const containerRect = container.getBoundingClientRect();
+
+        // Define the edge threshold area (in pixels) to trigger auto-scrolling
+        const edgeThreshold = 40;
+
+        // Reset auto-scroll direction
+        let direction: "left" | "right" | null = null;
+        let scrollSpeed = 0;
+
+        // Check if mouse is near the left edge
+        if (clientX < containerRect.left + edgeThreshold) {
+            direction = "left";
+            // Calculate scroll speed based on proximity to edge (closer = faster)
+            scrollSpeed = Math.max(1, Math.round((edgeThreshold - (clientX - containerRect.left)) / 10));
+        }
+        // Check if mouse is near the right edge
+        else if (clientX > containerRect.right - edgeThreshold) {
+            direction = "right";
+            // Calculate scroll speed based on proximity to edge (closer = faster)
+            scrollSpeed = Math.max(1, Math.round((clientX - (containerRect.right - edgeThreshold)) / 10));
+        }
+
+        // Update refs with current auto-scroll state
+        autoScrollDirectionRef.current = direction;
+        autoScrollSpeedRef.current = scrollSpeed;
+
+        // Start or stop auto-scrolling based on direction
+        if (direction && !autoScrollActive.current) {
+            startAutoScroll();
+        } else if (!direction && autoScrollActive.current) {
+            stopAutoScroll();
+        }
+    };
+
+    // Start auto-scrolling
+    const startAutoScroll = () => {
+        if (autoScrollActive.current) return;
+
+        autoScrollActive.current = true;
+
+        // Use requestAnimationFrame for smoother scrolling
+        const doScroll = () => {
+            if (!autoScrollActive.current || !scrollContainerRef?.current) return;
+
+            const container = scrollContainerRef.current;
+            const direction = autoScrollDirectionRef.current;
+            const speed = autoScrollSpeedRef.current;
+
+            if (direction === "left") {
+                container.scrollLeft -= speed;
+            } else if (direction === "right") {
+                container.scrollLeft += speed;
+            }
+
+            // Continue scrolling if active
+            if (autoScrollActive.current) {
+                autoScrollTimerRef.current = requestAnimationFrame(doScroll);
+            }
+        };
+
+        autoScrollTimerRef.current = requestAnimationFrame(doScroll);
+    };
+
+    // Stop auto-scrolling
+    const stopAutoScroll = () => {
+        autoScrollActive.current = false;
+        if (autoScrollTimerRef.current !== null) {
+            cancelAnimationFrame(autoScrollTimerRef.current);
+            autoScrollTimerRef.current = null;
+        }
+    };
 
     // Task interaction handlers
     const handleTaskClick = (event: React.MouseEvent, task: Task) => {
@@ -156,6 +240,11 @@ const TaskRow: React.FC<TaskRowProps> = ({
             });
         } else if (!(e instanceof MouseEvent)) {
             updateTooltipPosition(e as React.MouseEvent);
+        }
+
+        // Check for auto-scrolling when dragging
+        if (draggingTask && scrollContainerRef?.current) {
+            checkForAutoScroll(e.clientX);
         }
 
         // Handle task dragging and resizing
@@ -370,6 +459,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
         } catch (error) {
             console.error("Error in handleMouseUp:", error);
         } finally {
+            // Stop auto-scrolling
+            stopAutoScroll();
+
             // Reset all drag states
             setDraggingTask(null);
             setDragType(null);
@@ -389,6 +481,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         return () => {
             document.removeEventListener("mouseup", handleMouseUp);
             document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
+            stopAutoScroll();
         };
     }, []);
 
