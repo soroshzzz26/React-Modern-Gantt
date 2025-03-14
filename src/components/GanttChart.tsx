@@ -9,6 +9,7 @@ import {
 import TaskRow from "./TaskRow";
 import Timeline from "./Timeline";
 import TodayMarker from "./TodayMarker";
+import ViewModeSelector from "./ViewModeSelector";
 import TaskList from "./TaskList";
 import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
 import "../styles/gantt.css";
@@ -395,61 +396,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
                     </div>
                 </div>
             </div>
-        </div>
-    );
-};
-
-// View Mode Selector Component
-const ViewModeSelector: React.FC<{
-    activeMode: ViewMode;
-    onChange: (mode: ViewMode) => void;
-    darkMode: boolean;
-}> = ({ activeMode, onChange, darkMode }) => {
-    const buttonBaseClass = `px-3 py-1 text-sm font-medium rounded transition-colors duration-200 ${
-        darkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
-    }`;
-
-    const activeButtonClass = darkMode ? "bg-indigo-600 text-white" : "bg-indigo-600 text-white";
-
-    const inactiveButtonClass = darkMode ? "bg-gray-700 text-gray-300" : "bg-gray-200 text-gray-700";
-
-    return (
-        <div className="flex rounded-md shadow-sm">
-            <button
-                className={`${buttonBaseClass} rounded-l-md ${
-                    activeMode === ViewMode.DAY ? activeButtonClass : inactiveButtonClass
-                }`}
-                onClick={() => onChange(ViewMode.DAY)}>
-                Day
-            </button>
-            <button
-                className={`${buttonBaseClass} border-l ${
-                    activeMode === ViewMode.WEEK ? activeButtonClass : inactiveButtonClass
-                }`}
-                onClick={() => onChange(ViewMode.WEEK)}>
-                Week
-            </button>
-            <button
-                className={`${buttonBaseClass} border-l ${
-                    activeMode === ViewMode.MONTH ? activeButtonClass : inactiveButtonClass
-                }`}
-                onClick={() => onChange(ViewMode.MONTH)}>
-                Month
-            </button>
-            <button
-                className={`${buttonBaseClass} border-l ${
-                    activeMode === ViewMode.QUARTER ? activeButtonClass : inactiveButtonClass
-                }`}
-                onClick={() => onChange(ViewMode.QUARTER)}>
-                Quarter
-            </button>
-            <button
-                className={`${buttonBaseClass} rounded-r-md border-l ${
-                    activeMode === ViewMode.YEAR ? activeButtonClass : inactiveButtonClass
-                }`}
-                onClick={() => onChange(ViewMode.YEAR)}>
-                Year
-            </button>
         </div>
     );
 };

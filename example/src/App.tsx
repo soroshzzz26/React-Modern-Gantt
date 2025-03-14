@@ -212,6 +212,7 @@ const GanttChartDemo = () => {
 
     // Task update handlers
     const handleBasicTaskUpdate = (groupId: string, updatedTask: Task) => {
+        console.log("Task updated:", updatedTask);
         setBasicTasks(prevTasks =>
             prevTasks.map(group =>
                 group.id === groupId
