@@ -44,6 +44,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
     renderTaskList,
     renderTask,
     renderTooltip,
+    renderViewModeSelector, // New: Custom render for view mode selector
+    renderHeader, // New: Custom render for the entire header
+    renderTimelineHeader, // New: Custom render for timeline header
     getTaskColor,
 
     // Core event handlers
@@ -334,6 +337,77 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Merge default styles with provided styles
     const mergedStyles = { ...defaultStyles, ...styles };
 
+    // Custom render function for the header
+    const renderHeaderContent = () => {
+        if (renderHeader) {
+            return renderHeader({
+                title,
+                darkMode,
+                viewMode: activeViewMode,
+                onViewModeChange: handleViewModeChange,
+                showViewModeSelector,
+            });
+        }
+
+        return (
+            <div className="p-6 border-b border-gantt-border">
+                <div className="flex justify-between items-center">
+                    <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
+
+                    {/* View Mode Selector - conditionally rendered based on showViewModeSelector prop */}
+                    {showViewModeSelector && (
+                        <div className="flex space-x-2">
+                            {renderViewModeSelector ? (
+                                renderViewModeSelector({
+                                    activeMode: activeViewMode,
+                                    onChange: handleViewModeChange,
+                                    darkMode,
+                                    availableModes: [
+                                        ViewMode.DAY,
+                                        ViewMode.WEEK,
+                                        ViewMode.MONTH,
+                                        ViewMode.QUARTER,
+                                        ViewMode.YEAR,
+                                    ],
+                                })
+                            ) : (
+                                <ViewModeSelector
+                                    activeMode={activeViewMode}
+                                    onChange={handleViewModeChange}
+                                    darkMode={darkMode}
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    // Custom render function for the timeline header
+    const renderTimelineHeaderContent = () => {
+        if (renderTimelineHeader) {
+            return renderTimelineHeader({
+                timeUnits,
+                currentUnitIndex: currentUnitIndex,
+                viewMode: activeViewMode,
+                locale,
+                unitWidth: viewUnitWidth,
+            });
+        }
+
+        return (
+            <Timeline
+                months={timeUnits}
+                currentMonthIndex={currentUnitIndex}
+                locale={locale}
+                className={mergedStyles.timeline}
+                viewMode={activeViewMode}
+                unitWidth={viewUnitWidth}
+            />
+        );
+    };
+
     return (
         <div
             ref={containerRef}
@@ -345,22 +419,8 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 } as React.CSSProperties
             }
             data-testid="gantt-chart">
-            <div className="p-6 border-b border-gantt-border">
-                <div className="flex justify-between items-center">
-                    <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
-
-                    {/* View Mode Selector - conditionally rendered based on showViewModeSelector prop */}
-                    {showViewModeSelector && (
-                        <div className="flex space-x-2">
-                            <ViewModeSelector
-                                activeMode={activeViewMode}
-                                onChange={handleViewModeChange}
-                                darkMode={darkMode}
-                            />
-                        </div>
-                    )}
-                </div>
-            </div>
+            {/* Render the header with custom rendering support */}
+            {renderHeaderContent()}
 
             <div className="relative flex">
                 {/* Task List (left sidebar) - conditionally use custom render function if provided */}
@@ -388,15 +448,8 @@ const GanttChart: React.FC<GanttChartProps> = ({
                         isAutoScrolling ? "rmg-auto-scrolling" : ""
                     }`}>
                     <div className="min-w-max">
-                        {/* Timeline header */}
-                        <Timeline
-                            months={timeUnits}
-                            currentMonthIndex={currentUnitIndex}
-                            locale={locale}
-                            className={mergedStyles.timeline}
-                            viewMode={activeViewMode}
-                            unitWidth={viewUnitWidth}
-                        />
+                        {/* Render the timeline header with custom rendering support */}
+                        {renderTimelineHeaderContent()}
 
                         <div className="relative">
                             {/* Today marker */}

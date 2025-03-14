@@ -5,14 +5,21 @@ const ViewModeSelector: React.FC<{
     activeMode: ViewMode;
     onChange: (mode: ViewMode) => void;
     darkMode: boolean;
-}> = ({ activeMode, onChange, darkMode }) => {
-    const viewModes = [
+    availableModes?: ViewMode[]; // New prop to allow controlling available modes
+}> = ({ activeMode, onChange, darkMode, availableModes }) => {
+    // Default view modes
+    const defaultViewModes = [
         { id: ViewMode.DAY, label: "Day" },
         { id: ViewMode.WEEK, label: "Week" },
         { id: ViewMode.MONTH, label: "Month" },
         { id: ViewMode.QUARTER, label: "Quarter" },
         { id: ViewMode.YEAR, label: "Year" },
     ];
+
+    // Filter view modes based on availableModes prop if provided
+    const viewModes = availableModes
+        ? defaultViewModes.filter(mode => availableModes.includes(mode.id))
+        : defaultViewModes;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [highlightStyle, setHighlightStyle] = useState({ left: "0px", width: "0px" });

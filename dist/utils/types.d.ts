@@ -58,6 +58,26 @@ export interface TooltipRenderProps {
     endDate: Date;
     viewMode: ViewMode;
 }
+export interface ViewModeSelectorRenderProps {
+    activeMode: ViewMode;
+    onChange: (mode: ViewMode) => void;
+    darkMode: boolean;
+    availableModes?: ViewMode[];
+}
+export interface HeaderRenderProps {
+    title: string;
+    darkMode: boolean;
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
+    showViewModeSelector: boolean;
+}
+export interface TimelineHeaderRenderProps {
+    timeUnits: Date[];
+    currentUnitIndex: number;
+    viewMode: ViewMode;
+    locale: string;
+    unitWidth: number;
+}
 export interface TaskColorProps {
     task: Task;
     isHovered: boolean;
@@ -85,6 +105,9 @@ export interface GanttChartProps {
     renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
     renderTask?: (props: TaskRenderProps) => React.ReactNode;
     renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
+    renderViewModeSelector?: (props: ViewModeSelectorRenderProps) => React.ReactNode;
+    renderHeader?: (props: HeaderRenderProps) => React.ReactNode;
+    renderTimelineHeader?: (props: TimelineHeaderRenderProps) => React.ReactNode;
     getTaskColor?: (props: TaskColorProps) => {
         backgroundColor: string;
         borderColor?: string;
