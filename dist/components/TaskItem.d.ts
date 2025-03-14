@@ -29,12 +29,14 @@ interface TaskItemProps {
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
     onClick: (event: React.MouseEvent, task: Task) => void;
+    onProgressUpdate?: (task: Task, newPercent: number) => void;
 }
 /**
  * TaskItem Component
  *
  * Renders a single task bar in the Gantt chart
  * Enhanced with smoother animations and transitions
+ * Added interactive progress bubble for adjusting task completion
  */
 declare const TaskItem: React.FC<TaskItemProps>;
 export default TaskItem;

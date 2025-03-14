@@ -10,6 +10,7 @@ import Tooltip from "./Tooltip";
  *
  * Displays and manages the tasks for a single task group
  * Supports different view modes with mode-appropriate dragging behavior
+ * Now with interactive progress bar functionality
  */
 const TaskRow: React.FC<TaskRowProps> = ({
     taskGroup,
@@ -741,6 +742,24 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
+    // NEW FUNCTION: Handle progress update
+    const handleProgressUpdate = (task: Task, newPercent: number) => {
+        if (onTaskUpdate && taskGroup.id) {
+            try {
+                // Create updated task with new progress percentage
+                const updatedTask = {
+                    ...task,
+                    percent: newPercent,
+                };
+
+                // Call the onTaskUpdate handler with the updated task
+                onTaskUpdate(taskGroup.id, updatedTask);
+            } catch (error) {
+                console.error("Error updating task progress:", error);
+            }
+        }
+    };
+
     // Clean up event listeners and animations on unmount
     useEffect(() => {
         return () => {
@@ -816,6 +835,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                     onClick={handleTaskClick}
                                     renderTask={renderTask}
                                     getTaskColor={getTaskColor}
+                                    onProgressUpdate={handleProgressUpdate}
                                 />
                             );
                         } catch (error) {

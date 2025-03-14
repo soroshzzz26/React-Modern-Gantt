@@ -138,7 +138,7 @@ export interface TaskRowProps {
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     onAutoScrollChange?: (isScrolling: boolean) => void; // Handler for auto-scrolling state
     viewMode?: ViewMode;
-    scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
+    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 
     // Custom render functions
     renderTask?: (props: TaskRenderProps) => React.ReactNode;
@@ -192,6 +192,7 @@ export interface TaskItemProps {
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
     onClick: (event: React.MouseEvent, task: Task) => void;
+    onProgressUpdate?: (task: Task, newPercent: number) => void; // New prop for progress updates
 }
 
 export interface TooltipProps {

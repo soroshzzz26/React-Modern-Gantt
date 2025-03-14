@@ -62,7 +62,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     timeStep,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
     // State for view mode and unit properties
     const [activeViewMode, setActiveViewMode] = useState<ViewMode>(viewMode);

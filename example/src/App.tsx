@@ -213,6 +213,20 @@ const GanttChartDemo = () => {
     // Task update handlers
     const handleBasicTaskUpdate = (groupId: string, updatedTask: Task) => {
         console.log("Task updated:", updatedTask);
+
+        // Add logging specifically for progress updates
+        if (updatedTask.percent !== undefined) {
+            const originalTask = basicTasks
+                .find(group => group.id === groupId)
+                ?.tasks.find(task => task.id === updatedTask.id);
+
+            const originalPercent = originalTask?.percent || 0;
+
+            if (originalPercent !== updatedTask.percent) {
+                console.log(`Progress updated: ${originalPercent}% → ${updatedTask.percent}%`);
+            }
+        }
+
         setBasicTasks(prevTasks =>
             prevTasks.map(group =>
                 group.id === groupId

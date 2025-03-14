@@ -119,7 +119,7 @@ export interface TaskRowProps {
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     onAutoScrollChange?: (isScrolling: boolean) => void;
     viewMode?: ViewMode;
-    scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
+    scrollContainerRef: React.RefObject<HTMLDivElement | null>;
     renderTask?: (props: TaskRenderProps) => React.ReactNode;
     renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
     getTaskColor?: (props: TaskColorProps) => {
@@ -168,6 +168,7 @@ export interface TaskItemProps {
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
     onClick: (event: React.MouseEvent, task: Task) => void;
+    onProgressUpdate?: (task: Task, newPercent: number) => void;
 }
 export interface TooltipProps {
     task: Task;
