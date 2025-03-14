@@ -9,7 +9,7 @@ import Tooltip from "./Tooltip";
  *  TaskRow Component
  *
  * Displays and manages the tasks for a single task group
- * Supports different view modes
+ * Supports different view modes with mode-appropriate dragging behavior
  */
 const TaskRow: React.FC<TaskRowProps> = ({
     taskGroup,
@@ -24,10 +24,15 @@ const TaskRow: React.FC<TaskRowProps> = ({
     onTaskUpdate,
     onTaskClick,
     onTaskSelect,
+    onAutoScrollChange,
     viewMode = ViewMode.MONTH,
-    scrollContainerRef, // New prop for the scroll container reference
-    smoothDragging = true, // New prop to enable/disable smooth dragging
-    movementThreshold = 3, // New prop for minimum pixel movement threshold
+    scrollContainerRef, // For the scroll container reference
+    smoothDragging = true, // Enable smooth dragging by default (except for day view)
+    movementThreshold = 3, // Minimum pixel movement threshold
+    animationSpeed = 0.25, // Animation speed (0.1-1)
+    renderTask,
+    renderTooltip,
+    getTaskColor,
 }) => {
     if (!taskGroup || !taskGroup.id || !Array.isArray(taskGroup.tasks)) {
         console.warn("TaskRow: Invalid task group data", taskGroup);
@@ -52,24 +57,35 @@ const TaskRow: React.FC<TaskRowProps> = ({
         endDate: Date;
     } | null>(null);
 
-    // Anti-jitter references
-    const lastPositionRef = useRef<{ left: number; width: number }>({ left: 0, width: 0 });
-    const lastMovementTimeRef = useRef<number>(0);
-    const accumulatedDeltaXRef = useRef<number>(0);
+    // Animation refs
+    const animationFrameRef = useRef<number | null>(null);
+    const lastMousePositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+    const targetPositionRef = useRef<{ left: number; width: number } | null>(null);
+    const currentPositionRef = useRef<{ left: number; width: number } | null>(null);
+    const velocityRef = useRef<{ left: number; width: number }>({ left: 0, width: 0 });
+    const lastUpdateTimeRef = useRef<number>(0);
 
     // Auto-scrolling refs
     const autoScrollActive = useRef<boolean>(false);
     const autoScrollTimerRef = useRef<number | null>(null);
     const autoScrollSpeedRef = useRef<number>(0);
     const autoScrollDirectionRef = useRef<"left" | "right" | null>(null);
+    const timelineLimitsRef = useRef<{ minLeft: number; maxLeft: number }>({
+        minLeft: 0,
+        maxLeft: totalMonths * monthWidth,
+    });
 
     // Refs for task interactions
     const rowRef = useRef<HTMLDivElement>(null);
     const draggingTaskRef = useRef<Task | null>(null);
     const previewTaskRef = useRef<Task | null>(null);
+    const taskElementRef = useRef<HTMLElement | null>(null);
 
     // Instance ID to prevent cross-chart interactions
     const instanceId = useRef(`task-row-${Math.random().toString(36).substring(2, 11)}`);
+
+    // Calculate if we should use smooth dragging - DISABLED for day view
+    const shouldUseSmoothDragging = smoothDragging && viewMode !== ViewMode.DAY;
 
     // Task update helpers
     const updateDraggingTask = (task: Task) => {
@@ -89,6 +105,141 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     // Calculate row height based on task arrangement
     const rowHeight = Math.max(60, taskRows.length * 40 + 20);
+
+    // Update timeline limits
+    useEffect(() => {
+        timelineLimitsRef.current = {
+            minLeft: 0,
+            maxLeft: totalMonths * monthWidth,
+        };
+    }, [totalMonths, monthWidth]);
+
+    // Animation functions
+    const animateTaskMovement = () => {
+        if (!taskElementRef.current || !targetPositionRef.current || !currentPositionRef.current) {
+            animationFrameRef.current = null;
+            return;
+        }
+
+        const now = Date.now();
+        const elapsed = now - lastUpdateTimeRef.current;
+        lastUpdateTimeRef.current = now;
+
+        // Smooth animation coefficient (adjust for more or less smoothness)
+        const easing = animationSpeed || 0.25;
+
+        // Calculate new position with easing
+        const newLeft =
+            currentPositionRef.current.left +
+            (targetPositionRef.current.left - currentPositionRef.current.left) * easing;
+        const newWidth =
+            currentPositionRef.current.width +
+            (targetPositionRef.current.width - currentPositionRef.current.width) * easing;
+
+        // Update velocity for more natural animation
+        velocityRef.current.left = (newLeft - currentPositionRef.current.left) / (elapsed || 16);
+        velocityRef.current.width = (newWidth - currentPositionRef.current.width) / (elapsed || 16);
+
+        // Update current position
+        currentPositionRef.current = { left: newLeft, width: newWidth };
+
+        // Apply to DOM
+        taskElementRef.current.style.left = `${newLeft}px`;
+        taskElementRef.current.style.width = `${newWidth}px`;
+
+        // Calculate and update dates based on current position
+        if (draggingTaskRef.current) {
+            updateDatesFromPosition(newLeft, newWidth);
+        }
+
+        // Continue animation loop
+        animationFrameRef.current = requestAnimationFrame(animateTaskMovement);
+    };
+
+    // Update dates based on visual position
+    const updateDatesFromPosition = (left: number, width: number) => {
+        if (!draggingTaskRef.current) return;
+
+        try {
+            // For day view, apply precise date calculation
+            if (viewMode === ViewMode.DAY) {
+                // Calculate days from start position
+                const daysFromStart = Math.round(left / monthWidth);
+
+                // Calculate exact days span
+                const daysSpan = Math.max(1, Math.round(width / monthWidth));
+
+                // Apply precise day calculations
+                const baseDate = new Date(validStartDate);
+                baseDate.setHours(0, 0, 0, 0);
+
+                const newStartDate = new Date(baseDate);
+                newStartDate.setDate(baseDate.getDate() + daysFromStart);
+                newStartDate.setHours(0, 0, 0, 0);
+
+                const newEndDate = new Date(newStartDate);
+                newEndDate.setDate(newStartDate.getDate() + daysSpan - 1);
+                newEndDate.setHours(23, 59, 59, 999);
+
+                // Ensure dates are within the timeline boundaries
+                const startTime = validStartDate.getTime();
+                const endTime = validEndDate.getTime();
+
+                if (newStartDate.getTime() < startTime) {
+                    newStartDate.setTime(startTime);
+                }
+
+                if (newEndDate.getTime() > endTime) {
+                    newEndDate.setTime(endTime);
+                }
+
+                // Create updated task with the new dates
+                const updatedTask = {
+                    ...draggingTaskRef.current,
+                    startDate: newStartDate,
+                    endDate: newEndDate,
+                };
+
+                // Update preview state
+                updatePreviewTask(updatedTask);
+            } else {
+                // Regular calculation for other view modes
+                const timelineRange = getTimelineRangeForViewMode(validStartDate, validEndDate, viewMode);
+                const msPerPixel = timelineRange / (totalMonths * monthWidth);
+
+                let newStartMs = validStartDate.getTime() + left * msPerPixel;
+                let newEndMs = validStartDate.getTime() + (left + width) * msPerPixel;
+
+                // Ensure dates are within the timeline boundaries
+                const startTime = validStartDate.getTime();
+                const endTime = validEndDate.getTime();
+
+                if (newStartMs < startTime) {
+                    newStartMs = startTime;
+                }
+
+                if (newEndMs > endTime) {
+                    newEndMs = endTime;
+                }
+
+                const { newStartDate, newEndDate } = normalizeDatesForViewMode(
+                    new Date(newStartMs),
+                    new Date(newEndMs),
+                    viewMode
+                );
+
+                const updatedTask = {
+                    ...draggingTaskRef.current,
+                    startDate: newStartDate,
+                    endDate: newEndDate,
+                };
+
+                updatePreviewTask(updatedTask);
+            }
+        } catch (error) {
+            console.error("Error updating dates:", error);
+        }
+    };
 
     // Auto-scroll function
     const checkForAutoScroll = (clientX: number) => {
@@ -124,8 +275,10 @@ const TaskRow: React.FC<TaskRowProps> = ({
         // Start or stop auto-scrolling based on direction
         if (direction && !autoScrollActive.current) {
             startAutoScroll();
+            if (onAutoScrollChange) onAutoScrollChange(true);
         } else if (!direction && autoScrollActive.current) {
             stopAutoScroll();
+            if (onAutoScrollChange) onAutoScrollChange(false);
         }
     };
 
@@ -137,16 +290,48 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
         // Use requestAnimationFrame for smoother scrolling
         const doScroll = () => {
-            if (!autoScrollActive.current || !scrollContainerRef?.current) return;
+            if (!autoScrollActive.current || !scrollContainerRef?.current || !targetPositionRef.current) return;
 
             const container = scrollContainerRef.current;
             const direction = autoScrollDirectionRef.current;
             const speed = autoScrollSpeedRef.current;
 
+            // Get current scroll position
+            const currentScrollLeft = container.scrollLeft;
+            // Get maximum scroll position
+            const maxScrollLeft = container.scrollWidth - container.clientWidth;
+
             if (direction === "left") {
-                container.scrollLeft -= speed;
+                // Don't scroll past the beginning
+                if (currentScrollLeft <= 0) {
+                    stopAutoScroll();
+                    return;
+                }
+
+                const newScrollLeft = Math.max(0, currentScrollLeft - speed);
+                container.scrollLeft = newScrollLeft;
+
+                // Update target position during auto-scroll, but enforce boundaries
+                if (targetPositionRef.current) {
+                    const newLeft = Math.max(timelineLimitsRef.current.minLeft, targetPositionRef.current.left - speed);
+                    targetPositionRef.current.left = newLeft;
+                }
             } else if (direction === "right") {
-                container.scrollLeft += speed;
+                // Don't scroll past the end
+                if (currentScrollLeft >= maxScrollLeft) {
+                    stopAutoScroll();
+                    return;
+                }
+
+                const newScrollLeft = Math.min(maxScrollLeft, currentScrollLeft + speed);
+                container.scrollLeft = newScrollLeft;
+
+                // Update target position during auto-scroll, but enforce boundaries
+                if (targetPositionRef.current && initialTaskState) {
+                    const maxLeftPosition = timelineLimitsRef.current.maxLeft - targetPositionRef.current.width;
+                    const newLeft = Math.min(maxLeftPosition, targetPositionRef.current.left + speed);
+                    targetPositionRef.current.left = newLeft;
+                }
             }
 
             // Continue scrolling if active
@@ -191,7 +376,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
-    const updateTooltipPosition = (e: React.MouseEvent) => {
+    const updateTooltipPosition = (e: React.MouseEvent | MouseEvent) => {
         if (rowRef.current) {
             const rect = rowRef.current.getBoundingClientRect();
             setTooltipPosition({
@@ -213,6 +398,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         ) as HTMLElement;
 
         if (!taskEl) return;
+        taskElementRef.current = taskEl;
 
         // Store the initial state
         const initialLeft = parseFloat(taskEl.style.left || "0");
@@ -225,10 +411,24 @@ const TaskRow: React.FC<TaskRowProps> = ({
             endDate: new Date(task.endDate),
         });
 
-        // Initialize anti-jitter refs
-        lastPositionRef.current = { left: initialLeft, width: initialWidth };
-        lastMovementTimeRef.current = Date.now();
-        accumulatedDeltaXRef.current = 0;
+        // Initialize animation refs
+        targetPositionRef.current = { left: initialLeft, width: initialWidth };
+        currentPositionRef.current = { left: initialLeft, width: initialWidth };
+        lastMousePositionRef.current = { x: event.clientX, y: event.clientY };
+        lastUpdateTimeRef.current = Date.now();
+        velocityRef.current = { left: 0, width: 0 };
+
+        // Update task element data attribute for styling
+        taskEl.setAttribute("data-dragging", "true");
+
+        // Prepare for smooth animations (only if not in day view)
+        if (shouldUseSmoothDragging) {
+            // Only add a transition for non-day view modes
+            taskEl.style.transition = "none"; // We'll handle the animation manually
+        } else {
+            // For day view, use immediate snapping with no transitions
+            taskEl.style.transition = "none";
+        }
 
         // Set up dragging state
         setDraggingTask(task);
@@ -239,19 +439,26 @@ const TaskRow: React.FC<TaskRowProps> = ({
         updateDraggingTask(task);
         updatePreviewTask(task);
 
+        // Start animation loop (only for smooth dragging)
+        if (animationFrameRef.current === null && shouldUseSmoothDragging) {
+            animationFrameRef.current = requestAnimationFrame(animateTaskMovement);
+        }
+
         // Add global event listeners
         document.addEventListener("mouseup", handleMouseUp);
         document.addEventListener("mousemove", handleMouseMove as unknown as EventListener);
     };
 
     const handleMouseMove = (e: React.MouseEvent | MouseEvent) => {
+        // Store current mouse position for animation
+        lastMousePositionRef.current = { x: e.clientX, y: e.clientY };
+
         // Update tooltip position
         if (e instanceof MouseEvent && hoveredTask && rowRef.current) {
-            const mouseEvent = e as MouseEvent;
             const rect = rowRef.current.getBoundingClientRect();
             setTooltipPosition({
-                x: mouseEvent.clientX - rect.left + 20,
-                y: mouseEvent.clientY - rect.top,
+                x: e.clientX - rect.left + 20,
+                y: e.clientY - rect.top,
             });
         } else if (!(e instanceof MouseEvent)) {
             updateTooltipPosition(e as React.MouseEvent);
@@ -263,204 +470,91 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
 
         // Handle task dragging and resizing
-        if (draggingTask && dragType && initialTaskState && rowRef.current) {
+        if (draggingTask && dragType && initialTaskState && rowRef.current && targetPositionRef.current) {
             try {
-                const taskEl = document.querySelector(
-                    `[data-task-id="${draggingTask.id}"][data-instance-id="${instanceId.current}"]`
-                ) as HTMLElement;
-
-                if (!taskEl) return;
-
                 // Calculate the total movement since drag started
                 const totalDeltaX = e.clientX - dragStartX;
-
-                // Anti-jitter: Accumulate small movements but don't apply them until they exceed threshold
-                if (smoothDragging) {
-                    accumulatedDeltaXRef.current +=
-                        totalDeltaX - (initialTaskState.left + accumulatedDeltaXRef.current - initialTaskState.left);
-
-                    // Don't apply very small movements that could cause jiggling
-                    if (Math.abs(accumulatedDeltaXRef.current) < movementThreshold) {
-                        return;
-                    }
-                }
 
                 // Get the timeline's total width
                 const totalWidth = totalMonths * monthWidth;
 
-                let newLeft = initialTaskState.left;
-                let newWidth = initialTaskState.width;
-                let positionChanged = false;
+                // Calculate new target position based on drag type
+                let newLeft = targetPositionRef.current.left;
+                let newWidth = targetPositionRef.current.width;
 
-                // Apply movement based on drag type
                 switch (dragType) {
                     case "move":
-                        // Move task
+                        // Move task with bounds checking
                         newLeft = Math.max(
                             0,
                             Math.min(totalWidth - initialTaskState.width, initialTaskState.left + totalDeltaX)
                         );
 
-                        // Apply snapping based on view mode - improved for day view
+                        // Special handling for day view (immediate snapping)
                         if (viewMode === ViewMode.DAY) {
-                            // Use round instead of floor for more accurate day snapping
-                            const snappedLeft = Math.round(newLeft / monthWidth) * monthWidth;
-
-                            // Only update if significantly different or has changed grid position
-                            if (Math.abs(snappedLeft - lastPositionRef.current.left) >= movementThreshold) {
-                                newLeft = snappedLeft;
-                                positionChanged = true;
-                            } else {
-                                newLeft = lastPositionRef.current.left;
-                            }
-                        } else {
-                            // For other view modes, check if position has changed significantly
-                            if (Math.abs(newLeft - lastPositionRef.current.left) >= movementThreshold) {
-                                positionChanged = true;
-                            } else {
-                                newLeft = lastPositionRef.current.left;
-                            }
-                        }
-
-                        if (positionChanged) {
-                            taskEl.style.left = `${newLeft}px`;
-                            lastPositionRef.current.left = newLeft;
+                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
                         }
                         break;
 
                     case "resize-left":
-                        // Resize from left (min width = 20px)
+                        // Resize from left with minimum width
                         const maxLeftDelta = initialTaskState.width - 20;
                         const leftDelta = Math.min(maxLeftDelta, totalDeltaX);
 
                         newLeft = Math.max(0, initialTaskState.left + leftDelta);
 
-                        // Apply snapping based on view mode
+                        // Special handling for day view (immediate snapping)
                         if (viewMode === ViewMode.DAY) {
-                            const snappedLeft = Math.round(newLeft / monthWidth) * monthWidth;
-
-                            // Only update if significantly different or has changed grid position
-                            if (Math.abs(snappedLeft - lastPositionRef.current.left) >= movementThreshold) {
-                                newLeft = snappedLeft;
-                                positionChanged = true;
-                            } else {
-                                newLeft = lastPositionRef.current.left;
-                            }
-                        } else {
-                            // For other view modes, check if position has changed significantly
-                            if (Math.abs(newLeft - lastPositionRef.current.left) >= movementThreshold) {
-                                positionChanged = true;
-                            } else {
-                                newLeft = lastPositionRef.current.left;
-                            }
+                            newLeft = Math.round(newLeft / monthWidth) * monthWidth;
                         }
 
                         // Calculate width to maintain right edge position
                         const rightEdge = initialTaskState.left + initialTaskState.width;
                         newWidth = Math.max(20, rightEdge - newLeft);
 
-                        if (positionChanged) {
-                            taskEl.style.left = `${newLeft}px`;
-                            taskEl.style.width = `${newWidth}px`;
-                            lastPositionRef.current = { left: newLeft, width: newWidth };
+                        // Special handling for day view (ensure full day widths)
+                        if (viewMode === ViewMode.DAY) {
+                            newWidth = Math.round(newWidth / monthWidth) * monthWidth;
+                            newWidth = Math.max(monthWidth, newWidth); // Minimum one day
                         }
                         break;
 
                     case "resize-right":
-                        // Resize from right (min width = 20px)
+                        // Resize from right with minimum width
                         newWidth = Math.max(
                             20,
                             Math.min(totalWidth - initialTaskState.left, initialTaskState.width + totalDeltaX)
                         );
 
-                        // Apply snapping based on view mode
+                        // Special handling for day view (ensure full day widths)
                         if (viewMode === ViewMode.DAY) {
-                            const rightEdge = initialTaskState.left + newWidth;
-                            const snappedRightEdge = Math.round(rightEdge / monthWidth) * monthWidth;
-                            const snappedWidth = Math.max(20, snappedRightEdge - initialTaskState.left);
-
-                            // Only update if significantly different or has changed grid position
-                            if (Math.abs(snappedWidth - lastPositionRef.current.width) >= movementThreshold) {
-                                newWidth = snappedWidth;
-                                positionChanged = true;
-                            } else {
-                                newWidth = lastPositionRef.current.width;
-                            }
-                        } else {
-                            // For other view modes, check if width has changed significantly
-                            if (Math.abs(newWidth - lastPositionRef.current.width) >= movementThreshold) {
-                                positionChanged = true;
-                            } else {
-                                newWidth = lastPositionRef.current.width;
-                            }
-                        }
-
-                        if (positionChanged) {
-                            taskEl.style.width = `${newWidth}px`;
-                            lastPositionRef.current.width = newWidth;
+                            newWidth = Math.round(newWidth / monthWidth) * monthWidth;
+                            newWidth = Math.max(monthWidth, newWidth); // Minimum one day
                         }
                         break;
                 }
 
-                // Only calculate and update dates if position actually changed
-                if (positionChanged) {
-                    // For day view, apply precise date calculation to avoid off-by-one errors
-                    if (viewMode === ViewMode.DAY) {
-                        // Calculate days from start position
-                        const daysFromStart = Math.round(newLeft / monthWidth);
+                // Update target position reference
+                targetPositionRef.current = { left: newLeft, width: newWidth };
 
-                        // Calculate exact days span
-                        const daysSpan = Math.max(1, Math.round(newWidth / monthWidth));
-
-                        // Apply precise day calculations
-                        const baseDate = new Date(validStartDate);
-                        baseDate.setHours(0, 0, 0, 0);
-
-                        const newStartDate = new Date(baseDate);
-                        newStartDate.setDate(baseDate.getDate() + daysFromStart);
-                        newStartDate.setHours(0, 0, 0, 0);
-
-                        const newEndDate = new Date(newStartDate);
-                        newEndDate.setDate(newStartDate.getDate() + daysSpan - 1);
-                        newEndDate.setHours(23, 59, 59, 999);
-
-                        // Create updated task with the new dates
-                        const updatedTask = {
-                            ...draggingTask,
-                            startDate: newStartDate,
-                            endDate: newEndDate,
-                        };
-
-                        // Update preview state
-                        setPreviewTask(updatedTask);
-                        updatePreviewTask(updatedTask);
-                    } else {
-                        // Regular calculation for other view modes
-                        const timelineRange = getTimelineRangeForViewMode(validStartDate, validEndDate, viewMode);
-                        const msPerPixel = timelineRange / totalWidth;
-
-                        let newStartMs = validStartDate.getTime() + newLeft * msPerPixel;
-                        let newEndMs = validStartDate.getTime() + (newLeft + newWidth) * msPerPixel;
-
-                        const { newStartDate, newEndDate } = normalizeDatesForViewMode(
-                            new Date(newStartMs),
-                            new Date(newEndMs),
-                            viewMode
-                        );
-
-                        const updatedTask = {
-                            ...draggingTask,
-                            startDate: newStartDate,
-                            endDate: newEndDate,
-                        };
-
-                        setPreviewTask(updatedTask);
-                        updatePreviewTask(updatedTask);
+                // Apply position immediately for day view mode
+                if (viewMode === ViewMode.DAY && taskElementRef.current) {
+                    taskElementRef.current.style.left = `${newLeft}px`;
+                    taskElementRef.current.style.width = `${newWidth}px`;
+                    updateDatesFromPosition(newLeft, newWidth);
+                }
+                // Start animation for smooth dragging in other view modes
+                else if (shouldUseSmoothDragging) {
+                    if (animationFrameRef.current === null) {
+                        lastUpdateTimeRef.current = Date.now();
+                        animationFrameRef.current = requestAnimationFrame(animateTaskMovement);
                     }
-
-                    // Reset accumulated delta after applying position changes
-                    accumulatedDeltaXRef.current = 0;
-                    lastMovementTimeRef.current = Date.now();
+                }
+                // Direct update for non-smooth non-day view modes
+                else if (taskElementRef.current) {
+                    taskElementRef.current.style.left = `${newLeft}px`;
+                    taskElementRef.current.style.width = `${newWidth}px`;
+                    updateDatesFromPosition(newLeft, newWidth);
                 }
             } catch (error) {
                 console.error("Error in handleMouseMove:", error);
@@ -535,20 +629,100 @@ const TaskRow: React.FC<TaskRowProps> = ({
         return { newStartDate, newEndDate };
     };
 
+    // Finalize task positioning on mouse up
+    const finalizeTaskPosition = () => {
+        if (!taskElementRef.current || !targetPositionRef.current || !draggingTaskRef.current) return;
+
+        // Get final position
+        let finalLeft = targetPositionRef.current.left;
+        let finalWidth = targetPositionRef.current.width;
+
+        // Apply snapping for final position in day mode
+        if (viewMode === ViewMode.DAY) {
+            // Snap to day grid
+            finalLeft = Math.round(finalLeft / monthWidth) * monthWidth;
+            finalWidth = Math.round(finalWidth / monthWidth) * monthWidth;
+
+            // Ensure minimum width
+            finalWidth = Math.max(monthWidth, finalWidth);
+
+            // Apply final position to element
+            taskElementRef.current.style.transition =
+                "transform 0.15s ease-out, left 0.15s ease-out, width 0.15s ease-out";
+            taskElementRef.current.style.left = `${finalLeft}px`;
+            taskElementRef.current.style.width = `${finalWidth}px`;
+        }
+
+        // Apply snapping for other modes if desired
+        else if (!shouldUseSmoothDragging) {
+            taskElementRef.current.style.transition =
+                "transform 0.15s ease-out, left 0.15s ease-out, width 0.15s ease-out";
+            taskElementRef.current.style.left = `${finalLeft}px`;
+            taskElementRef.current.style.width = `${finalWidth}px`;
+        }
+
+        // Calculate final dates
+        let finalTask = previewTaskRef.current;
+        if (!finalTask) return;
+
+        // Verify final task is within timeline bounds
+        const timelineStartTime = validStartDate.getTime();
+        const timelineEndTime = validEndDate.getTime();
+
+        // Ensure task dates are within bounds
+        if (finalTask.startDate.getTime() < timelineStartTime) {
+            finalTask = {
+                ...finalTask,
+                startDate: new Date(timelineStartTime),
+            };
+        }
+
+        if (finalTask.endDate.getTime() > timelineEndTime) {
+            finalTask = {
+                ...finalTask,
+                endDate: new Date(timelineEndTime),
+            };
+        }
+
+        // Call update handler with the final task
+        if (onTaskUpdate && finalTask) {
+            try {
+                onTaskUpdate(taskGroup.id, finalTask);
+            } catch (error) {
+                console.error("Error in onTaskUpdate:", error);
+            }
+        }
+    };
+
     const handleMouseUp = () => {
         try {
-            const currentDraggingTask = draggingTaskRef.current;
-            const currentPreviewTask = previewTaskRef.current;
+            // Cancel any ongoing animation
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
 
-            // Update the task if dragging is complete
-            if (currentDraggingTask && currentPreviewTask && onTaskUpdate) {
-                onTaskUpdate(taskGroup.id, currentPreviewTask);
+            // Finalize task position with snapping
+            finalizeTaskPosition();
+
+            // Clean up animation state
+            if (taskElementRef.current) {
+                // Reset the dragging state
+                taskElementRef.current.setAttribute("data-dragging", "false");
+
+                // Reset transitions after a short delay to allow final animation to complete
+                setTimeout(() => {
+                    if (taskElementRef.current) {
+                        taskElementRef.current.style.transition = "";
+                    }
+                }, 200);
             }
         } catch (error) {
             console.error("Error in handleMouseUp:", error);
         } finally {
             // Stop auto-scrolling
             stopAutoScroll();
+            if (onAutoScrollChange) onAutoScrollChange(false);
 
             // Reset all drag states
             setDraggingTask(null);
@@ -557,7 +731,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
             setInitialTaskState(null);
             draggingTaskRef.current = null;
             previewTaskRef.current = null;
-            accumulatedDeltaXRef.current = 0;
+            taskElementRef.current = null;
+            targetPositionRef.current = null;
+            currentPositionRef.current = null;
 
             // Remove global event listeners
             document.removeEventListener("mouseup", handleMouseUp);
@@ -565,12 +741,17 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
-    // Clean up event listeners on unmount
+    // Clean up event listeners and animations on unmount
     useEffect(() => {
         return () => {
             document.removeEventListener("mouseup", handleMouseUp);
             document.removeEventListener("mousemove", handleMouseMove as unknown as EventListener);
             stopAutoScroll();
+
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
         };
     }, []);
 
@@ -633,6 +814,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
                                     onMouseEnter={handleTaskMouseEnter}
                                     onMouseLeave={handleTaskMouseLeave}
                                     onClick={handleTaskClick}
+                                    renderTask={renderTask}
+                                    getTaskColor={getTaskColor}
                                 />
                             );
                         } catch (error) {
@@ -658,6 +841,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     instanceId={instanceId.current}
                     className={tooltipClassName}
                     viewMode={viewMode}
+                    renderTooltip={renderTooltip}
                 />
             )}
         </div>

@@ -34,8 +34,7 @@ interface TaskItemProps {
  * TaskItem Component
  *
  * Renders a single task bar in the Gantt chart
- * Supports dragging, resizing, and progress display
- * Now with custom rendering capabilities
+ * Enhanced with smoother animations and transitions
  */
 declare const TaskItem: React.FC<TaskItemProps>;
 export default TaskItem;

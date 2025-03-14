@@ -81,6 +81,7 @@ export interface GanttChartProps {
     showViewModeSelector?: boolean;
     smoothDragging?: boolean;
     movementThreshold?: number;
+    animationSpeed?: number;
     renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
     renderTask?: (props: TaskRenderProps) => React.ReactNode;
     renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
@@ -112,9 +113,11 @@ export interface TaskRowProps {
     tooltipClassName?: string;
     smoothDragging?: boolean;
     movementThreshold?: number;
+    animationSpeed?: number;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
+    onAutoScrollChange?: (isScrolling: boolean) => void;
     viewMode?: ViewMode;
     scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
     renderTask?: (props: TaskRenderProps) => React.ReactNode;
@@ -160,6 +163,7 @@ export interface TaskItemProps {
         borderColor?: string;
         textColor?: string;
     };
+    renderTask?: (props: TaskRenderProps) => React.ReactNode;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -181,6 +185,7 @@ export interface TooltipProps {
     instanceId: string;
     className?: string;
     viewMode?: ViewMode;
+    renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
 }
 export interface TodayMarkerProps {
     currentMonthIndex: number;

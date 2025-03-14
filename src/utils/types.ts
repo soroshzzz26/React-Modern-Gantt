@@ -89,9 +89,10 @@ export interface GanttChartProps {
     locale?: string;
     styles?: GanttStyles;
     viewMode?: ViewMode;
-    showViewModeSelector?: boolean; // New prop to control ViewModeSelector visibility
-    smoothDragging?: boolean; // New prop to control smooth dragging
+    showViewModeSelector?: boolean; // Control ViewModeSelector visibility
+    smoothDragging?: boolean; // Enable smooth dragging
     movementThreshold?: number; // Movement threshold to reduce jiggling
+    animationSpeed?: number; // Control animation speed (0-1)
 
     // Custom rendering functions
     renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
@@ -129,11 +130,13 @@ export interface TaskRowProps {
     showProgress?: boolean;
     className?: string;
     tooltipClassName?: string;
-    smoothDragging?: boolean; // New prop to control smooth dragging
-    movementThreshold?: number; // New prop for movement threshold
+    smoothDragging?: boolean; // Enable smooth dragging (except for day view)
+    movementThreshold?: number; // Movement threshold for jitter prevention
+    animationSpeed?: number; // Control animation speed (0.1-1)
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
+    onAutoScrollChange?: (isScrolling: boolean) => void; // Handler for auto-scrolling state
     viewMode?: ViewMode;
     scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
 
@@ -184,6 +187,7 @@ export interface TaskItemProps {
         borderColor?: string;
         textColor?: string;
     };
+    renderTask?: (props: TaskRenderProps) => React.ReactNode;
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -203,6 +207,7 @@ export interface TooltipProps {
     instanceId: string;
     className?: string;
     viewMode?: ViewMode;
+    renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
 }
 
 export interface TodayMarkerProps {

@@ -1,6 +1,6 @@
 /**
- * React Modern Gantt CSS
- * Core theme system using CSS variables and Tailwind
+ * React Modern Gantt CSS Enhancements
+ * Improved styles for smoother interactions and animations
  */
 
 :root {
@@ -19,8 +19,17 @@
     --rmg-progress-bg: rgba(0, 0, 0, 0.2);
     --rmg-progress-fill: #ffffff;
     --rmg-shadow: rgba(0, 0, 0, 0.1);
+    --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
+    --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
     --gantt-month-width: 150px;
     --gantt-row-height: 40px;
+
+    /* Animation variables */
+    --rmg-task-hover-transition: transform 0.15s cubic-bezier(0.2, 0, 0.13, 2),
+        box-shadow 0.15s cubic-bezier(0.2, 0, 0.13, 2);
+    --rmg-task-drag-transition: transform 0.05s cubic-bezier(0.2, 0, 0.13, 2),
+        box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
+    --rmg-task-release-transition: all 0.2s cubic-bezier(0.2, 0, 0.13, 2);
 }
 
 .dark {
@@ -39,161 +48,132 @@
     --rmg-progress-bg: rgba(0, 0, 0, 0.3);
     --rmg-progress-fill: #e5e7eb;
     --rmg-shadow: rgba(0, 0, 0, 0.3);
+    --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
+    --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
 }
 
-/* Utility classes that map to CSS variables */
-.bg-gantt-bg {
-    background-color: var(--rmg-bg);
-}
-.text-gantt-text {
-    color: var(--rmg-text);
-}
-.border-gantt-border {
-    border-color: var(--rmg-border);
-}
-.bg-gantt-highlight {
-    background-color: var(--rmg-highlight);
-}
-.bg-gantt-marker {
-    background-color: var(--rmg-marker);
-}
-.bg-gantt-task {
-    background-color: var(--rmg-task);
-}
-.text-gantt-task-text {
-    color: var(--rmg-task-text);
+/* Hover and active states for task items */
+[data-task-id]:not([data-dragging="true"]) {
+    transition: var(--rmg-task-hover-transition);
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
-/* Tooltip specific classes */
+[data-task-id]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px var(--rmg-shadow-hover);
+    z-index: 20;
+}
+
+[data-task-id][data-dragging="true"] {
+    transition: var(--rmg-task-drag-transition);
+    z-index: 100;
+    cursor: grabbing;
+    box-shadow: 0 5px 15px var(--rmg-shadow-drag);
+    opacity: 0.95;
+}
+
+/* Improve tooltip animations */
 .rmg-task-tooltip {
-    background-color: var(--rmg-tooltip-bg);
-    color: var(--rmg-tooltip-text);
-    border-color: var(--rmg-tooltip-border);
-    box-shadow: 0 2px 8px var(--rmg-shadow);
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
 }
 
-/* Pre-defined task color classes */
-.bg-task-blue {
-    @apply bg-blue-500 dark:bg-blue-600;
+.rmg-task-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.bg-task-green {
-    @apply bg-emerald-500 dark:bg-emerald-600;
-}
-
-.bg-task-purple {
-    @apply bg-purple-500 dark:bg-purple-600;
-}
-
-.bg-task-orange {
-    @apply bg-orange-500 dark:bg-orange-600;
-}
-
-.bg-task-amber {
-    @apply bg-amber-500 dark:bg-amber-600;
-}
-
-.bg-task-indigo {
-    @apply bg-indigo-500 dark:bg-indigo-600;
-}
-
-.bg-task-cyan {
-    @apply bg-cyan-500 dark:bg-cyan-600;
-}
-
-.bg-task-pink {
-    @apply bg-pink-500 dark:bg-pink-600;
-}
-
-.bg-task-red {
-    @apply bg-red-500 dark:bg-red-600;
-}
-
-.bg-task-gray {
-    @apply bg-gray-500 dark:bg-gray-600;
-}
-
-/* Core component styles */
-.rmg-gantt-chart {
-    --gantt-row-height: 40px;
-    --gantt-month-width: 150px;
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    line-height: 1.5;
-}
-
-/* Make sure month widths are consistent across the component */
-.w-\[var\(--gantt-month-width\)\] {
-    width: var(--gantt-month-width);
-}
-
-.rmg-resize-handle {
-    background-color: var(--rmg-resize-handle);
-}
-
-.rmg-progress-bar {
+/* Improve progress bar appearance */
+.rmg-task-progress {
+    position: absolute;
+    bottom: 3px;
+    left: 3px;
+    right: 3px;
+    height: 3px;
     background-color: var(--rmg-progress-bg);
+    border-radius: 4px;
+    overflow: hidden;
 }
 
-.rmg-progress-fill {
+.rmg-task-progress-fill {
+    height: 100%;
     background-color: var(--rmg-progress-fill);
+    border-radius: 4px;
+    transition: width 0.3s ease-out;
 }
 
-/* Animation for task movement */
-@keyframes task-update {
+/* Timeline hover effect */
+.rmg-timeline-unit:hover {
+    background-color: var(--rmg-highlight);
+    transition: background-color 0.15s ease;
+}
+
+/* Resize handles hover effect */
+.rmg-resize-handle {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+[data-task-id]:hover .rmg-resize-handle {
+    opacity: 1;
+}
+
+/* Hardware acceleration for smoother animations */
+.rmg-gantt-chart {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Add subtle pulse animation to today marker */
+.rmg-today-marker {
+    animation: pulse 3s infinite ease-in-out;
+}
+
+@keyframes pulse {
     0% {
-        transform: scale(0.98);
         opacity: 0.8;
     }
-    100% {
-        transform: scale(1);
+    50% {
         opacity: 1;
+    }
+    100% {
+        opacity: 0.8;
+    }
+}
+
+/* Add a smooth transition for update flash */
+@keyframes update-flash {
+    0% {
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0);
     }
 }
 
 .rmg-task-updated {
-    animation: task-update 0.3s ease-out;
+    animation: update-flash 1s cubic-bezier(0.2, 0, 0.13, 2);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    :root {
-        --gantt-month-width: 120px;
-    }
-}
-
-@media (max-width: 480px) {
-    :root {
-        --gantt-month-width: 100px;
-    }
-}
-
-/**
- * Additional styles for task dragging with smooth transitions
- */
-
-/* Add transition for smoother task movement */
-.rmg-gantt-task-item {
-    transition: box-shadow 0.2s ease;
-}
-
-/* Style for tasks while being dragged */
-.rmg-task-dragging {
-    /* Disable transition for direct dragging */
-    transition: none !important;
-    /* Elevated appearance */
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
-    z-index: 100 !important;
-    opacity: 0.95;
-    cursor: grabbing !important;
-}
-
-/* Add a helper class for smooth transition when auto-scrolling */
-.rmg-autoscroll-active .rmg-timeline {
+/* Smooth scrolling for container */
+.rmg-gantt-scroll-container {
     scroll-behavior: smooth;
 }
 
-/* Reduce jitter by using hardware acceleration for tasks */
-.rmg-gantt-task-item {
-    transform: translateZ(0);
-    will-change: left, width;
+/* Utility class for when auto-scrolling is active */
+.rmg-auto-scrolling {
+    scroll-behavior: auto !important;
+}
+
+/* Improved task appearance */
+[data-task-id] {
+    box-shadow: 0 1px 3px var(--rmg-shadow);
+    border-radius: 4px;
 }

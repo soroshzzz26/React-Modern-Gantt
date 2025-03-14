@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Task, TaskColorProps } from "../utils/types";
 
 interface TaskItemProps {
@@ -36,8 +36,7 @@ interface TaskItemProps {
  * TaskItem Component
  *
  * Renders a single task bar in the Gantt chart
- * Supports dragging, resizing, and progress display
- * Now with custom rendering capabilities
+ * Enhanced with smoother animations and transitions
  */
 const TaskItem: React.FC<TaskItemProps> = ({
     task,
@@ -58,6 +57,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
 }) => {
     // Show handles only when hovered or dragging and in edit mode
     const showHandles = (isHovered || isDragging) && editMode;
+    const taskRef = useRef<HTMLDivElement>(null);
+    const wasUpdated = useRef<boolean>(false);
+    const prevLeft = useRef<number>(leftPx);
+    const prevWidth = useRef<number>(widthPx);
 
     if (!task || !task.id) {
         console.warn("TaskItem: Invalid task data", task);
@@ -87,6 +90,31 @@ const TaskItem: React.FC<TaskItemProps> = ({
         onMouseDown(e, task, "resize-right");
     };
 
+    // Check if task was updated for visual feedback
+    useEffect(() => {
+        // Track if the task position was updated
+        if (taskRef.current && (prevLeft.current !== leftPx || prevWidth.current !== widthPx)) {
+            wasUpdated.current = true;
+
+            // Add updated class for visual feedback
+            taskRef.current.classList.add("rmg-task-updated");
+
+            // Remove class after animation completes
+            const timeout = setTimeout(() => {
+                if (taskRef.current) {
+                    taskRef.current.classList.remove("rmg-task-updated");
+                }
+                wasUpdated.current = false;
+            }, 1000);
+
+            // Update refs
+            prevLeft.current = leftPx;
+            prevWidth.current = widthPx;
+
+            return () => clearTimeout(timeout);
+        }
+    }, [leftPx, widthPx]);
+
     // Use custom render function if provided
     if (renderTask) {
         const customTaskContent = renderTask({
@@ -102,6 +130,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
         return (
             <div
+                ref={taskRef}
                 className="absolute"
                 style={{
                     left: `${Math.max(0, leftPx)}px`,
@@ -114,7 +143,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
                 onMouseLeave={onMouseLeave}
                 data-testid={`task-${task.id}`}
                 data-task-id={task.id}
-                data-instance-id={instanceId}>
+                data-instance-id={instanceId}
+                data-dragging={isDragging ? "true" : "false"}>
                 {customTaskContent}
             </div>
         );
@@ -133,15 +163,18 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
     return (
         <div
+            ref={taskRef}
             className={`absolute h-8 rounded ${bgColorClass} ${borderColorClass} ${textColor} flex items-center px-2 text-xs font-medium ${
                 editMode ? "cursor-move" : "cursor-pointer"
-            }`}
+            } ${isDragging ? "shadow-lg" : ""}`}
             style={{
                 left: `${Math.max(0, leftPx)}px`,
                 width: `${Math.max(20, widthPx)}px`,
                 top: `${topPx}px`,
                 ...bgColorStyle,
                 ...borderColorStyle,
+                // Add will-change for better performance during animations
+                willChange: isDragging ? "transform, left, width" : "auto",
             }}
             onClick={e => onClick(e, task)}
             onMouseDown={e => onMouseDown(e, task, "move")}
@@ -149,11 +182,12 @@ const TaskItem: React.FC<TaskItemProps> = ({
             onMouseLeave={onMouseLeave}
             data-testid={`task-${task.id}`}
             data-task-id={task.id}
-            data-instance-id={instanceId}>
+            data-instance-id={instanceId}
+            data-dragging={isDragging ? "true" : "false"}>
             {/* Left resize handle */}
             {showHandles && (
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l"
+                    className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l rmg-resize-handle"
                     onMouseDown={handleResizeLeft}
                 />
             )}
@@ -174,7 +208,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             {/* Right resize handle */}
             {showHandles && (
                 <div
-                    className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r"
+                    className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r rmg-resize-handle"
                     onMouseDown={handleResizeRight}
                 />
             )}

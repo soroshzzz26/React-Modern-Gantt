@@ -18,16 +18,7 @@ import "../styles/gantt.css";
  * GanttChart Component with ViewMode support
  *
  * A modern, customizable Gantt chart for project timelines
- * Supports different view modes while maintaining precise task positioning
- *
- * @example
- * // Basic usage with view mode
- * <GanttChart
- *   tasks={tasks}
- *   onTaskUpdate={handleUpdate}
- *   showProgress={true}
- *   viewMode={ViewMode.WEEK}
- * />
+ * Enhanced with smooth dragging and animations
  */
 const GanttChart: React.FC<GanttChartProps> = ({
     tasks = [],
@@ -43,10 +34,11 @@ const GanttChart: React.FC<GanttChartProps> = ({
     darkMode = false,
     locale = "default",
     styles = {},
-    viewMode = ViewMode.MONTH, // Default view mode is month
-    showViewModeSelector = true, // New prop to control visibility of view mode selector
-    smoothDragging = true, // New prop to control smooth dragging in TaskRow
-    movementThreshold = 3, // New prop for drag movement threshold
+    viewMode = ViewMode.MONTH,
+    showViewModeSelector = true,
+    smoothDragging = true,
+    movementThreshold = 3,
+    animationSpeed = 0.25, // New prop for controlling animation speed (0-1)
 
     // Component render functions
     renderTaskList,
@@ -76,6 +68,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     const [activeViewMode, setActiveViewMode] = useState<ViewMode>(viewMode);
     const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
     const [viewUnitWidth, setViewUnitWidth] = useState<number>(150); // Default width for a month
+    const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(false);
 
     // Calculate timeline bounds
     const derivedStartDate = customStartDate || findEarliestDate(tasks);
@@ -202,6 +195,18 @@ const GanttChart: React.FC<GanttChartProps> = ({
 
     const currentUnitIndex = getCurrentUnitIndex();
 
+    // Handle auto-scrolling state
+    const handleAutoScrollingChange = (isScrolling: boolean) => {
+        setIsAutoScrolling(isScrolling);
+        if (scrollContainerRef.current) {
+            if (isScrolling) {
+                scrollContainerRef.current.classList.add("rmg-auto-scrolling");
+            } else {
+                scrollContainerRef.current.classList.remove("rmg-auto-scrolling");
+            }
+        }
+    };
+
     // Calculate total height based on task rows
     const getTotalHeight = () => {
         let height = 0;
@@ -299,6 +304,14 @@ const GanttChart: React.FC<GanttChartProps> = ({
         handleViewModeChange(viewMode);
     }, [viewMode]);
 
+    // Apply custom animation speed to CSS variables
+    useEffect(() => {
+        if (containerRef.current) {
+            const speedValue = Math.max(0.1, Math.min(1, animationSpeed || 0.25));
+            containerRef.current.style.setProperty("--rmg-animation-speed", speedValue.toString());
+        }
+    }, [animationSpeed, containerRef.current]);
+
     const style: React.CSSProperties = {
         fontSize: fontSize || "inherit",
     };
@@ -369,7 +382,11 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 )}
 
                 {/* Timeline and Tasks (right content) */}
-                <div ref={scrollContainerRef} className="flex-grow overflow-x-auto">
+                <div
+                    ref={scrollContainerRef}
+                    className={`flex-grow overflow-x-auto rmg-gantt-scroll-container ${
+                        isAutoScrolling ? "rmg-auto-scrolling" : ""
+                    }`}>
                     <div className="min-w-max">
                         {/* Timeline header */}
                         <Timeline
@@ -412,12 +429,14 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                         onTaskUpdate={handleTaskUpdate}
                                         onTaskClick={handleTaskClick}
                                         onTaskSelect={handleTaskSelect}
+                                        onAutoScrollChange={handleAutoScrollingChange}
                                         className={mergedStyles.taskRow}
                                         tooltipClassName={mergedStyles.tooltip}
                                         viewMode={activeViewMode}
                                         scrollContainerRef={scrollContainerRef}
                                         smoothDragging={smoothDragging}
                                         movementThreshold={movementThreshold}
+                                        animationSpeed={animationSpeed}
                                         // Pass down custom render props
                                         renderTask={renderTask}
                                         renderTooltip={renderTooltip}
