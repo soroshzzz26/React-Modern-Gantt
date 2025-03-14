@@ -1,5 +1,5 @@
 import React from "react";
-import { Task } from "../utils/types";
+import { Task, TaskColorProps } from "../utils/types";
 
 interface TaskItemProps {
     task: Task;
@@ -11,6 +11,21 @@ interface TaskItemProps {
     editMode: boolean;
     showProgress?: boolean;
     instanceId: string;
+    renderTask?: (props: {
+        task: Task;
+        leftPx: number;
+        widthPx: number;
+        topPx: number;
+        isHovered: boolean;
+        isDragging: boolean;
+        editMode: boolean;
+        showProgress?: boolean;
+    }) => React.ReactNode;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -22,6 +37,7 @@ interface TaskItemProps {
  *
  * Renders a single task bar in the Gantt chart
  * Supports dragging, resizing, and progress display
+ * Now with custom rendering capabilities
  */
 const TaskItem: React.FC<TaskItemProps> = ({
     task,
@@ -33,6 +49,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
     editMode,
     showProgress = false,
     instanceId,
+    renderTask,
+    getTaskColor,
     onMouseDown,
     onMouseEnter,
     onMouseLeave,
@@ -46,8 +64,17 @@ const TaskItem: React.FC<TaskItemProps> = ({
         return null;
     }
 
-    // Get task color or default to gantt-task CSS variable
-    const taskColorClass = task.color || "bg-gantt-task";
+    // Get task colors - either from custom function or default
+    let backgroundColor = task.color || "bg-gantt-task";
+    let borderColor = "";
+    let textColor = "text-gantt-task-text";
+
+    if (getTaskColor) {
+        const colors = getTaskColor({ task, isHovered, isDragging });
+        backgroundColor = colors.backgroundColor;
+        borderColor = colors.borderColor || "";
+        textColor = colors.textColor || textColor;
+    }
 
     // Handle resize interactions
     const handleResizeLeft = (e: React.MouseEvent) => {
@@ -60,15 +87,61 @@ const TaskItem: React.FC<TaskItemProps> = ({
         onMouseDown(e, task, "resize-right");
     };
 
+    // Use custom render function if provided
+    if (renderTask) {
+        const customTaskContent = renderTask({
+            task,
+            leftPx,
+            widthPx,
+            topPx,
+            isHovered,
+            isDragging,
+            editMode,
+            showProgress,
+        });
+
+        return (
+            <div
+                className="absolute"
+                style={{
+                    left: `${Math.max(0, leftPx)}px`,
+                    width: `${Math.max(20, widthPx)}px`,
+                    top: `${topPx}px`,
+                }}
+                onClick={e => onClick(e, task)}
+                onMouseDown={e => onMouseDown(e, task, "move")}
+                onMouseEnter={e => onMouseEnter(e, task)}
+                onMouseLeave={onMouseLeave}
+                data-testid={`task-${task.id}`}
+                data-task-id={task.id}
+                data-instance-id={instanceId}>
+                {customTaskContent}
+            </div>
+        );
+    }
+
+    // Calculate if we need to apply the background color as a class or inline style
+    const bgColorStyle = backgroundColor.startsWith("bg-") ? {} : { backgroundColor };
+    const bgColorClass = backgroundColor.startsWith("bg-") ? backgroundColor : "";
+
+    const borderColorStyle = borderColor
+        ? borderColor.startsWith("border-")
+            ? {}
+            : { borderColor, borderWidth: "1px" }
+        : {};
+    const borderColorClass = borderColor && borderColor.startsWith("border-") ? borderColor : "";
+
     return (
         <div
-            className={`absolute h-8 rounded ${taskColorClass} flex items-center px-2 text-xs text-gantt-task-text font-medium ${
+            className={`absolute h-8 rounded ${bgColorClass} ${borderColorClass} ${textColor} flex items-center px-2 text-xs font-medium ${
                 editMode ? "cursor-move" : "cursor-pointer"
             }`}
             style={{
                 left: `${Math.max(0, leftPx)}px`,
                 width: `${Math.max(20, widthPx)}px`,
                 top: `${topPx}px`,
+                ...bgColorStyle,
+                ...borderColorStyle,
             }}
             onClick={e => onClick(e, task)}
             onMouseDown={e => onMouseDown(e, task, "move")}

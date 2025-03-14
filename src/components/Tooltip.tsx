@@ -1,5 +1,5 @@
 import React from "react";
-import { Task, ViewMode } from "../utils/types";
+import { Task, ViewMode, TooltipRenderProps } from "../utils/types";
 import { TaskManager } from "../utils/TaskManager";
 import { TooltipProps } from "../utils/types";
 import { format } from "date-fns";
@@ -9,8 +9,13 @@ import { format } from "date-fns";
  *
  * Displays a tooltip with task information
  * Adapts date display based on view mode
+ * Now supports custom rendering
  */
-const Tooltip: React.FC<TooltipProps> = ({
+const Tooltip: React.FC<
+    TooltipProps & {
+        renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
+    }
+> = ({
     task,
     position,
     dragType,
@@ -23,6 +28,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     instanceId,
     className = "",
     viewMode = ViewMode.MONTH,
+    renderTooltip,
 }) => {
     // Default values
     let displayStartDate = task.startDate;
@@ -86,6 +92,28 @@ const Tooltip: React.FC<TooltipProps> = ({
 
     const actionText = getActionText();
 
+    // Use custom rendering if provided
+    if (renderTooltip) {
+        return (
+            <div
+                className={`rmg-task-tooltip absolute z-20 ${className}`}
+                style={{
+                    left: `${position.x}px`,
+                    top: `${position.y - 40}px`,
+                }}>
+                {renderTooltip({
+                    task,
+                    position,
+                    dragType,
+                    startDate: displayStartDate,
+                    endDate: displayEndDate,
+                    viewMode,
+                })}
+            </div>
+        );
+    }
+
+    // Default tooltip rendering
     return (
         <div
             className={`rmg-task-tooltip absolute z-20 bg-[var(--rmg-tooltip-bg,#ffffff)] text-[var(--rmg-tooltip-text,#1f2937)] border border-[var(--rmg-tooltip-border,#e5e7eb)] rounded-md shadow-md p-2 text-xs select-none ${className}`}

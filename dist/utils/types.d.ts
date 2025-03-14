@@ -31,6 +31,38 @@ export interface GanttStyles {
     taskItem?: string;
     tooltip?: string;
 }
+export interface TaskListRenderProps {
+    tasks: TaskGroup[];
+    headerLabel?: string;
+    onGroupClick?: (group: TaskGroup) => void;
+    viewMode: ViewMode;
+}
+export interface TaskRenderProps {
+    task: Task;
+    leftPx: number;
+    widthPx: number;
+    topPx: number;
+    isHovered: boolean;
+    isDragging: boolean;
+    editMode: boolean;
+    showProgress?: boolean;
+}
+export interface TooltipRenderProps {
+    task: Task;
+    position: {
+        x: number;
+        y: number;
+    };
+    dragType: "move" | "resize-left" | "resize-right" | null;
+    startDate: Date;
+    endDate: Date;
+    viewMode: ViewMode;
+}
+export interface TaskColorProps {
+    task: Task;
+    isHovered: boolean;
+    isDragging: boolean;
+}
 export interface GanttChartProps {
     tasks: TaskGroup[];
     startDate?: Date;
@@ -46,6 +78,17 @@ export interface GanttChartProps {
     locale?: string;
     styles?: GanttStyles;
     viewMode?: ViewMode;
+    showViewModeSelector?: boolean;
+    smoothDragging?: boolean;
+    movementThreshold?: number;
+    renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
+    renderTask?: (props: TaskRenderProps) => React.ReactNode;
+    renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
@@ -67,11 +110,20 @@ export interface TaskRowProps {
     showProgress?: boolean;
     className?: string;
     tooltipClassName?: string;
+    smoothDragging?: boolean;
+    movementThreshold?: number;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     viewMode?: ViewMode;
     scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
+    renderTask?: (props: TaskRenderProps) => React.ReactNode;
+    renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
 }
 export interface TaskListProps {
     tasks: TaskGroup[];
@@ -82,6 +134,7 @@ export interface TaskListProps {
     rowHeight?: number;
     className?: string;
     onGroupClick?: (group: TaskGroup) => void;
+    viewMode?: ViewMode;
 }
 export interface TimelineProps {
     months: Date[];
@@ -102,6 +155,11 @@ export interface TaskItemProps {
     showProgress?: boolean;
     instanceId: string;
     className?: string;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;

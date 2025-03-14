@@ -44,6 +44,15 @@ const GanttChart: React.FC<GanttChartProps> = ({
     locale = "default",
     styles = {},
     viewMode = ViewMode.MONTH, // Default view mode is month
+    showViewModeSelector = true, // New prop to control visibility of view mode selector
+    smoothDragging = true, // New prop to control smooth dragging in TaskRow
+    movementThreshold = 3, // New prop for drag movement threshold
+
+    // Component render functions
+    renderTaskList,
+    renderTask,
+    renderTooltip,
+    getTaskColor,
 
     // Core event handlers
     onTaskUpdate,
@@ -53,6 +62,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     onTaskSelect,
     onTaskDoubleClick,
     onGroupClick,
+    onViewModeChange,
 
     // Visual customization
     fontSize,
@@ -277,6 +287,11 @@ const GanttChart: React.FC<GanttChartProps> = ({
             default:
                 setViewUnitWidth(150);
         }
+
+        // Call the external handler if provided
+        if (onViewModeChange) {
+            onViewModeChange(newMode);
+        }
     };
 
     // Initialize view mode
@@ -321,26 +336,37 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 <div className="flex justify-between items-center">
                     <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
 
-                    {/* View Mode Selector */}
-                    <div className="flex space-x-2">
-                        <ViewModeSelector
-                            activeMode={activeViewMode}
-                            onChange={handleViewModeChange}
-                            darkMode={darkMode}
-                        />
-                    </div>
+                    {/* View Mode Selector - conditionally rendered based on showViewModeSelector prop */}
+                    {showViewModeSelector && (
+                        <div className="flex space-x-2">
+                            <ViewModeSelector
+                                activeMode={activeViewMode}
+                                onChange={handleViewModeChange}
+                                darkMode={darkMode}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 
             <div className="relative flex">
-                {/* Task List (left sidebar) */}
-                <TaskList
-                    tasks={tasks}
-                    headerLabel={headerLabel}
-                    onGroupClick={onGroupClick}
-                    className={mergedStyles.taskList}
-                    viewMode={activeViewMode}
-                />
+                {/* Task List (left sidebar) - conditionally use custom render function if provided */}
+                {renderTaskList ? (
+                    renderTaskList({
+                        tasks,
+                        headerLabel,
+                        onGroupClick,
+                        viewMode: activeViewMode,
+                    })
+                ) : (
+                    <TaskList
+                        tasks={tasks}
+                        headerLabel={headerLabel}
+                        onGroupClick={onGroupClick}
+                        className={mergedStyles.taskList}
+                        viewMode={activeViewMode}
+                    />
+                )}
 
                 {/* Timeline and Tasks (right content) */}
                 <div ref={scrollContainerRef} className="flex-grow overflow-x-auto">
@@ -389,7 +415,13 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                         className={mergedStyles.taskRow}
                                         tooltipClassName={mergedStyles.tooltip}
                                         viewMode={activeViewMode}
-                                        scrollContainerRef={scrollContainerRef} // Pass the scroll container ref
+                                        scrollContainerRef={scrollContainerRef}
+                                        smoothDragging={smoothDragging}
+                                        movementThreshold={movementThreshold}
+                                        // Pass down custom render props
+                                        renderTask={renderTask}
+                                        renderTooltip={renderTooltip}
+                                        getTaskColor={getTaskColor}
                                     />
                                 );
                             })}

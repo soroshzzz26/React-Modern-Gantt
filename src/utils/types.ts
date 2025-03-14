@@ -39,6 +39,40 @@ export interface GanttStyles {
     tooltip?: string;
 }
 
+// Custom render function types
+export interface TaskListRenderProps {
+    tasks: TaskGroup[];
+    headerLabel?: string;
+    onGroupClick?: (group: TaskGroup) => void;
+    viewMode: ViewMode;
+}
+
+export interface TaskRenderProps {
+    task: Task;
+    leftPx: number;
+    widthPx: number;
+    topPx: number;
+    isHovered: boolean;
+    isDragging: boolean;
+    editMode: boolean;
+    showProgress?: boolean;
+}
+
+export interface TooltipRenderProps {
+    task: Task;
+    position: { x: number; y: number };
+    dragType: "move" | "resize-left" | "resize-right" | null;
+    startDate: Date;
+    endDate: Date;
+    viewMode: ViewMode;
+}
+
+export interface TaskColorProps {
+    task: Task;
+    isHovered: boolean;
+    isDragging: boolean;
+}
+
 // Main component props
 export interface GanttChartProps {
     tasks: TaskGroup[];
@@ -55,6 +89,19 @@ export interface GanttChartProps {
     locale?: string;
     styles?: GanttStyles;
     viewMode?: ViewMode;
+    showViewModeSelector?: boolean; // New prop to control ViewModeSelector visibility
+    smoothDragging?: boolean; // New prop to control smooth dragging
+    movementThreshold?: number; // Movement threshold to reduce jiggling
+
+    // Custom rendering functions
+    renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
+    renderTask?: (props: TaskRenderProps) => React.ReactNode;
+    renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
 
     // Event handlers
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
@@ -82,11 +129,22 @@ export interface TaskRowProps {
     showProgress?: boolean;
     className?: string;
     tooltipClassName?: string;
+    smoothDragging?: boolean; // New prop to control smooth dragging
+    movementThreshold?: number; // New prop for movement threshold
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
     viewMode?: ViewMode;
     scrollContainerRef?: React.RefObject<HTMLDivElement> | null;
+
+    // Custom render functions
+    renderTask?: (props: TaskRenderProps) => React.ReactNode;
+    renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
 }
 
 export interface TaskListProps {
@@ -98,6 +156,7 @@ export interface TaskListProps {
     rowHeight?: number;
     className?: string;
     onGroupClick?: (group: TaskGroup) => void;
+    viewMode?: ViewMode;
 }
 
 export interface TimelineProps {
@@ -120,6 +179,11 @@ export interface TaskItemProps {
     showProgress?: boolean;
     instanceId: string;
     className?: string;
+    getTaskColor?: (props: TaskColorProps) => {
+        backgroundColor: string;
+        borderColor?: string;
+        textColor?: string;
+    };
     onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
@@ -138,7 +202,7 @@ export interface TooltipProps {
     showProgress?: boolean;
     instanceId: string;
     className?: string;
-    viewMode?: ViewMode; // Added viewMode prop
+    viewMode?: ViewMode;
 }
 
 export interface TodayMarkerProps {
@@ -148,8 +212,8 @@ export interface TodayMarkerProps {
     dayOfMonth?: number;
     className?: string;
     markerClass?: string;
-    viewMode?: ViewMode; // Added viewMode prop
-    unitWidth?: number; // Added unitWidth prop
+    viewMode?: ViewMode;
+    unitWidth?: number;
 }
 
 // View Mode enum
