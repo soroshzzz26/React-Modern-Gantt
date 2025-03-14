@@ -1,34 +1,9 @@
-import { Task, ViewMode } from "./types";
-import {
-    differenceInDays,
-    differenceInWeeks,
-    differenceInMonths,
-    differenceInQuarters,
-    differenceInYears,
-    addDays,
-    startOfDay,
-    endOfDay,
-    startOfWeek,
-    endOfWeek,
-    startOfMonth,
-    endOfMonth,
-    startOfQuarter,
-    endOfQuarter,
-    startOfYear,
-    endOfYear,
-    isWithinInterval,
-} from "date-fns";
+import { Task, ViewMode } from "@/types";
+import { startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
-/**
- * TaskManager with ViewMode support
- *
- * Manages operations on tasks like calculating positions, dates, etc.
- * Supports different view modes (day, week, month, quarter, year)
- */
-export class TaskManager {
+export class TaskService {
     /**
      * Calculate the new dates for a task based on pixel position
-     * Takes view mode into account
      */
     public static calculateDatesFromPosition(
         left: number,
@@ -103,11 +78,11 @@ export class TaskManager {
             };
         }
     }
+
     /**
      * Create an updated task with new dates
      */
     public static createUpdatedTask(task: Task, newStartDate: Date, newEndDate: Date): Task {
-        // Create a clean copy with all original properties
         return {
             ...task,
             startDate: new Date(newStartDate),
@@ -117,7 +92,6 @@ export class TaskManager {
 
     /**
      * Calculates position and width for a task in pixels
-     * Takes view mode into account
      */
     public static calculateTaskPixelPosition(
         task: Task,
@@ -128,7 +102,6 @@ export class TaskManager {
         viewMode: ViewMode = ViewMode.MONTH
     ): { leftPx: number; widthPx: number } {
         try {
-            // Ensure we have valid dates
             if (!(task.startDate instanceof Date) || !(task.endDate instanceof Date)) {
                 throw new Error("Invalid dates in task");
             }
@@ -142,7 +115,6 @@ export class TaskManager {
             // Apply special handling for day view mode
             if (viewMode === ViewMode.DAY) {
                 // Ensure consistent day boundaries using midnight as reference
-                // This aligns with how days are generated in GanttChart
                 const startOfDayTime = new Date(
                     startDate.getFullYear(),
                     startDate.getMonth(),
@@ -209,22 +181,17 @@ export class TaskManager {
 
             // Add day view specific adjustments for proper alignment
             if (viewMode === ViewMode.DAY) {
-                // Fix the day offset issue by using proper rounding
-                // Round down to ensure we start at the beginning of the day cell
                 leftPx = Math.round(leftPx / unitWidth) * unitWidth;
-
-                // Ensure width spans full day units
                 widthPx = Math.max(unitWidth, Math.round(widthPx / unitWidth) * unitWidth);
             }
 
             // Apply view mode specific adjustments for minimum width
-            // Different view modes should have different minimum visible widths
             const minWidthByViewMode = {
-                [ViewMode.DAY]: 20, // Min width for day view
-                [ViewMode.WEEK]: 20, // Min width for week view
-                [ViewMode.MONTH]: 20, // Min width for month view
-                [ViewMode.QUARTER]: 30, // Min width for quarter view
-                [ViewMode.YEAR]: 40, // Min width for year view
+                [ViewMode.DAY]: 20,
+                [ViewMode.WEEK]: 20,
+                [ViewMode.MONTH]: 20,
+                [ViewMode.QUARTER]: 30,
+                [ViewMode.YEAR]: 40,
             };
 
             // Ensure minimum width
@@ -237,7 +204,7 @@ export class TaskManager {
 
             return { leftPx, widthPx };
         } catch (error) {
-            console.error("Error calculating task position:", error, task);
+            console.error("Error calculating task position:", error);
             // Return a default position as fallback
             return { leftPx: 0, widthPx: 20 };
         }
@@ -276,90 +243,6 @@ export class TaskManager {
         } catch (error) {
             console.error("Error getting live dates:", error);
             return { startDate: new Date(startDate), endDate: new Date(endDate) };
-        }
-    }
-
-    /**
-     * Format a date for display
-     */
-    public static formatDate(date: Date, locale: string = "default", viewMode: ViewMode = ViewMode.MONTH): string {
-        if (!(date instanceof Date) || isNaN(date.getTime())) {
-            return "Invalid date";
-        }
-
-        // Different formats based on view mode
-        let options: Intl.DateTimeFormatOptions;
-
-        switch (viewMode) {
-            case ViewMode.DAY:
-                options = { year: "numeric", month: "short", day: "numeric" };
-                break;
-            case ViewMode.WEEK:
-                options = { year: "numeric", month: "short", day: "numeric" };
-                break;
-            case ViewMode.MONTH:
-                options = { year: "numeric", month: "short", day: "numeric" };
-                break;
-            case ViewMode.QUARTER:
-                options = { year: "numeric", month: "short" };
-                break;
-            case ViewMode.YEAR:
-                options = { year: "numeric" };
-                break;
-            default:
-                options = { year: "numeric", month: "short", day: "numeric" };
-        }
-
-        return date.toLocaleDateString(locale, options);
-    }
-
-    /**
-     * Calculate duration between dates based on the view mode
-     */
-    public static getDuration(
-        start: Date,
-        end: Date,
-        viewMode: ViewMode = ViewMode.MONTH
-    ): { value: number; unit: string } {
-        try {
-            // Ensure dates are valid
-            if (!(start instanceof Date) || !(end instanceof Date) || isNaN(start.getTime()) || isNaN(end.getTime())) {
-                return { value: 0, unit: "days" };
-            }
-
-            // Handle dates in the wrong order
-            const earlierDate = start < end ? start : end;
-            const laterDate = start < end ? end : start;
-
-            // Calculate based on view mode
-            switch (viewMode) {
-                case ViewMode.DAY:
-                    const days = differenceInDays(laterDate, earlierDate) + 1;
-                    return { value: days, unit: days === 1 ? "day" : "days" };
-
-                case ViewMode.WEEK:
-                    const weeks = differenceInWeeks(laterDate, earlierDate) + 1;
-                    return { value: weeks, unit: weeks === 1 ? "week" : "weeks" };
-
-                case ViewMode.MONTH:
-                    const months = differenceInMonths(laterDate, earlierDate) + 1;
-                    return { value: months, unit: months === 1 ? "month" : "months" };
-
-                case ViewMode.QUARTER:
-                    const quarters = differenceInQuarters(laterDate, earlierDate) + 1;
-                    return { value: quarters, unit: quarters === 1 ? "quarter" : "quarters" };
-
-                case ViewMode.YEAR:
-                    const years = differenceInYears(laterDate, earlierDate) + 1;
-                    return { value: years, unit: years === 1 ? "year" : "years" };
-
-                default:
-                    const defaultDays = differenceInDays(laterDate, earlierDate) + 1;
-                    return { value: defaultDays, unit: defaultDays === 1 ? "day" : "days" };
-            }
-        } catch (error) {
-            console.error("Error calculating duration:", error);
-            return { value: 0, unit: "days" };
         }
     }
 

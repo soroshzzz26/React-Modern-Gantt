@@ -1,15 +1,12 @@
 import React from "react";
-import { Task, ViewMode, TooltipRenderProps } from "../utils/types";
-import { TaskManager } from "../utils/TaskManager";
-import { TooltipProps } from "../utils/types";
+import { ViewMode, TooltipRenderProps } from "@/types";
+import { TaskService } from "@/services";
+import { TooltipProps } from "@/types";
 import { format } from "date-fns";
+import { getDuration } from "@/utils/dateUtils";
 
 /**
- *  Tooltip Component
- *
- * Displays a tooltip with task information
- * Adapts date display based on view mode
- * Now supports custom rendering
+ * Tooltip Component - Shows task information on hover
  */
 const Tooltip: React.FC<
     TooltipProps & {
@@ -42,7 +39,7 @@ const Tooltip: React.FC<
         ) as HTMLElement;
 
         if (taskEl && (dragType || taskEl.style.left || taskEl.style.width)) {
-            const dates = TaskManager.getLiveDatesFromElement(
+            const dates = TaskService.getLiveDatesFromElement(
                 taskEl,
                 startDate,
                 endDate,
@@ -58,9 +55,9 @@ const Tooltip: React.FC<
     }
 
     // Calculate duration based on view mode
-    const duration = TaskManager.getDuration(displayStartDate, displayEndDate, viewMode);
+    const duration = getDuration(displayStartDate, displayEndDate, viewMode);
 
-    // Format dates based on view mode - Simplified to use a single format function
+    // Format dates based on view mode
     const formatDate = (date: Date) => {
         if (!(date instanceof Date) || isNaN(date.getTime())) {
             return "Invalid date";

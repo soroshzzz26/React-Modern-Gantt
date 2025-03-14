@@ -1,14 +1,9 @@
 import React from "react";
-import { TimelineProps, ViewMode } from "../utils/types";
+import { TimelineProps, ViewMode } from "@/types";
 import { format, getWeek, isValid } from "date-fns";
 
 /**
- * Timeline Component with hierarchical display
- *
- * Displays time headers for the Gantt chart based on the current view mode
- * Now supports a hierarchical display with two levels:
- * - Top level: Months/Years/Quarters
- * - Bottom level: Days/Weeks when appropriate
+ * Timeline Component with hierarchical display for different view modes
  */
 const Timeline: React.FC<TimelineProps> = ({
     months,
@@ -21,8 +16,7 @@ const Timeline: React.FC<TimelineProps> = ({
     // Get locale object for date-fns
     const getLocale = () => {
         if (locale === "default") return undefined;
-        // This is just a placeholder. In a real implementation,
-        // you would import and use locale objects from date-fns/locale
+        // This would use actual locale imports in a real implementation
         return undefined;
     };
 
@@ -32,21 +26,16 @@ const Timeline: React.FC<TimelineProps> = ({
 
         switch (viewMode) {
             case ViewMode.DAY:
-                // For day view, show day number and weekday for better clarity
                 return format(date, "d", { locale: getLocale() });
             case ViewMode.WEEK:
-                // For week view, use proper ISO week number from date-fns
                 const weekNum = getWeek(date);
                 return `W${weekNum}`;
             case ViewMode.MONTH:
-                // Format as "Jan 2023"
                 return format(date, "MMM yyyy", { locale: getLocale() });
             case ViewMode.QUARTER:
-                // Format as "Q1 2023"
                 const quarter = Math.floor(date.getMonth() / 3) + 1;
                 return `Q${quarter} ${date.getFullYear()}`;
             case ViewMode.YEAR:
-                // Format as "2023"
                 return date.getFullYear().toString();
             default:
                 return format(date, "MMM yyyy", { locale: getLocale() });
@@ -60,10 +49,8 @@ const Timeline: React.FC<TimelineProps> = ({
         switch (viewMode) {
             case ViewMode.DAY:
             case ViewMode.WEEK:
-                // For day/week views, show month and year
                 return format(date, "MMM yyyy", { locale: getLocale() });
             default:
-                // For other views, this isn't needed
                 return format(date, "MMM yyyy", { locale: getLocale() });
         }
     };
@@ -105,14 +92,6 @@ const Timeline: React.FC<TimelineProps> = ({
     // Determine CSS width property based on viewMode
     const timeUnitWidthClass = `w-[var(--gantt-unit-width)]`;
 
-    // Debug function to verify date alignment (can be removed in production)
-    const debugDate = (date: Date) => {
-        if (viewMode === ViewMode.DAY) {
-            return date.toISOString().slice(0, 10); // YYYY-MM-DD format
-        }
-        return "";
-    };
-
     return (
         <div
             className={`rmg-timeline ${className}`}
@@ -123,7 +102,7 @@ const Timeline: React.FC<TimelineProps> = ({
                     {higherLevelMonths.map((item, index) => (
                         <div
                             key={`higher-level-${index}`}
-                            className={`flex-shrink-0 p-2 font-semibold text-center text-gantt-text border-r border-gantt-border h-10`}
+                            className="flex-shrink-0 p-2 font-semibold text-center text-gantt-text border-r border-gantt-border h-10"
                             style={{ width: `${item.span * unitWidth}px` }}
                             data-timeunit-higher={item.date.toISOString()}>
                             {formatHigherLevelHeader(item.date)}
@@ -140,8 +119,7 @@ const Timeline: React.FC<TimelineProps> = ({
                         className={`${timeUnitWidthClass} flex-shrink-0 p-2 font-semibold text-center text-gantt-text ${
                             index === currentMonthIndex ? "bg-gantt-highlight" : ""
                         } ${needsHierarchicalDisplay ? "border-r border-gantt-border" : ""} h-10`}
-                        data-timeunit={timeUnit.toISOString()}
-                        data-date={debugDate(timeUnit)}>
+                        data-timeunit={timeUnit.toISOString()}>
                         {formatDateHeader(timeUnit)}
                     </div>
                 ))}

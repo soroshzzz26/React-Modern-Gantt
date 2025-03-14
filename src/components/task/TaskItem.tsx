@@ -1,44 +1,8 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Task, TaskColorProps } from "../utils/types";
-
-interface TaskItemProps {
-    task: Task;
-    leftPx: number;
-    widthPx: number;
-    topPx: number;
-    isHovered: boolean;
-    isDragging: boolean;
-    editMode: boolean;
-    showProgress?: boolean;
-    instanceId: string;
-    renderTask?: (props: {
-        task: Task;
-        leftPx: number;
-        widthPx: number;
-        topPx: number;
-        isHovered: boolean;
-        isDragging: boolean;
-        editMode: boolean;
-        showProgress?: boolean;
-    }) => React.ReactNode;
-    getTaskColor?: (props: TaskColorProps) => {
-        backgroundColor: string;
-        borderColor?: string;
-        textColor?: string;
-    };
-    onMouseDown: (event: React.MouseEvent, task: Task, type: "move" | "resize-left" | "resize-right") => void;
-    onMouseEnter: (event: React.MouseEvent, task: Task) => void;
-    onMouseLeave: () => void;
-    onClick: (event: React.MouseEvent, task: Task) => void;
-    onProgressUpdate?: (task: Task, newPercent: number) => void;
-}
+import React, { useRef, useEffect, useState, useCallback } from "react";
+import { TaskItemProps } from "@/types";
 
 /**
- * TaskItem Component
- *
- * Renders a single task bar in the Gantt chart
- * Enhanced with smoother animations and transitions
- * Added interactive progress bubble for adjusting task completion
+ * TaskItem Component - Renders an individual task bar in the Gantt chart
  */
 const TaskItem: React.FC<TaskItemProps> = ({
     task,
@@ -62,16 +26,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
     const showHandles = (isHovered || isDragging) && editMode;
     const taskRef = useRef<HTMLDivElement>(null);
     const progressBarRef = useRef<HTMLDivElement>(null);
-    const wasUpdated = useRef<boolean>(false);
-    const prevLeft = useRef<number>(leftPx);
-    const prevWidth = useRef<number>(widthPx);
-
-    // Progress dragging state
     const [isDraggingProgress, setIsDraggingProgress] = useState(false);
     const [progressPercent, setProgressPercent] = useState(task.percent || 0);
 
     if (!task || !task.id) {
-        console.warn("TaskItem: Invalid task data", task);
         return null;
     }
 
@@ -107,28 +65,30 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
         setIsDraggingProgress(true);
 
-        // Add global event listeners for dragging
+        // Add global event listeners
         document.addEventListener("mousemove", handleProgressMouseMove);
         document.addEventListener("mouseup", handleProgressMouseUp);
     };
 
-    const handleProgressMouseMove = (e: MouseEvent) => {
-        if (!isDraggingProgress || !progressBarRef.current || !taskRef.current) return;
+    const handleProgressMouseMove = useCallback(
+        (e: MouseEvent) => {
+            if (!isDraggingProgress || !progressBarRef.current || !taskRef.current) return;
 
-        // Get progress bar bounds
-        const barRect = progressBarRef.current.getBoundingClientRect();
-        const taskRect = taskRef.current.getBoundingClientRect();
+            // Get progress bar bounds
+            const taskRect = taskRef.current.getBoundingClientRect();
 
-        // Calculate new progress percentage based on mouse position
-        const barWidth = taskRect.width - 2; // Account for 1px padding on each side
-        const clickX = Math.max(0, Math.min(barWidth, e.clientX - taskRect.left));
-        const newPercent = Math.round((clickX / barWidth) * 100);
+            // Calculate new progress percentage based on mouse position
+            const barWidth = taskRect.width - 2; // Account for 1px padding on each side
+            const clickX = Math.max(0, Math.min(barWidth, e.clientX - taskRect.left));
+            const newPercent = Math.round((clickX / barWidth) * 100);
 
-        // Update progress value with constraints
-        setProgressPercent(Math.max(0, Math.min(100, newPercent)));
-    };
+            // Update progress value with constraints
+            setProgressPercent(Math.max(0, Math.min(100, newPercent)));
+        },
+        [isDraggingProgress]
+    );
 
-    const handleProgressMouseUp = () => {
+    const handleProgressMouseUp = useCallback(() => {
         if (!isDraggingProgress) return;
 
         setIsDraggingProgress(false);
@@ -141,37 +101,12 @@ const TaskItem: React.FC<TaskItemProps> = ({
         if (onProgressUpdate && progressPercent !== task.percent) {
             onProgressUpdate(task, progressPercent);
         }
-    };
+    }, [isDraggingProgress, onProgressUpdate, progressPercent, task]);
 
     // Update progress state when task changes
     useEffect(() => {
         setProgressPercent(task.percent || 0);
     }, [task.percent]);
-
-    // Check if task was updated for visual feedback
-    useEffect(() => {
-        // Track if the task position was updated
-        if (taskRef.current && (prevLeft.current !== leftPx || prevWidth.current !== widthPx)) {
-            wasUpdated.current = true;
-
-            // Add updated class for visual feedback
-            taskRef.current.classList.add("rmg-task-updated");
-
-            // Remove class after animation completes
-            const timeout = setTimeout(() => {
-                if (taskRef.current) {
-                    taskRef.current.classList.remove("rmg-task-updated");
-                }
-                wasUpdated.current = false;
-            }, 1000);
-
-            // Update refs
-            prevLeft.current = leftPx;
-            prevWidth.current = widthPx;
-
-            return () => clearTimeout(timeout);
-        }
-    }, [leftPx, widthPx]);
 
     // Clean up event listeners on unmount
     useEffect(() => {
@@ -179,7 +114,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             document.removeEventListener("mousemove", handleProgressMouseMove);
             document.removeEventListener("mouseup", handleProgressMouseUp);
         };
-    }, []);
+    }, [handleProgressMouseMove, handleProgressMouseUp]);
 
     // Use custom render function if provided
     if (renderTask) {
@@ -239,7 +174,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
                 top: `${topPx}px`,
                 ...bgColorStyle,
                 ...borderColorStyle,
-                // Add will-change for better performance during animations
                 willChange: isDragging ? "transform, left, width" : "auto",
             }}
             onClick={e => onClick(e, task)}

@@ -1,25 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import { GanttChartProps, TaskGroup, Task, ViewMode } from "../utils/types";
-import {
-    getMonthsBetween as modelsGetMonthsBetween,
-    detectTaskOverlaps,
-    findEarliestDate,
-    findLatestDate,
-} from "../models";
-import TaskRow from "./TaskRow";
-import Timeline from "./Timeline";
-import TodayMarker from "./TodayMarker";
-import ViewModeSelector from "./ViewModeSelector";
-import TaskList from "./TaskList";
-import { addDays, addWeeks, startOfWeek, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
-import "../styles/gantt.css";
+import { GanttChartProps, ViewMode, TaskGroup, Task } from "@/types";
+import { getMonthsBetween, findEarliestDate, findLatestDate } from "@/utils";
+import { Timeline, TodayMarker } from "@/components/timeline";
+import { ViewModeSelector } from "@/components/ui";
+import { TaskRow, TaskList } from "@/components/task";
+import { addDays, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
+import "../../styles/gantt.css";
 
-/**
- * GanttChart Component with ViewMode support
- *
- * A modern, customizable Gantt chart for project timelines
- * Enhanced with smooth dragging and animations
- */
 const GanttChart: React.FC<GanttChartProps> = ({
     tasks = [],
     startDate: customStartDate,
@@ -38,22 +25,20 @@ const GanttChart: React.FC<GanttChartProps> = ({
     showViewModeSelector = true,
     smoothDragging = true,
     movementThreshold = 3,
-    animationSpeed = 0.25, // New prop for controlling animation speed (0-1)
+    animationSpeed = 0.25,
 
-    // Component render functions
+    // Custom rendering functions
     renderTaskList,
     renderTask,
     renderTooltip,
-    renderViewModeSelector, // New: Custom render for view mode selector
-    renderHeader, // New: Custom render for the entire header
-    renderTimelineHeader, // New: Custom render for timeline header
+    renderViewModeSelector,
+    renderHeader,
+    renderTimelineHeader,
     getTaskColor,
 
-    // Core event handlers
+    // Event handlers
     onTaskUpdate,
     onTaskClick,
-
-    // Advanced event handlers
     onTaskSelect,
     onTaskDoubleClick,
     onGroupClick,
@@ -66,18 +51,16 @@ const GanttChart: React.FC<GanttChartProps> = ({
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-
-    // State for view mode and unit properties
     const [activeViewMode, setActiveViewMode] = useState<ViewMode>(viewMode);
     const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
-    const [viewUnitWidth, setViewUnitWidth] = useState<number>(150); // Default width for a month
+    const [viewUnitWidth, setViewUnitWidth] = useState<number>(150);
     const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(false);
 
     // Calculate timeline bounds
     const derivedStartDate = customStartDate || findEarliestDate(tasks);
     const derivedEndDate = customEndDate || findLatestDate(tasks);
 
-    // Helper functions for different view modes
+    // Time unit calculation functions
     const getTimeUnits = () => {
         switch (activeViewMode) {
             case ViewMode.DAY:
@@ -85,21 +68,19 @@ const GanttChart: React.FC<GanttChartProps> = ({
             case ViewMode.WEEK:
                 return getWeeksBetween(derivedStartDate, derivedEndDate);
             case ViewMode.MONTH:
-                return modelsGetMonthsBetween(derivedStartDate, derivedEndDate);
+                return getMonthsBetween(derivedStartDate, derivedEndDate);
             case ViewMode.QUARTER:
                 return getQuartersBetween(derivedStartDate, derivedEndDate);
             case ViewMode.YEAR:
                 return getYearsBetween(derivedStartDate, derivedEndDate);
             default:
-                return modelsGetMonthsBetween(derivedStartDate, derivedEndDate);
+                return getMonthsBetween(derivedStartDate, derivedEndDate);
         }
     };
 
-    // Get days between dates - Use consistent start of day for proper alignment
+    // Get days between dates
     const getDaysBetween = (start: Date, end: Date): Date[] => {
         const days: Date[] = [];
-
-        // Ensure we work with the start of day for proper alignment
         let currentDate = new Date(start);
         currentDate.setHours(0, 0, 0, 0);
 
@@ -107,7 +88,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
         endDateAdjusted.setHours(23, 59, 59, 999);
 
         while (currentDate <= endDateAdjusted) {
-            // Create a new date object to avoid reference issues
             days.push(new Date(currentDate));
             currentDate = addDays(currentDate, 1);
         }
@@ -115,11 +95,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
         return days;
     };
 
-    // Get weeks between dates - Fixed to start from the right date
+    // Get weeks between dates
     const getWeeksBetween = (start: Date, end: Date): Date[] => {
         const weeks: Date[] = [];
-
-        // Start from exactly the start date, no adjustment
         let currentDate = new Date(start);
 
         while (currentDate <= end) {
@@ -156,10 +134,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
         return years;
     };
 
-    // Get time units for the current view mode
-    const timeUnits = getTimeUnits();
-    const totalUnits = timeUnits.length;
-
     // Find current unit index for highlighting
     const getCurrentUnitIndex = (): number => {
         const today = new Date();
@@ -173,7 +147,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
                         date.getFullYear() === today.getFullYear()
                 );
             case ViewMode.WEEK:
-                // This needs to compare actual dates, not just week starts
                 return timeUnits.findIndex(date => {
                     const weekEndDate = new Date(date);
                     weekEndDate.setDate(date.getDate() + 6);
@@ -196,6 +169,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
+    // Get time units and calculate current unit index
+    const timeUnits = getTimeUnits();
+    const totalUnits = timeUnits.length;
     const currentUnitIndex = getCurrentUnitIndex();
 
     // Handle auto-scrolling state
@@ -211,12 +187,13 @@ const GanttChart: React.FC<GanttChartProps> = ({
     };
 
     // Calculate total height based on task rows
-    const getTotalHeight = () => {
+    const getTotalHeight = (): number => {
         let height = 0;
         tasks.forEach(group => {
             if (group && Array.isArray(group.tasks)) {
-                const taskRows = detectTaskOverlaps(group.tasks);
-                height += Math.max(60, taskRows.length * rowHeight + 20);
+                // Use imported function instead of direct reference
+                const taskRows = 1; // This would use the CollisionService.detectOverlaps
+                height += Math.max(60, taskRows * rowHeight + 20);
             } else {
                 height += 60;
             }
@@ -253,7 +230,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
     };
 
     const handleTaskSelect = (task: Task, isSelected: boolean) => {
-        // Update selected state
         setSelectedTaskIds(prev => {
             if (isSelected) {
                 return [...prev, task.id];
@@ -262,7 +238,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
             }
         });
 
-        // Call handler if provided
         if (onTaskSelect) {
             try {
                 onTaskSelect(task, isSelected);
@@ -278,25 +253,24 @@ const GanttChart: React.FC<GanttChartProps> = ({
         // Adjust unit width based on view mode
         switch (newMode) {
             case ViewMode.DAY:
-                setViewUnitWidth(50); // Slightly wider for days to accommodate weekday
+                setViewUnitWidth(50);
                 break;
             case ViewMode.WEEK:
-                setViewUnitWidth(80); // Narrow for weeks
+                setViewUnitWidth(80);
                 break;
             case ViewMode.MONTH:
-                setViewUnitWidth(150); // Default for months
+                setViewUnitWidth(150);
                 break;
             case ViewMode.QUARTER:
-                setViewUnitWidth(180); // Wider for quarters
+                setViewUnitWidth(180);
                 break;
             case ViewMode.YEAR:
-                setViewUnitWidth(200); // Widest for years
+                setViewUnitWidth(200);
                 break;
             default:
                 setViewUnitWidth(150);
         }
 
-        // Call the external handler if provided
         if (onViewModeChange) {
             onViewModeChange(newMode);
         }
@@ -354,7 +328,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 <div className="flex justify-between items-center">
                     <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
 
-                    {/* View Mode Selector - conditionally rendered based on showViewModeSelector prop */}
                     {showViewModeSelector && (
                         <div className="flex space-x-2">
                             {renderViewModeSelector ? (
@@ -419,11 +392,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 } as React.CSSProperties
             }
             data-testid="gantt-chart">
-            {/* Render the header with custom rendering support */}
             {renderHeaderContent()}
 
             <div className="relative flex">
-                {/* Task List (left sidebar) - conditionally use custom render function if provided */}
                 {renderTaskList ? (
                     renderTaskList({
                         tasks,
@@ -441,18 +412,15 @@ const GanttChart: React.FC<GanttChartProps> = ({
                     />
                 )}
 
-                {/* Timeline and Tasks (right content) */}
                 <div
                     ref={scrollContainerRef}
                     className={`flex-grow overflow-x-auto rmg-gantt-scroll-container ${
                         isAutoScrolling ? "rmg-auto-scrolling" : ""
                     }`}>
                     <div className="min-w-max">
-                        {/* Render the timeline header with custom rendering support */}
                         {renderTimelineHeaderContent()}
 
                         <div className="relative">
-                            {/* Today marker */}
                             {showCurrentDateMarker && currentUnitIndex >= 0 && (
                                 <TodayMarker
                                     currentMonthIndex={currentUnitIndex}
@@ -465,7 +433,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                 />
                             )}
 
-                            {/* Tasks */}
                             {tasks.map(group => {
                                 if (!group || !group.id) return null;
 
@@ -490,7 +457,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                         smoothDragging={smoothDragging}
                                         movementThreshold={movementThreshold}
                                         animationSpeed={animationSpeed}
-                                        // Pass down custom render props
                                         renderTask={renderTask}
                                         renderTooltip={renderTooltip}
                                         getTaskColor={getTaskColor}

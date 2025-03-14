@@ -1,45 +1,7 @@
-/**
- * Type definitions for React Modern Gantt
- */
 import React from "react";
+import { Task, TaskGroup, GanttStyles } from "./core";
+import { ViewMode } from "./enums";
 
-// Basic task and group types
-export interface Task {
-    id: string;
-    name: string;
-    startDate: Date;
-    endDate: Date;
-    color?: string;
-    percent?: number;
-    dependencies?: string[];
-    // Additional data can be attached by the user
-    [key: string]: any;
-}
-
-export interface TaskGroup {
-    id: string;
-    name: string;
-    description?: string;
-    icon?: string;
-    tasks: Task[];
-    // Additional data can be attached by the user
-    [key: string]: any;
-}
-
-// Component styles
-export interface GanttStyles {
-    container?: string;
-    title?: string;
-    header?: string;
-    taskList?: string;
-    timeline?: string;
-    todayMarker?: string;
-    taskRow?: string;
-    taskItem?: string;
-    tooltip?: string;
-}
-
-// Custom render function types
 export interface TaskListRenderProps {
     tasks: TaskGroup[];
     headerLabel?: string;
@@ -71,7 +33,7 @@ export interface ViewModeSelectorRenderProps {
     activeMode: ViewMode;
     onChange: (mode: ViewMode) => void;
     darkMode: boolean;
-    availableModes?: ViewMode[]; // Optional: allow controlling which modes are available
+    availableModes?: ViewMode[];
 }
 
 export interface HeaderRenderProps {
@@ -96,7 +58,7 @@ export interface TaskColorProps {
     isDragging: boolean;
 }
 
-// Main component props
+// Component props
 export interface GanttChartProps {
     tasks: TaskGroup[];
     startDate?: Date;
@@ -112,10 +74,10 @@ export interface GanttChartProps {
     locale?: string;
     styles?: GanttStyles;
     viewMode?: ViewMode;
-    showViewModeSelector?: boolean; // Control ViewModeSelector visibility
-    smoothDragging?: boolean; // Enable smooth dragging
-    movementThreshold?: number; // Movement threshold to reduce jiggling
-    animationSpeed?: number; // Control animation speed (0-1)
+    showViewModeSelector?: boolean;
+    smoothDragging?: boolean;
+    movementThreshold?: number;
+    animationSpeed?: number;
 
     // Custom rendering functions
     renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
@@ -145,7 +107,6 @@ export interface GanttChartProps {
     unitWidth?: number;
 }
 
-// Individual component props
 export interface TaskRowProps {
     taskGroup: TaskGroup;
     startDate: Date;
@@ -156,13 +117,13 @@ export interface TaskRowProps {
     showProgress?: boolean;
     className?: string;
     tooltipClassName?: string;
-    smoothDragging?: boolean; // Enable smooth dragging (except for day view)
-    movementThreshold?: number; // Movement threshold for jitter prevention
-    animationSpeed?: number; // Control animation speed (0.1-1)
+    smoothDragging?: boolean;
+    movementThreshold?: number;
+    animationSpeed?: number;
     onTaskUpdate?: (groupId: string, updatedTask: Task) => void;
     onTaskClick?: (task: Task, group: TaskGroup) => void;
     onTaskSelect?: (task: Task, isSelected: boolean) => void;
-    onAutoScrollChange?: (isScrolling: boolean) => void; // Handler for auto-scrolling state
+    onAutoScrollChange?: (isScrolling: boolean) => void;
     viewMode?: ViewMode;
     scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 
@@ -218,7 +179,7 @@ export interface TaskItemProps {
     onMouseEnter: (event: React.MouseEvent, task: Task) => void;
     onMouseLeave: () => void;
     onClick: (event: React.MouseEvent, task: Task) => void;
-    onProgressUpdate?: (task: Task, newPercent: number) => void; // New prop for progress updates
+    onProgressUpdate?: (task: Task, newPercent: number) => void;
 }
 
 export interface TooltipProps {
@@ -246,22 +207,6 @@ export interface TodayMarkerProps {
     markerClass?: string;
     viewMode?: ViewMode;
     unitWidth?: number;
-}
-
-// View Mode enum
-export enum ViewMode {
-    DAY = "day",
-    WEEK = "week",
-    MONTH = "month",
-    QUARTER = "quarter",
-    YEAR = "year",
-}
-
-// Date format options
-export enum DateDisplayFormat {
-    MONTH_YEAR = "month-year",
-    FULL_DATE = "full-date",
-    SHORT_DATE = "short-date",
 }
 
 // Interaction states for custom hooks

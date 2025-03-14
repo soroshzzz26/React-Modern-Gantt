@@ -1,10 +1,10 @@
-import { Task, ViewMode } from "@/utils/types";
+import { Task, ViewMode } from "@/types";
 
 /**
- * Manages the detection and resolution of task collisions
- * Enhanced with pixel-precise collision detection
+ * Service for detecting and resolving task collisions/overlaps
+ * Used for arranging tasks in rows to prevent visual overlapping
  */
-export class CollisionManager {
+export class CollisionService {
     /**
      * Detects overlapping tasks and organizes them into rows
      * Using precise visual overlap detection

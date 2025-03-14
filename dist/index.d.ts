@@ -1,16 +1,11 @@
 /**
  * React Modern Gantt
  * A flexible, customizable Gantt chart component for React applications
+ *
+ * @module react-modern-gantt
  */
-export { default as GanttChart } from "./components/GanttChart";
-export { default as TaskRow } from "./components/TaskRow";
-export { default as TaskItem } from "./components/TaskItem";
-export { default as TaskList } from "./components/TaskList";
-export { default as Timeline } from "./components/Timeline";
-export { default as TodayMarker } from "./components/TodayMarker";
-export { default as Tooltip } from "./components/Tooltip";
-export type { Task, TaskGroup, GanttStyles, GanttChartProps, TaskRowProps, TaskListProps, TimelineProps, TaskItemProps, TaskInteraction, } from "./utils/types";
-export { DateDisplayFormat, ViewMode } from "./utils/types";
-export { formatMonth, formatDate, formatDateRange, getMonthsBetween, getDaysInMonth, getStandardDayMarkers, calculateTaskPosition, calculateDuration, detectTaskOverlaps, findEarliestDate, findLatestDate, } from "./models";
-export { CollisionManager } from "./utils/CollisionManager";
-export { TaskManager } from "./utils/TaskManager";
+export { GanttChart } from "./components/core";
+export { TaskItem, TaskList, TaskRow } from "./components/task";
+export { Timeline, TodayMarker } from "./components/timeline";
+export { Tooltip, ViewModeSelector } from "./components/ui";
+export type { Task, TaskGroup, GanttStyles, GanttChartProps, TaskItemProps, TaskListProps, TaskRowProps, TimelineProps, TodayMarkerProps, TooltipProps, TaskRenderProps, TaskListRenderProps, TooltipRenderProps, ViewModeSelectorRenderProps, HeaderRenderProps, TimelineHeaderRenderProps, TaskColorProps, ViewMode, DateDisplayFormat, TaskInteraction, } from "./types";

@@ -1,12 +1,17 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ViewMode } from "../utils/types";
+import { ViewMode } from "@/types";
 
-const ViewModeSelector: React.FC<{
+interface ViewModeSelectorProps {
     activeMode: ViewMode;
     onChange: (mode: ViewMode) => void;
     darkMode: boolean;
-    availableModes?: ViewMode[]; // New prop to allow controlling available modes
-}> = ({ activeMode, onChange, darkMode, availableModes }) => {
+    availableModes?: ViewMode[];
+}
+
+/**
+ * ViewModeSelector Component - Allows switching between different timeline views
+ */
+const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({ activeMode, onChange, darkMode, availableModes }) => {
     // Default view modes
     const defaultViewModes = [
         { id: ViewMode.DAY, label: "Day" },

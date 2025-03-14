@@ -1,47 +1,51 @@
 /**
  * React Modern Gantt
  * A flexible, customizable Gantt chart component for React applications
+ *
+ * @module react-modern-gantt
  */
 
-// Main components
-export { default as GanttChart } from "./components/GanttChart";
-export { default as TaskRow } from "./components/TaskRow";
-export { default as TaskItem } from "./components/TaskItem";
-export { default as TaskList } from "./components/TaskList";
-export { default as Timeline } from "./components/Timeline";
-export { default as TodayMarker } from "./components/TodayMarker";
-export { default as Tooltip } from "./components/Tooltip";
+// Core components
+export { GanttChart } from "./components/core";
+
+// Task components
+export { TaskItem, TaskList, TaskRow } from "./components/task";
+
+// Timeline components
+export { Timeline, TodayMarker } from "./components/timeline";
+
+// UI components
+export { Tooltip, ViewModeSelector } from "./components/ui";
 
 // Types
 export type {
+    // Core types
     Task,
     TaskGroup,
     GanttStyles,
+
+    // Component props
     GanttChartProps,
-    TaskRowProps,
-    TaskListProps,
-    TimelineProps,
     TaskItemProps,
+    TaskListProps,
+    TaskRowProps,
+    TimelineProps,
+    TodayMarkerProps,
+    TooltipProps,
+
+    // Render props
+    TaskRenderProps,
+    TaskListRenderProps,
+    TooltipRenderProps,
+    ViewModeSelectorRenderProps,
+    HeaderRenderProps,
+    TimelineHeaderRenderProps,
+    TaskColorProps,
+
+    // Enums
+    ViewMode,
+    DateDisplayFormat,
+
+    // Utility types
     TaskInteraction,
-} from "./utils/types";
-
-export { DateDisplayFormat, ViewMode } from "./utils/types";
-
-// Utility functions
-export {
-    formatMonth,
-    formatDate,
-    formatDateRange,
-    getMonthsBetween,
-    getDaysInMonth,
-    getStandardDayMarkers,
-    calculateTaskPosition,
-    calculateDuration,
-    detectTaskOverlaps,
-    findEarliestDate,
-    findLatestDate,
-} from "./models";
-
-// Manager classes
-export { CollisionManager } from "./utils/CollisionManager";
-export { TaskManager } from "./utils/TaskManager";
+} from "./types";

@@ -1,24 +1,9 @@
 import React from "react";
-import { TaskGroup, ViewMode } from "../utils/types";
-import { detectTaskOverlaps } from "../models";
-
-export interface TaskListProps {
-    tasks: TaskGroup[];
-    headerLabel?: string;
-    showIcon?: boolean;
-    showTaskCount?: boolean;
-    showDescription?: boolean;
-    rowHeight?: number;
-    className?: string;
-    onGroupClick?: (group: TaskGroup) => void;
-    viewMode?: ViewMode; // Add viewMode to know when to adjust header height
-}
+import { TaskGroup, ViewMode, TaskListProps } from "@/types";
+import { CollisionService } from "@/services";
 
 /**
- * TaskList Component
- *
- * Displays the list of task groups on the left side of the Gantt chart
- * Now with proper header height alignment and padding
+ * TaskList Component - Displays the list of task groups on the left side of the Gantt chart
  */
 const TaskList: React.FC<TaskListProps> = ({
     tasks = [],
@@ -40,7 +25,7 @@ const TaskList: React.FC<TaskListProps> = ({
             return 60; // Default height for empty groups
         }
 
-        const taskRows = detectTaskOverlaps(taskGroup.tasks);
+        const taskRows = CollisionService.detectOverlaps(taskGroup.tasks, viewMode);
         return Math.max(60, taskRows.length * rowHeight + 20);
     };
 
