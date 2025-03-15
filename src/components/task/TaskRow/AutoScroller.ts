@@ -1,14 +1,25 @@
+import React from "react";
+
 export class AutoScroller {
-    private scrolling = false;
-    private speed = 0;
+    private scrolling: boolean = false;
+    private speed: number = 0;
     private direction: "left" | "right" | null = null;
     private scrollTimerId: number | null = null;
     private containerRef: React.RefObject<HTMLDivElement | null>;
     private onChange?: (isScrolling: boolean) => void;
+    private targetPositionRef?: React.MutableRefObject<{ left: number; width: number } | null>;
+    private timelineLimitsRef?: React.MutableRefObject<{ minLeft: number; maxLeft: number }>;
 
-    constructor(containerRef: React.RefObject<HTMLDivElement | null>, onChange?: (isScrolling: boolean) => void) {
+    constructor(
+        containerRef: React.RefObject<HTMLDivElement | null>,
+        onChange?: (isScrolling: boolean) => void,
+        targetPositionRef?: React.MutableRefObject<{ left: number; width: number } | null>,
+        timelineLimitsRef?: React.MutableRefObject<{ minLeft: number; maxLeft: number }>
+    ) {
         this.containerRef = containerRef;
         this.onChange = onChange;
+        this.targetPositionRef = targetPositionRef;
+        this.timelineLimitsRef = timelineLimitsRef;
     }
 
     public checkForScrolling(clientX: number) {
@@ -21,11 +32,16 @@ export class AutoScroller {
         let direction: "left" | "right" | null = null;
         let scrollSpeed = 0;
 
+        // Check if mouse is near the left edge
         if (clientX < containerRect.left + edgeThreshold) {
             direction = "left";
+            // Calculate scroll speed based on proximity to edge (closer = faster)
             scrollSpeed = Math.max(1, Math.round((edgeThreshold - (clientX - containerRect.left)) / 10));
-        } else if (clientX > containerRect.right - edgeThreshold) {
+        }
+        // Check if mouse is near the right edge
+        else if (clientX > containerRect.right - edgeThreshold) {
             direction = "right";
+            // Calculate scroll speed based on proximity to edge (closer = faster)
             scrollSpeed = Math.max(1, Math.round((clientX - (containerRect.right - edgeThreshold)) / 10));
         }
 
@@ -57,15 +73,34 @@ export class AutoScroller {
                     this.stopScrolling();
                     return;
                 }
-                container.scrollLeft = Math.max(0, currentScrollLeft - this.speed);
+
+                const newScrollLeft = Math.max(0, currentScrollLeft - this.speed);
+                container.scrollLeft = newScrollLeft;
+
+                // Update target position during auto-scroll if provided
+                if (this.targetPositionRef?.current && this.timelineLimitsRef?.current) {
+                    const minLeft = this.timelineLimitsRef.current.minLeft;
+                    const newLeft = Math.max(minLeft, this.targetPositionRef.current.left - this.speed);
+                    this.targetPositionRef.current.left = newLeft;
+                }
             } else if (this.direction === "right") {
                 if (currentScrollLeft >= maxScrollLeft) {
                     this.stopScrolling();
                     return;
                 }
-                container.scrollLeft = Math.min(maxScrollLeft, currentScrollLeft + this.speed);
+
+                const newScrollLeft = Math.min(maxScrollLeft, currentScrollLeft + this.speed);
+                container.scrollLeft = newScrollLeft;
+
+                // Update target position during auto-scroll if provided
+                if (this.targetPositionRef?.current && this.timelineLimitsRef?.current) {
+                    const maxLeft = this.timelineLimitsRef.current.maxLeft - this.targetPositionRef.current.width;
+                    const newLeft = Math.min(maxLeft, this.targetPositionRef.current.left + this.speed);
+                    this.targetPositionRef.current.left = newLeft;
+                }
             }
 
+            // Continue scrolling if active
             if (this.scrolling) {
                 this.scrollTimerId = requestAnimationFrame(doScroll);
             }

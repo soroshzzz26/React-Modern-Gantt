@@ -7,6 +7,10 @@ import { TaskRow, TaskList } from "@/components/task";
 import { addDays, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
 import "../../styles/gantt.css";
 
+/**
+ * GanttChart Component with ViewMode support
+ * A modern, customizable Gantt chart for project timelines
+ */
 const GanttChart: React.FC<GanttChartProps> = ({
     tasks = [],
     startDate: customStartDate,
@@ -55,6 +59,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
     const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
     const [viewUnitWidth, setViewUnitWidth] = useState<number>(150);
     const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(false);
+
+    // Add a forceRender counter to trigger re-renders when tasks update
+    const [forceRender, setForceRender] = useState<number>(0);
 
     // Calculate timeline bounds
     const derivedStartDate = customStartDate || findEarliestDate(tasks);
@@ -186,21 +193,6 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
-    // Calculate total height based on task rows
-    const getTotalHeight = (): number => {
-        let height = 0;
-        tasks.forEach(group => {
-            if (group && Array.isArray(group.tasks)) {
-                // Use imported function instead of direct reference
-                const taskRows = 1; // This would use the CollisionService.detectOverlaps
-                height += Math.max(60, taskRows * rowHeight + 20);
-            } else {
-                height += 60;
-            }
-        });
-        return height;
-    };
-
     // Task interaction handlers
     const handleTaskUpdate = (groupId: string, updatedTask: Task) => {
         if (onTaskUpdate) {
@@ -211,6 +203,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
                         updatedTask.startDate instanceof Date ? updatedTask.startDate : new Date(updatedTask.startDate),
                     endDate: updatedTask.endDate instanceof Date ? updatedTask.endDate : new Date(updatedTask.endDate),
                 };
+
+                // Force a re-render to update collision detection
+                setForceRender(prev => prev + 1);
 
                 onTaskUpdate(groupId, ensuredTask);
             } catch (error) {
@@ -424,7 +419,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                             {showCurrentDateMarker && currentUnitIndex >= 0 && (
                                 <TodayMarker
                                     currentMonthIndex={currentUnitIndex}
-                                    height={getTotalHeight()}
+                                    height={tasks.length * 60} // Simplified calculation
                                     label={todayLabel}
                                     dayOfMonth={currentDate.getDate()}
                                     className={mergedStyles.todayMarker}
@@ -438,7 +433,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
 
                                 return (
                                     <TaskRow
-                                        key={`task-row-${group.id}`}
+                                        key={`task-row-${group.id}-${forceRender}`}
                                         taskGroup={group}
                                         startDate={derivedStartDate}
                                         endDate={derivedEndDate}

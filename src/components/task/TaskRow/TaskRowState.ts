@@ -38,9 +38,13 @@ export class TaskRowState {
     }
 
     public getTaskRows(): Task[][] {
-        return this.state.previewTask
-            ? CollisionService.getPreviewArrangement(this.state.previewTask, this.taskGroup.tasks, this.viewMode)
-            : CollisionService.detectOverlaps(this.taskGroup.tasks, this.viewMode);
+        // Use the preview task for calculating arrangement if it exists
+        if (this.state.previewTask) {
+            return CollisionService.getPreviewArrangement(this.state.previewTask, this.taskGroup.tasks, this.viewMode);
+        }
+
+        // Otherwise use normal collision detection
+        return CollisionService.detectOverlaps(this.taskGroup.tasks, this.viewMode);
     }
 
     public getState(): TaskInteractionState {
@@ -60,11 +64,18 @@ export class TaskRowState {
         initialLeft: number,
         initialWidth: number
     ) {
+        // Create a deep copy of the task to avoid reference issues
+        const taskCopy = {
+            ...task,
+            startDate: new Date(task.startDate),
+            endDate: new Date(task.endDate),
+        };
+
         this.updateState({
-            draggingTask: task,
+            draggingTask: taskCopy,
             dragType: type,
             dragStartX: clientX,
-            previewTask: task,
+            previewTask: taskCopy, // Initialize previewTask with the task being dragged
             initialTaskState: {
                 left: initialLeft,
                 width: initialWidth,
@@ -92,6 +103,13 @@ export class TaskRowState {
     }
 
     public updatePreviewTask(task: Task) {
-        this.updateState({ previewTask: task });
+        // Create a deep copy to ensure we're not maintaining references
+        const updatedTask = {
+            ...task,
+            startDate: new Date(task.startDate),
+            endDate: new Date(task.endDate),
+        };
+
+        this.updateState({ previewTask: updatedTask });
     }
 }
