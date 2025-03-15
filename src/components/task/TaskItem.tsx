@@ -167,7 +167,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             ref={taskRef}
             className={`absolute h-8 rounded ${bgColorClass} ${borderColorClass} ${textColor} flex items-center px-2 text-xs font-medium ${
                 editMode ? "cursor-move" : "cursor-pointer"
-            } ${isDragging ? "shadow-lg" : ""}`}
+            } ${isDragging ? "shadow-lg dark:shadow-gray-900" : ""}`}
             style={{
                 left: `${Math.max(0, leftPx)}px`,
                 width: `${Math.max(20, widthPx)}px`,
@@ -199,7 +199,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             {showProgress && typeof progressPercent === "number" && (
                 <div
                     ref={progressBarRef}
-                    className={`absolute bottom-1 left-1 right-1 h-2 bg-black bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden ${
+                    className={`absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden ${
                         editMode ? "cursor-pointer" : ""
                     }`}
                     onClick={e => {

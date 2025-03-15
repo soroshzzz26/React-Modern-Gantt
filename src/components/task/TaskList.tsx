@@ -68,7 +68,7 @@ const TaskList: React.FC<TaskListProps> = ({
                 return (
                     <div
                         key={`task-group-${taskGroup.id || "unknown"}`}
-                        className="p-2 border-r border-b border-gantt-border font-medium text-gantt-text bg-gantt-bg hover:bg-gantt-highlight transition-colors duration-150"
+                        className="p-2 border-r border-b border-gray-200 dark:border-gray-700 font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
                         style={{ height: `${groupHeight}px` }}
                         onClick={() => handleGroupClick(taskGroup)}
                         data-testid={`task-group-${taskGroup.id || "unknown"}`}>

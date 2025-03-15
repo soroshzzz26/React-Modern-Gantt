@@ -113,7 +113,7 @@ const Tooltip: React.FC<
     // Default tooltip rendering
     return (
         <div
-            className={`rmg-task-tooltip absolute z-20 bg-[var(--rmg-tooltip-bg,#ffffff)] text-[var(--rmg-tooltip-text,#1f2937)] border border-[var(--rmg-tooltip-border,#e5e7eb)] rounded-md shadow-md p-2 text-xs select-none ${className}`}
+            className={`rmg-task-tooltip absolute z-20 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-md shadow-md p-2 text-xs select-none ${className}`}
             style={{
                 left: `${position.x}px`,
                 top: `${position.y - 40}px`,

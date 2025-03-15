@@ -102,7 +102,7 @@ const Timeline: React.FC<TimelineProps> = ({
                     {higherLevelMonths.map((item, index) => (
                         <div
                             key={`higher-level-${index}`}
-                            className="flex-shrink-0 p-2 font-semibold text-center text-gantt-text border-r border-gantt-border h-10"
+                            className="flex-shrink-0 p-2 font-semibold text-center text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 h-10"
                             style={{ width: `${item.span * unitWidth}px` }}
                             data-timeunit-higher={item.date.toISOString()}>
                             {formatHigherLevelHeader(item.date)}

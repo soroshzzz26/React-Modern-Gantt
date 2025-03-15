@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
                     </div>
                     <div className="flex space-x-6">
                         <a
-                            href="https://github.com/yourusername/react-modern-gantt"
+                            href="https://github.com/MikaStiebitz/React-Modern-Gantt"
                             target="_blank"
                             rel="noopener noreferrer"
                             className={`text-sm ${
