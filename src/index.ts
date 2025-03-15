@@ -42,10 +42,13 @@ export type {
     TimelineHeaderRenderProps,
     TaskColorProps,
 
+    // Utility types
+    TaskInteraction,
+} from "./types";
+
+// Enmus
+export {
     // Enums
     ViewMode,
     DateDisplayFormat,
-
-    // Utility types
-    TaskInteraction,
 } from "./types";
