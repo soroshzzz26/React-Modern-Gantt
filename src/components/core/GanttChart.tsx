@@ -5,7 +5,6 @@ import { Timeline, TodayMarker } from "@/components/timeline";
 import { ViewModeSelector } from "@/components/ui";
 import { TaskRow, TaskList } from "@/components/task";
 import { addDays, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
-import "../../styles/gantt.css";
 
 /**
  * GanttChart Component with ViewMode support
@@ -319,7 +318,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
 
         return (
-            <div className="p-6 border-b border-gantt-border">
+            <div className="p-6 border-b border-gantt-border bg-gantt-bg">
                 <div className="flex justify-between items-center">
                     <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
 

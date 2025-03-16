@@ -1,55 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 /**
- * React Modern Gantt CSS Enhancements
- * Improved styles for smoother interactions and animations
+ * React Modern Gantt CSS
  */
+@layer base {
+    :root {
+        /* Light mode theme */
+        --rmg-bg: #ffffff;
+        --rmg-text: #1f2937;
+        --rmg-border: #e5e7eb;
+        --rmg-highlight: #eff6ff;
+        --rmg-marker: #ef4444;
+        --rmg-task: #3b82f6;
+        --rmg-task-text: #ffffff;
+        --rmg-tooltip-bg: #ffffff;
+        --rmg-tooltip-text: #1f2937;
+        --rmg-tooltip-border: #e5e7eb;
+        --rmg-resize-handle: rgba(255, 255, 255, 0.3);
+        --rmg-progress-bg: rgba(0, 0, 0, 0.2);
+        --rmg-progress-fill: #ffffff;
+        --rmg-shadow: rgba(0, 0, 0, 0.1);
+        --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
+        --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
+        --gantt-month-width: 150px;
+        --gantt-row-height: 40px;
 
-:root {
-    /* Light mode theme */
-    --rmg-bg: #ffffff;
-    --rmg-text: #1f2937;
-    --rmg-border: #e5e7eb;
-    --rmg-highlight: #eff6ff;
-    --rmg-marker: #ef4444;
-    --rmg-task: #3b82f6;
-    --rmg-task-text: #ffffff;
-    --rmg-tooltip-bg: #ffffff;
-    --rmg-tooltip-text: #1f2937;
-    --rmg-tooltip-border: #e5e7eb;
-    --rmg-resize-handle: rgba(255, 255, 255, 0.3);
-    --rmg-progress-bg: rgba(0, 0, 0, 0.2);
-    --rmg-progress-fill: #ffffff;
-    --rmg-shadow: rgba(0, 0, 0, 0.1);
-    --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
-    --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
-    --gantt-month-width: 150px;
-    --gantt-row-height: 40px;
+        /* Animation variables */
+        --rmg-task-hover-transition: transform 0.15s cubic-bezier(0.2, 0, 0.13, 2),
+            box-shadow 0.15s cubic-bezier(0.2, 0, 0.13, 2);
+        --rmg-task-drag-transition: transform 0.05s cubic-bezier(0.2, 0, 0.13, 2),
+            box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
+        --rmg-task-release-transition: all 0.2s cubic-bezier(0.2, 0, 0.13, 2);
+    }
 
-    /* Animation variables */
-    --rmg-task-hover-transition: transform 0.15s cubic-bezier(0.2, 0, 0.13, 2),
-        box-shadow 0.15s cubic-bezier(0.2, 0, 0.13, 2);
-    --rmg-task-drag-transition: transform 0.05s cubic-bezier(0.2, 0, 0.13, 2),
-        box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
-    --rmg-task-release-transition: all 0.2s cubic-bezier(0.2, 0, 0.13, 2);
-}
-
-.dark {
-    /* Dark mode theme */
-    --rmg-bg: #1f2937;
-    --rmg-text: #f3f4f6;
-    --rmg-border: #374151;
-    --rmg-highlight: #374151;
-    --rmg-marker: #ef4444;
-    --rmg-task: #4f46e5;
-    --rmg-task-text: #ffffff;
-    --rmg-tooltip-bg: #1f2937;
-    --rmg-tooltip-text: #f3f4f6;
-    --rmg-tooltip-border: #374151;
-    --rmg-resize-handle: rgba(255, 255, 255, 0.4);
-    --rmg-progress-bg: rgba(0, 0, 0, 0.3);
-    --rmg-progress-fill: #e5e7eb;
-    --rmg-shadow: rgba(0, 0, 0, 0.3);
-    --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
-    --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
+    .dark {
+        /* Dark mode theme */
+        --rmg-bg: #1f2937;
+        --rmg-text: #f3f4f6;
+        --rmg-border: #374151;
+        --rmg-highlight: #374151;
+        --rmg-marker: #ef4444;
+        --rmg-task: #4f46e5;
+        --rmg-task-text: #ffffff;
+        --rmg-tooltip-bg: #1f2937;
+        --rmg-tooltip-text: #f3f4f6;
+        --rmg-tooltip-border: #374151;
+        --rmg-resize-handle: rgba(255, 255, 255, 0.4);
+        --rmg-progress-bg: rgba(0, 0, 0, 0.3);
+        --rmg-progress-fill: #e5e7eb;
+        --rmg-shadow: rgba(0, 0, 0, 0.3);
+        --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
+        --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
+    }
 }
 
 /* Hover and active states for task items */

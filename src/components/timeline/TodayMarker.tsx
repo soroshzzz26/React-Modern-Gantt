@@ -61,7 +61,7 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
             }}
             data-testid="today-marker">
             <div
-                className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${markerClass} px-1 py-0.5 rounded text-xs text-white whitespace-nowrap`}>
+                className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${markerClass} px-1 py-0.5 rounded text-xs text-white dark:text-white whitespace-nowrap`}>
                 {label}
             </div>
         </div>

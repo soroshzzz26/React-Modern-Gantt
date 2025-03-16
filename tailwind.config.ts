@@ -1,4 +1,3 @@
-// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -9,13 +8,13 @@ const config: Config = {
             colors: {
                 // Gantt chart colors
                 gantt: {
-                    bg: "var(--gantt-bg)",
-                    text: "var(--gantt-text)",
-                    border: "var(--gantt-border)",
-                    highlight: "var(--gantt-highlight)",
-                    marker: "var(--gantt-marker)",
-                    task: "var(--gantt-task)",
-                    "task-text": "var(--gantt-task-text)",
+                    bg: "var(--rmg-bg)",
+                    text: "var(--rmg-text)",
+                    border: "var(--rmg-border)",
+                    highlight: "var(--rmg-highlight)",
+                    marker: "var(--rmg-marker)",
+                    task: "var(--rmg-task)",
+                    "task-text": "var(--rmg-task-text)",
                 },
             },
         },

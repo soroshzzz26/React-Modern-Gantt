@@ -46,23 +46,17 @@ const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({ activeMode, onChang
     }, [activeMode]);
 
     const containerClass = `
-        relative inline-flex rounded-full p-0.5
-        ${darkMode ? "bg-gray-800/80" : "bg-gray-100/90"}
-        transition-all duration-300 ease-in-out shadow-sm
-        border ${darkMode ? "border-gray-700" : "border-gray-200"}
+    relative inline-flex rounded-full p-0.5
+    ${darkMode ? "bg-gray-800/80" : "bg-gray-100/90"}
+    transition-all duration-300 ease-in-out shadow-sm dark:shadow-gray-900
+    border ${darkMode ? "border-gray-700" : "border-gray-200"}
     `;
 
     const tabClass = (isActive: boolean) => `
-        relative z-10 px-3 py-1 text-xs font-medium
-        transition-all duration-200 ease-in-out
-        ${
-            isActive
-                ? "text-white"
-                : darkMode
-                ? "text-gray-400 hover:text-gray-200"
-                : "text-gray-500 hover:text-gray-700"
-        }
-        focus:outline-none
+    relative z-10 px-3 py-1 text-xs font-medium
+    transition-all duration-200 ease-in-out
+    ${isActive ? "text-white" : darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}
+    focus:outline-none
     `;
 
     return (

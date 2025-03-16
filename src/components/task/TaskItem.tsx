@@ -187,7 +187,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             {/* Left resize handle */}
             {showHandles && (
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l rmg-resize-handle"
+                    className="absolute left-0 top-0 bottom-0 w-2 bg-white dark:bg-gray-600 bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l rmg-resize-handle"
                     onMouseDown={handleResizeLeft}
                 />
             )}
@@ -199,7 +199,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             {showProgress && typeof progressPercent === "number" && (
                 <div
                     ref={progressBarRef}
-                    className={`absolute bottom-1 left-1 right-1 h-1 bg-black bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden ${
+                    className={`absolute bottom-1 left-1 right-1 h-1 bg-black dark:bg-white bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden ${
                         editMode ? "cursor-pointer" : ""
                     }`}
                     onClick={e => {
@@ -218,10 +218,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
                         {/* Progress bubble handle */}
                         {editMode && (isHovered || isDraggingProgress) && (
                             <div
-                                className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 h-4 w-4 rounded-full bg-white border-2 ${
+                                className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 h-4 w-4 rounded-full bg-white dark:bg-gray-300 border-2 ${
                                     borderColor || backgroundColor.startsWith("bg-")
                                         ? borderColorClass || bgColorClass
-                                        : "border-blue-500"
+                                        : "border-blue-500 dark:border-blue-400"
                                 } cursor-ew-resize shadow-sm hover:shadow-md transition-shadow ${
                                     isDraggingProgress ? "scale-110" : ""
                                 }`}
@@ -235,7 +235,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             {/* Right resize handle */}
             {showHandles && (
                 <div
-                    className="absolute right-0 top-0 bottom-0 w-2 bg-white bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r rmg-resize-handle"
+                    className="absolute right-0 top-0 bottom-0 w-2 bg-white dark:bg-gray-600 bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r rmg-resize-handle"
                     onMouseDown={handleResizeRight}
                 />
             )}

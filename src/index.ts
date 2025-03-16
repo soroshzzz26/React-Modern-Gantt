@@ -1,3 +1,4 @@
+import "./styles/gantt.css";
 /**
  * React Modern Gantt
  * A flexible, customizable Gantt chart component for React applications
