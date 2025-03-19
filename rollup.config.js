@@ -56,11 +56,11 @@ export default {
             },
         }),
         postcss({
-            plugins: [autoprefixer(), require("@tailwindcss/postcss")()],
+            plugins: [autoprefixer()],
             minimize: true,
             extract: "dist/styles.css",
-            modules: false, // Set to true if you're using CSS Modules
-            inject: false, // Don't inject CSS into the page
+            modules: false,
+            inject: false,
         }),
         terser(),
     ],
