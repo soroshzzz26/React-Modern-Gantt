@@ -1,17 +1,11 @@
 @import "tailwindcss";
 /**
- * React Modern Gantt CSS
+ * React Modern Gantt CSS - Tailwind v4 Version
  */
-@layer base {
+
+@layer theme {
+    /* Light mode theme */
     :root {
-        /* Light mode theme */
-        --rmg-bg: #ffffff;
-        --rmg-text: #1f2937;
-        --rmg-border: #e5e7eb;
-        --rmg-highlight: #eff6ff;
-        --rmg-marker: #ef4444;
-        --rmg-task: #3b82f6;
-        --rmg-task-text: #ffffff;
         --rmg-tooltip-bg: #ffffff;
         --rmg-tooltip-text: #1f2937;
         --rmg-tooltip-border: #e5e7eb;
@@ -21,8 +15,6 @@
         --rmg-shadow: rgba(0, 0, 0, 0.1);
         --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
         --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
-        --gantt-month-width: 150px;
-        --gantt-row-height: 40px;
 
         /* Animation variables */
         --rmg-task-hover-transition: transform 0.15s cubic-bezier(0.2, 0, 0.13, 2),
@@ -30,17 +22,18 @@
         --rmg-task-drag-transition: transform 0.05s cubic-bezier(0.2, 0, 0.13, 2),
             box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
         --rmg-task-release-transition: all 0.2s cubic-bezier(0.2, 0, 0.13, 2);
+
+        --color-gantt-bg: #ffffff;
+        --color-gantt-text: #1f2937;
+        --color-gantt-border: #e5e7eb;
+        --color-gantt-highlight: #eff6ff;
+        --color-gantt-marker: #ef4444;
+        --color-gantt-task: #3b82f6;
+        --color-gantt-task-text: #ffffff;
     }
 
     .dark {
         /* Dark mode theme */
-        --rmg-bg: #1f2937;
-        --rmg-text: #f3f4f6;
-        --rmg-border: #374151;
-        --rmg-highlight: #374151;
-        --rmg-marker: #ef4444;
-        --rmg-task: #4f46e5;
-        --rmg-task-text: #ffffff;
         --rmg-tooltip-bg: #1f2937;
         --rmg-tooltip-text: #f3f4f6;
         --rmg-tooltip-border: #374151;
@@ -50,6 +43,14 @@
         --rmg-shadow: rgba(0, 0, 0, 0.3);
         --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
         --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
+
+        --color-gantt-bg: #1f2937;
+        --color-gantt-text: #f3f4f6;
+        --color-gantt-border: #374151;
+        --color-gantt-highlight: #374151;
+        --color-gantt-marker: #ef4444;
+        --color-gantt-task: #4f46e5;
+        --color-gantt-task-text: #ffffff;
     }
 }
 
