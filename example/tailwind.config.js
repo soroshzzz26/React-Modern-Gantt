@@ -9,13 +9,13 @@ module.exports = {
         extend: {
             colors: {
                 // Custom colors for the Gantt chart
-                "gantt-bg": "var(--rmg-bg, #ffffff)",
-                "gantt-text": "var(--rmg-text, #1f2937)",
-                "gantt-border": "var(--rmg-border, #e5e7eb)",
-                "gantt-highlight": "var(--rmg-highlight, #eff6ff)",
-                "gantt-marker": "var(--rmg-marker, #ef4444)",
-                "gantt-task": "var(--rmg-task, #3b82f6)",
-                "gantt-task-text": "var(--rmg-task-text, #ffffff)",
+                "gantt-bg": "var(--rmg-bg)",
+                "gantt-text": "var(--rmg-text)",
+                "gantt-border": "var(--rmg-border)",
+                "gantt-highlight": "var(--rmg-highlight)",
+                "gantt-marker": "var(--rmg-marker)",
+                "gantt-task": "var(--rmg-task)",
+                "gantt-task-text": "var(--rmg-task-text)",
             },
             typography: {
                 DEFAULT: {
