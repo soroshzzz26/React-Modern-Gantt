@@ -1,7 +1,9 @@
 /** @type {import('postcss-load-config').Config} */
 const config = {
     plugins: {
-        "@tailwindcss/postcss": {},
+        // Detect Tailwind version and use appropriate plugin
+        ...(process.env.TAILWIND_VERSION === "3" ? { tailwindcss: {} } : { "@tailwindcss/postcss": {} }),
+        autoprefixer: {},
     },
 };
 

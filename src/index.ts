@@ -8,6 +8,7 @@ import "./styles/gantt.css";
 
 // Core components
 export { GanttChart } from "./components/core";
+export { default as NextGanttChart } from "./components/core/NextGanttChart";
 
 // Task components
 export { TaskItem, TaskList, TaskRow } from "./components/task";
@@ -56,3 +57,19 @@ export {
     ViewMode,
     DateDisplayFormat,
 } from "./types";
+
+// Export utility functions for advanced usage
+export { CollisionService, TaskService } from "./services";
+export {
+    formatDate,
+    formatMonth,
+    getMonthsBetween,
+    getDaysInMonth,
+    formatDateRange,
+    calculateDuration,
+    getDuration,
+    findEarliestDate,
+    findLatestDate,
+    calculateTaskPosition,
+    detectTaskOverlaps,
+} from "./utils";

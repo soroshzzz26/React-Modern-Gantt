@@ -22,7 +22,17 @@ A flexible, customizable Gantt chart component for React applications with drag-
 -   🌊 **Smooth animations** with configurable speeds and thresholds
 -   🔄 **Auto-scrolling** during drag operations
 
-## Installation
+## Compatibility
+
+React Modern Gantt is designed to be compatible with a wide range of project setups:
+
+-   **React**: Works with React 17, 18, and 19
+-   **Tailwind CSS**: Compatible with both Tailwind CSS v3 and v4
+-   **TypeScript/JavaScript**: Full TypeScript type definitions included, but works perfectly with JavaScript projects too
+
+## Installation & Setup
+
+### 1. Install the package
 
 ```bash
 npm install react-modern-gantt
@@ -30,80 +40,58 @@ npm install react-modern-gantt
 yarn add react-modern-gantt
 ```
 
-## Quick Start
+### 2. Update your Tailwind configuration
 
-There are multiple ways to integrate React Modern Gantt into your application:
+If you're using Tailwind CSS in your project, make sure to add the package to your content sources:
 
-### Option 1: Standard Import with CSS (Recommended)
+```js
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+    content: [
+        // Your existing content paths
+        "./src/**/*.{js,jsx,ts,tsx}",
+        // Add the component library
+        "./node_modules/react-modern-gantt/**/*.{js,jsx,ts,tsx}",
+    ],
+    // Rest of your configuration
+};
+```
+
+### 3. Choose your import style
+
+#### For standard React projects:
 
 ```jsx
 import { GanttChart } from "react-modern-gantt";
 import "react-modern-gantt/dist/index.css"; // Import CSS styles
 
 function MyGanttChart() {
-    return (
-
-    );
+    return;
 }
 ```
 
-### Option 2: Auto-Styled Component (No CSS Import Needed)
+#### For Next.js projects:
 
 ```jsx
-import { GanttChartWithStyles } from "react-modern-gantt";
-// No need for separate CSS import!
+"use client"; // If using Next.js App Router
 
-function MyGanttChart() {
-    return (
-
-    );
-}
-```
-
-### Option 3: NextJS Integration (Client-Side Only)
-
-For Next.js applications, use the NextGanttChart component to avoid SSR errors:
-
-```jsx
 import { NextGanttChart } from "react-modern-gantt";
 import "react-modern-gantt/dist/index.css"; // Import CSS styles
 
-function MyNextJsGanttChart() {
-    return (
-
-    );
+function MyNextGanttChart() {
+    return;
 }
 ```
 
-### Create your task data
+#### No CSS import needed:
 
 ```jsx
-// Create your task data
-const tasks = [
-    {
-        id: "team-1",
-        name: "Engineering",
-        description: "Development Team",
-        tasks: [
-            {
-                id: "task-1",
-                name: "Website Redesign",
-                startDate: new Date(2023, 0, 1),
-                endDate: new Date(2023, 2, 15),
-                color: "bg-blue-500",
-                percent: 75,
-            },
-            // More tasks...
-        ],
-    },
-    // More groups...
-];
+import { GanttChartWithStyles } from "react-modern-gantt";
 
-// Handle task updates
-const handleTaskUpdate = (groupId, updatedTask) => {
-    // Update your task data here
-    console.log("Task updated:", updatedTask);
-};
+function MyGanttChart() {
+    return;
+}
 ```
 
 ## Core Concepts

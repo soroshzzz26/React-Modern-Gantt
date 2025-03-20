@@ -6,8 +6,11 @@ import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import autoprefixer from "autoprefixer";
 import { createFilter } from "@rollup/pluginutils";
-import tailwindcss from "@tailwindcss/postcss";
 import pkg from "./package.json";
+
+// Detect Tailwind version - use v4 for build but ensure compatibility with v3
+const isV4 = true;
+const tailwindPlugin = isV4 ? require("@tailwindcss/postcss") : require("tailwindcss");
 
 export default {
     input: "src/index.ts",
@@ -79,7 +82,11 @@ ${code}`,
             },
         }),
         postcss({
-            plugins: [tailwindcss(), autoprefixer()],
+            plugins: [
+                // Detect whether to use tailwindcss or @tailwindcss/postcss
+                isV4 ? tailwindPlugin() : tailwindPlugin,
+                autoprefixer(),
+            ],
             minimize: true,
             modules: false,
             inject: false,
@@ -98,5 +105,5 @@ ${code}`,
         }),
         terser(),
     ],
-    external: ["react", "react-dom", "date-fns", "next/dynamic"],
+    external: ["react", "react-dom", "date-fns", "next/dynamic", "tailwindcss"],
 };
