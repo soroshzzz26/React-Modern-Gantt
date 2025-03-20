@@ -1,11 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import CodeExample from "../components/demo/CodeExample";
+import GanttCodeExample from "../components/demo/GanttCodeExample";
 import { Link } from "react-router-dom";
+
+// Import shadcn components
+import { Card, CardContent } from "../components/ui/card";
 
 const ComponentsPage: React.FC = () => {
     const { darkMode } = useTheme();
     const [activeSection, setActiveSection] = useState("gantt-chart");
+
+    // Watch for hash changes to update the active section
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                setActiveSection(hash);
+                // Scroll to the section
+                const element = document.getElementById(hash);
+                if (element) {
+                    element.scrollIntoView({ behavior: "smooth" });
+                }
+            }
+        };
+
+        // Check on mount
+        handleHashChange();
+
+        // Setup event listener
+        window.addEventListener("hashchange", handleHashChange);
+        return () => {
+            window.removeEventListener("hashchange", handleHashChange);
+        };
+    }, []);
 
     // Navigation sections
     const sections = [
@@ -237,6 +266,18 @@ export default ProjectTimeline;`,
         if (element) {
             element.scrollIntoView({ behavior: "smooth" });
         }
+        // Update URL without reloading the page
+        window.history.pushState(null, "", `#${id}`);
+    };
+
+    // Animations for sections
+    const sectionVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5 },
+        },
     };
 
     return (
@@ -253,7 +294,7 @@ export default ProjectTimeline;`,
                                 <li key={section.id}>
                                     <button
                                         onClick={() => scrollToSection(section.id)}
-                                        className={`block text-left w-full px-3 py-2 rounded-md ${
+                                        className={`block text-left w-full px-3 py-2 rounded-md transition-colors duration-200 ${
                                             activeSection === section.id
                                                 ? `${
                                                       darkMode
@@ -290,12 +331,22 @@ export default ProjectTimeline;`,
 
                 {/* Main content */}
                 <div className="lg:col-span-9">
-                    <h1 className={`text-3xl font-bold mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    <motion.h1
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className={`text-3xl font-bold mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}>
                         Component Documentation
-                    </h1>
+                    </motion.h1>
 
                     {/* GanttChart Section */}
-                    <section id="gantt-chart" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="gantt-chart"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             GanttChart Component
                         </h2>
@@ -310,10 +361,16 @@ export default ProjectTimeline;`,
                             code={codeExamples.ganttChartImport}
                             language="javascript"
                         />
-                    </section>
+                    </motion.section>
 
                     {/* Task Interfaces Section */}
-                    <section id="task-interfaces" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="task-interfaces"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             Task Interfaces
                         </h2>
@@ -328,10 +385,16 @@ export default ProjectTimeline;`,
                             code={codeExamples.taskInterfaces}
                             language="typescript"
                         />
-                    </section>
+                    </motion.section>
 
                     {/* Props Section */}
-                    <section id="props" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="props"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             Core Props
                         </h2>
@@ -339,75 +402,104 @@ export default ProjectTimeline;`,
                             The GanttChart component accepts several props to customize its behavior and appearance.
                         </p>
 
-                        <CodeExample
+                        <GanttCodeExample
                             title="Basic Props"
                             description="Here are the most commonly used props for configuring the GanttChart."
                             code={codeExamples.coreProps}
-                            language="jsx"
                         />
 
-                        <div className={`mt-8 p-6 rounded-lg ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
-                            <h3 className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
-                                Props Reference
-                            </h3>
+                        <Card
+                            className={`mt-8 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+                            <CardContent className="pt-6">
+                                <h3
+                                    className={`text-lg font-semibold mb-4 ${
+                                        darkMode ? "text-white" : "text-gray-900"
+                                    }`}>
+                                    Props Reference
+                                </h3>
 
-                            <div className={`overflow-x-auto ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <th className="text-left py-3 px-4 font-semibold">Prop</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Type</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Default</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Description</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">tasks</td>
-                                            <td className="py-3 px-4">TaskGroup[]</td>
-                                            <td className="py-3 px-4">[]</td>
-                                            <td className="py-3 px-4">Array of task groups</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">title</td>
-                                            <td className="py-3 px-4">string</td>
-                                            <td className="py-3 px-4">"Project Timeline"</td>
-                                            <td className="py-3 px-4">Title displayed at the top of the chart</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">viewMode</td>
-                                            <td className="py-3 px-4">ViewMode</td>
-                                            <td className="py-3 px-4">ViewMode.MONTH</td>
-                                            <td className="py-3 px-4">
-                                                Timeline display mode (day, week, month, quarter, year)
-                                            </td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">editMode</td>
-                                            <td className="py-3 px-4">boolean</td>
-                                            <td className="py-3 px-4">true</td>
-                                            <td className="py-3 px-4">Whether tasks can be dragged/resized</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">showProgress</td>
-                                            <td className="py-3 px-4">boolean</td>
-                                            <td className="py-3 px-4">false</td>
-                                            <td className="py-3 px-4">Whether to show progress indicators</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-3 px-4 font-medium">darkMode</td>
-                                            <td className="py-3 px-4">boolean</td>
-                                            <td className="py-3 px-4">false</td>
-                                            <td className="py-3 px-4">Whether to use dark mode theme</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </section>
+                                <div className={`overflow-x-auto ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                    <table className="min-w-full">
+                                        <thead>
+                                            <tr
+                                                className={`border-b ${
+                                                    darkMode ? "border-gray-700" : "border-gray-200"
+                                                }`}>
+                                                <th className="text-left py-3 px-4 font-semibold">Prop</th>
+                                                <th className="text-left py-3 px-4 font-semibold">Type</th>
+                                                <th className="text-left py-3 px-4 font-semibold">Default</th>
+                                                <th className="text-left py-3 px-4 font-semibold">Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr
+                                                className={`border-b ${
+                                                    darkMode ? "border-gray-700" : "border-gray-200"
+                                                }`}>
+                                                <td className="py-3 px-4 font-medium">tasks</td>
+                                                <td className="py-3 px-4">TaskGroup[]</td>
+                                                <td className="py-3 px-4">[]</td>
+                                                <td className="py-3 px-4">Array of task groups</td>
+                                            </tr>
+                                            <tr
+                                                className={`border-b ${
+                                                    darkMode ? "border-gray-700" : "border-gray-200"
+                                                }`}>
+                                                <td className="py-3 px-4 font-medium">title</td>
+                                                <td className="py-3 px-4">string</td>
+                                                <td className="py-3 px-4">"Project Timeline"</td>
+                                                <td className="py-3 px-4">Title displayed at the top of the chart</td>
+                                            </tr>
+                                            <tr
+                                                className={`border-b ${
+                                                    darkMode ? "border-gray-700" : "border-gray-200"
+                                                }`}>
+                                                <td className="py-3 px-4 font-medium">viewMode</td>
+                                                <td className="py-3 px-4">ViewMode</td>
+                                                <td className="py-3 px-4">ViewMode.MONTH</td>
+                                                <td className="py-3 px-4">
+                                                    Timeline display mode (day, week, month, quarter, year)
+                                                </td>
+                                            </tr>
+                                            <tr
+                                                className={`border-b ${
+                                                    darkMode ? "border-gray-700" : "border-gray-200"
+                                                }`}>
+                                                <td className="py-3 px-4 font-medium">editMode</td>
+                                                <td className="py-3 px-4">boolean</td>
+                                                <td className="py-3 px-4">true</td>
+                                                <td className="py-3 px-4">Whether tasks can be dragged/resized</td>
+                                            </tr>
+                                            <tr
+                                                className={`border-b ${
+                                                    darkMode ? "border-gray-700" : "border-gray-200"
+                                                }`}>
+                                                <td className="py-3 px-4 font-medium">showProgress</td>
+                                                <td className="py-3 px-4">boolean</td>
+                                                <td className="py-3 px-4">false</td>
+                                                <td className="py-3 px-4">Whether to show progress indicators</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="py-3 px-4 font-medium">darkMode</td>
+                                                <td className="py-3 px-4">boolean</td>
+                                                <td className="py-3 px-4">false</td>
+                                                <td className="py-3 px-4">Whether to use dark mode theme</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.section>
 
                     {/* Event Handlers Section */}
-                    <section id="events" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="events"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             Event Handlers
                         </h2>
@@ -415,60 +507,21 @@ export default ProjectTimeline;`,
                             The GanttChart component provides several event handlers to respond to user interactions.
                         </p>
 
-                        <CodeExample
+                        <GanttCodeExample
                             title="Event Handlers"
                             description="Use these event handlers to respond to user actions."
                             code={codeExamples.eventHandlers}
-                            language="jsx"
                         />
-
-                        <div className={`mt-8 p-6 rounded-lg ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
-                            <h3 className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
-                                Event Handler Reference
-                            </h3>
-
-                            <div className={`overflow-x-auto ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <th className="text-left py-3 px-4 font-semibold">Handler</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Parameters</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Description</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">onTaskUpdate</td>
-                                            <td className="py-3 px-4">
-                                                (groupId: string, updatedTask: Task) ={">"} void
-                                            </td>
-                                            <td className="py-3 px-4">
-                                                Called when a task is moved, resized, or progress updated
-                                            </td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">onTaskClick</td>
-                                            <td className="py-3 px-4">(task: Task, group: TaskGroup) ={">"} void</td>
-                                            <td className="py-3 px-4">Called when a task is clicked</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">onTaskSelect</td>
-                                            <td className="py-3 px-4">(task: Task, isSelected: boolean) ={">"} void</td>
-                                            <td className="py-3 px-4">Called when a task is selected</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-3 px-4 font-medium">onViewModeChange</td>
-                                            <td className="py-3 px-4">(viewMode: ViewMode) ={">"} void</td>
-                                            <td className="py-3 px-4">Called when view mode changes</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </section>
+                    </motion.section>
 
                     {/* View Modes Section */}
-                    <section id="view-modes" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="view-modes"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             View Modes
                         </h2>
@@ -483,55 +536,16 @@ export default ProjectTimeline;`,
                             code={codeExamples.viewModes}
                             language="jsx"
                         />
-
-                        <div className={`mt-8 p-6 rounded-lg ${darkMode ? "bg-gray-800" : "bg-gray-50"}`}>
-                            <h3 className={`text-lg font-semibold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
-                                View Mode Reference
-                            </h3>
-
-                            <div className={`overflow-x-auto ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <th className="text-left py-3 px-4 font-semibold">View Mode</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Description</th>
-                                            <th className="text-left py-3 px-4 font-semibold">Best Used For</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">DAY</td>
-                                            <td className="py-3 px-4">Shows individual days</td>
-                                            <td className="py-3 px-4">Detailed short-term planning (days/weeks)</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">WEEK</td>
-                                            <td className="py-3 px-4">Shows weeks</td>
-                                            <td className="py-3 px-4">Short to medium-term planning (weeks/months)</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">MONTH</td>
-                                            <td className="py-3 px-4">Shows months (default)</td>
-                                            <td className="py-3 px-4">Medium-term planning (months/quarters)</td>
-                                        </tr>
-                                        <tr className={`border-b ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-                                            <td className="py-3 px-4 font-medium">QUARTER</td>
-                                            <td className="py-3 px-4">Shows quarters</td>
-                                            <td className="py-3 px-4">Medium to long-term planning (quarters/year)</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-3 px-4 font-medium">YEAR</td>
-                                            <td className="py-3 px-4">Shows years</td>
-                                            <td className="py-3 px-4">Long-term planning (years)</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </section>
+                    </motion.section>
 
                     {/* Customization Section */}
-                    <section id="customization" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="customization"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             Customization
                         </h2>
@@ -539,23 +553,21 @@ export default ProjectTimeline;`,
                             The GanttChart component offers several ways to customize its appearance.
                         </p>
 
-                        <CodeExample
+                        <GanttCodeExample
                             title="Custom Styling"
                             description="Customize the appearance of the Gantt chart using Tailwind CSS classes."
                             code={codeExamples.customStyling}
-                            language="jsx"
                         />
-
-                        <CodeExample
-                            title="Custom Task Rendering"
-                            description="Completely customize the appearance of individual tasks by providing a custom render function."
-                            code={codeExamples.customTaskRender}
-                            language="jsx"
-                        />
-                    </section>
+                    </motion.section>
 
                     {/* Examples Section */}
-                    <section id="examples" className="mb-16 scroll-mt-24">
+                    <motion.section
+                        id="examples"
+                        className="mb-16 scroll-mt-24"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={sectionVariants}>
                         <h2 className={`text-2xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
                             Complete Code Example
                         </h2>
@@ -564,19 +576,22 @@ export default ProjectTimeline;`,
                             and event handling.
                         </p>
 
-                        <CodeExample
+                        <GanttCodeExample
                             title="Complete Example"
                             description="A full implementation of the GanttChart with state management."
                             code={codeExamples.completeExample}
-                            language="tsx"
                         />
-                    </section>
+                    </motion.section>
 
-                    {/* Back to top button */}
-                    <div className="text-center mt-12">
+                    {/* Back to top button with animation */}
+                    <motion.div
+                        className="text-center mt-12"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}>
                         <button
                             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                            className={`inline-flex items-center px-4 py-2 rounded-md ${
+                            className={`inline-flex items-center px-4 py-2 rounded-md transition-colors duration-200 ${
                                 darkMode
                                     ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
                                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -591,7 +606,7 @@ export default ProjectTimeline;`,
                             </svg>
                             Back to Top
                         </button>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </div>
