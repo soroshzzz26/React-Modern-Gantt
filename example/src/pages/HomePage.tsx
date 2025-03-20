@@ -72,7 +72,7 @@ yarn add react-modern-gantt`;
                 </p>
                 <div className="mt-8 flex justify-center gap-4">
                     <a
-                        href="https://github.com/yourusername/react-modern-gantt"
+                        href="https://github.com/MikaStiebitz/React-Modern-Gantt/"
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`px-6 py-3 rounded-md text-base font-medium ${
