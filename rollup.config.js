@@ -6,6 +6,7 @@ import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import autoprefixer from "autoprefixer";
 import { createFilter } from "@rollup/pluginutils";
+import tailwindcss from "@tailwindcss/postcss";
 import pkg from "./package.json";
 
 export default {
@@ -56,11 +57,24 @@ export default {
             },
         }),
         postcss({
-            plugins: [autoprefixer()],
+            plugins: [tailwindcss(), autoprefixer()],
             minimize: true,
-            extract: "dist/styles.css",
+            // extract: "dist/styles.css",
             modules: false,
             inject: false,
+            // Ensure all Tailwind classes are included
+            extract: true,
+            config: {
+                path: "./postcss.config.mjs",
+                ctx: {
+                    // Ensure purge is disabled
+                    env: "production",
+                    tailwindcss: {
+                        content: ["./src/**/*.{js,jsx,ts,tsx}"],
+                        safelist: [{ pattern: /.*/ }], // Include all classes
+                    },
+                },
+            },
         }),
         terser(),
     ],

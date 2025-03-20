@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import CodeBlock from "../common/CodeBlock";
@@ -25,7 +25,6 @@ const CodeExample: React.FC<CodeExampleProps> = ({
     showCopyButton = true,
 }) => {
     const { darkMode } = useTheme();
-    const [showCode, setShowCode] = useState(true);
 
     // If no demo component is provided, just show the code example
     if (!demoComponent) {
