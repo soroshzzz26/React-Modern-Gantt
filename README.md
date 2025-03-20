@@ -30,9 +30,9 @@ React Modern Gantt is designed to be compatible with a wide range of project set
 -   **Tailwind CSS**: Compatible with both Tailwind CSS v3 and v4
 -   **TypeScript/JavaScript**: Full TypeScript type definitions included, but works perfectly with JavaScript projects too
 
-## Installation & Setup
+## Installation & Usage
 
-### 1. Install the package
+### Simple Installation
 
 ```bash
 npm install react-modern-gantt
@@ -40,58 +40,72 @@ npm install react-modern-gantt
 yarn add react-modern-gantt
 ```
 
-### 2. Update your Tailwind configuration
-
-If you're using Tailwind CSS in your project, make sure to add the package to your content sources:
-
-```js
-// tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-    content: [
-        // Your existing content paths
-        "./src/**/*.{js,jsx,ts,tsx}",
-        // Add the component library
-        "./node_modules/react-modern-gantt/**/*.{js,jsx,ts,tsx}",
-    ],
-    // Rest of your configuration
-};
-```
-
-### 3. Choose your import style
-
-#### For standard React projects:
+### Zero-Configuration Usage
 
 ```jsx
+import GanttChart from "react-modern-gantt";
+
+function MyApp() {
+  const tasks = [
+    {
+      id: "team-1",
+      name: "Engineering",
+      description: "Development Team",
+      tasks: [
+        {
+          id: "task-1",
+          name: "Website Redesign",
+          startDate: new Date(2023, 0, 1),
+          endDate: new Date(2023, 2, 15),
+          color: "bg-blue-500",
+          percent: 75,
+        },
+        // More tasks...
+      ],
+    },
+    // More groups...
+  ];
+
+  const handleTaskUpdate = (groupId, updatedTask) => {
+    console.log("Task updated:", updatedTask);
+    // Update your state here
+  };
+
+  return (
+
+  );
+}
+```
+
+That's it! No additional configuration required. The component comes fully styled and ready to use.
+
+### Advanced Usage Options
+
+If you need more control, you can use specific imports:
+
+```jsx
+// Standard GanttChart component (you'll need to import CSS separately)
 import { GanttChart } from "react-modern-gantt";
-import "react-modern-gantt/dist/index.css"; // Import CSS styles
+import "react-modern-gantt/dist/index.css";
 
-function MyGanttChart() {
-    return;
-}
-```
-
-#### For Next.js projects:
-
-```jsx
-"use client"; // If using Next.js App Router
-
-import { NextGanttChart } from "react-modern-gantt";
-import "react-modern-gantt/dist/index.css"; // Import CSS styles
-
-function MyNextGanttChart() {
-    return;
-}
-```
-
-#### No CSS import needed:
-
-```jsx
+// Fully styled version (explicit import, same as default)
 import { GanttChartWithStyles } from "react-modern-gantt";
 
-function MyGanttChart() {
-    return;
-}
+// Next.js specific version
+import { NextGanttChart } from "react-modern-gantt";
+```
+
+### Typescript Support
+
+Full TypeScript definitions are included. Import types as needed:
+
+```tsx
+import { GanttChart, Task, TaskGroup, ViewMode } from "react-modern-gantt";
+
+// Define your tasks with proper typing
+const tasks: TaskGroup[] = [
+    // Your typed tasks here
+];
 ```
 
 ## Core Concepts

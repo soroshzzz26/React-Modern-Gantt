@@ -8,10 +8,6 @@ import autoprefixer from "autoprefixer";
 import { createFilter } from "@rollup/pluginutils";
 import pkg from "./package.json";
 
-// Detect Tailwind version - use v4 for build but ensure compatibility with v3
-const isV4 = true;
-const tailwindPlugin = isV4 ? require("@tailwindcss/postcss") : require("tailwindcss");
-
 export default {
     input: "src/index.ts",
     output: [
@@ -50,28 +46,6 @@ export default {
                 };
             },
         },
-        // Add banner to direct users to import styles if needed
-        {
-            name: "add-style-warning",
-            renderChunk(code, chunk, options) {
-                if (chunk.fileName.endsWith(".js") || chunk.fileName.endsWith(".esm.js")) {
-                    return {
-                        code: `/**
- * React Modern Gantt
- *
- * IMPORTANT: You may need to import the stylesheet:
- * import "react-modern-gantt/dist/index.css";
- *
- * Or import the withStyles variant:
- * import { GanttChartWithStyles } from "react-modern-gantt";
- */
-${code}`,
-                        map: { mappings: "" },
-                    };
-                }
-                return null;
-            },
-        },
         typescript({
             tsconfig: "./tsconfig.json",
             exclude: ["**/__tests__/**", "**/examples/**", "**/example/**"],
@@ -82,28 +56,21 @@ ${code}`,
             },
         }),
         postcss({
-            plugins: [
-                // Detect whether to use tailwindcss or @tailwindcss/postcss
-                isV4 ? tailwindPlugin() : tailwindPlugin,
-                autoprefixer(),
-            ],
+            plugins: [autoprefixer()],
             minimize: true,
             modules: false,
-            inject: false,
-            // Extract styles to separate file
+            // Change to TRUE to inject CSS into JS (for self-contained styling)
+            inject: true,
+            // Still extract the CSS for those who want to import it directly
             extract: "index.css",
             config: {
                 path: "./postcss.config.mjs",
                 ctx: {
                     env: "production",
-                    tailwindcss: {
-                        content: ["./src/**/*.{js,jsx,ts,tsx}"],
-                        safelist: [{ pattern: /.*/ }], // Include all classes
-                    },
                 },
             },
         }),
         terser(),
     ],
-    external: ["react", "react-dom", "date-fns", "next/dynamic", "tailwindcss"],
+    external: ["react", "react-dom", "date-fns"],
 };

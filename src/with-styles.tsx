@@ -1,18 +1,20 @@
 import React from "react";
 import { GanttChartProps } from "./types";
-import { GanttChart as UnstyledGanttChart } from "./components/core";
+import { GanttChart } from "./components/core";
+
+// Import CSS directly to ensure it's bundled with the component
 import "./styles/gantt.css";
 
 /**
- * GanttChartWithStyles - A convenience component that automatically imports CSS
- * Use this component if you want to avoid manually importing styles.
+ * GanttChartWithStyles - A fully styled component with no external dependencies
+ * Use this component for a zero-configuration experience.
  *
- * Usage:
- * import { GanttChartWithStyles } from 'react-modern-gantt';
- * // No need to import 'react-modern-gantt/dist/index.css'
+ * The styling is self-contained and doesn't require any Tailwind configuration
+ * or separate CSS imports.
  */
-const GanttChart: React.FC<GanttChartProps> = props => {
-    return <UnstyledGanttChart {...props} />;
+const GanttChartWithStyles: React.FC<GanttChartProps> = props => {
+    return <GanttChart {...props} />;
 };
 
-export default GanttChart;
+export { GanttChartWithStyles };
+export default GanttChartWithStyles;

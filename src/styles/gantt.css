@@ -1,20 +1,56 @@
-/* Import Tailwind directives to ensure compatibility with both v3 and v4 */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /**
- * React Modern Gantt CSS - Compatible with Tailwind v3 and v4
+ * React Modern Gantt - Standalone CSS
+ * This version contains all necessary styling without depending on Tailwind processing
  */
 
-/* Custom CSS variables for theming - removed @layer theme for v3 compatibility */
+/* Set up color variables */
 :root {
-    --rmg-tooltip-bg: #ffffff;
-    --rmg-tooltip-text: #1f2937;
-    --rmg-tooltip-border: #e5e7eb;
+    /* Base colors */
+    --color-white: #ffffff;
+    --color-black: #000000;
+
+    /* Gray scale */
+    --color-gray-50: #f9fafb;
+    --color-gray-100: #f3f4f6;
+    --color-gray-200: #e5e7eb;
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+    --color-gray-800: #1f2937;
+    --color-gray-900: #111827;
+
+    /* Blue scale */
+    --color-blue-50: #eff6ff;
+    --color-blue-100: #dbeafe;
+    --color-blue-500: #3b82f6;
+    --color-blue-600: #2563eb;
+    --color-blue-700: #1d4ed8;
+
+    /* Red scale */
+    --color-red-500: #ef4444;
+
+    /* Indigo scale */
+    --color-indigo-500: #6366f1;
+    --color-indigo-600: #4f46e5;
+
+    /* Component-specific colors */
+    --color-gantt-bg: var(--color-white);
+    --color-gantt-text: var(--color-gray-800);
+    --color-gantt-border: var(--color-gray-200);
+    --color-gantt-highlight: var(--color-blue-50);
+    --color-gantt-marker: var(--color-red-500);
+    --color-gantt-task: var(--color-blue-500);
+    --color-gantt-task-text: var(--color-white);
+
+    /* Utility variables */
+    --rmg-tooltip-bg: var(--color-white);
+    --rmg-tooltip-text: var(--color-gray-800);
+    --rmg-tooltip-border: var(--color-gray-200);
     --rmg-resize-handle: rgba(255, 255, 255, 0.3);
     --rmg-progress-bg: rgba(0, 0, 0, 0.2);
-    --rmg-progress-fill: #ffffff;
+    --rmg-progress-fill: var(--color-white);
     --rmg-shadow: rgba(0, 0, 0, 0.1);
     --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
     --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
@@ -25,35 +61,437 @@
     --rmg-task-drag-transition: transform 0.05s cubic-bezier(0.2, 0, 0.13, 2),
         box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
     --rmg-task-release-transition: all 0.2s cubic-bezier(0.2, 0, 0.13, 2);
-
-    --color-gantt-bg: #ffffff;
-    --color-gantt-text: #1f2937;
-    --color-gantt-border: #e5e7eb;
-    --color-gantt-highlight: #eff6ff;
-    --color-gantt-marker: #ef4444;
-    --color-gantt-task: #3b82f6;
-    --color-gantt-task-text: #ffffff;
 }
 
+/* Dark mode theme */
 .dark {
-    /* Dark mode theme */
-    --rmg-tooltip-bg: #1f2937;
-    --rmg-tooltip-text: #f3f4f6;
-    --rmg-tooltip-border: #374151;
+    --color-gantt-bg: var(--color-gray-800);
+    --color-gantt-text: var(--color-gray-100);
+    --color-gantt-border: var(--color-gray-700);
+    --color-gantt-highlight: var(--color-gray-700);
+    --color-gantt-marker: var(--color-red-500);
+    --color-gantt-task: var(--color-indigo-600);
+    --color-gantt-task-text: var(--color-white);
+
+    --rmg-tooltip-bg: var(--color-gray-800);
+    --rmg-tooltip-text: var(--color-gray-100);
+    --rmg-tooltip-border: var(--color-gray-700);
     --rmg-resize-handle: rgba(255, 255, 255, 0.4);
     --rmg-progress-bg: rgba(0, 0, 0, 0.3);
-    --rmg-progress-fill: #e5e7eb;
+    --rmg-progress-fill: var(--color-gray-200);
     --rmg-shadow: rgba(0, 0, 0, 0.3);
     --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
     --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
+}
 
-    --color-gantt-bg: #1f2937;
-    --color-gantt-text: #f3f4f6;
-    --color-gantt-border: #374151;
-    --color-gantt-highlight: #374151;
-    --color-gantt-marker: #ef4444;
-    --color-gantt-task: #4f46e5;
-    --color-gantt-task-text: #ffffff;
+/* Common utility classes needed by components */
+.w-full {
+    width: 100%;
+}
+.h-full {
+    height: 100%;
+}
+.max-w-4xl {
+    max-width: 56rem;
+}
+.min-w-max {
+    min-width: max-content;
+}
+.flex {
+    display: flex;
+}
+.flex-grow {
+    flex-grow: 1;
+}
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+.items-center {
+    align-items: center;
+}
+.justify-between {
+    justify-content: space-between;
+}
+.rounded,
+.rounded-md {
+    border-radius: 0.375rem;
+}
+.rounded-xl {
+    border-radius: 0.75rem;
+}
+.rounded-full {
+    border-radius: 9999px;
+}
+.shadow-lg {
+    box-shadow: 0 10px 15px -3px var(--rmg-shadow), 0 4px 6px -4px var(--rmg-shadow);
+}
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 var(--rmg-shadow);
+}
+.shadow-md {
+    box-shadow: 0 4px 6px -1px var(--rmg-shadow), 0 2px 4px -2px var(--rmg-shadow);
+}
+.overflow-hidden {
+    overflow: hidden;
+}
+.overflow-x-auto {
+    overflow-x: auto;
+}
+.overflow-y-hidden {
+    overflow-y: hidden;
+}
+.relative {
+    position: relative;
+}
+.absolute {
+    position: absolute;
+}
+.z-10 {
+    z-index: 10;
+}
+.z-20 {
+    z-index: 20;
+}
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.select-none {
+    user-select: none;
+}
+.whitespace-nowrap {
+    white-space: nowrap;
+}
+.text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+.text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+.text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+.text-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+.text-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+.font-medium {
+    font-weight: 500;
+}
+.font-semibold {
+    font-weight: 600;
+}
+.font-bold {
+    font-weight: 700;
+}
+.italic {
+    font-style: italic;
+}
+.p-2 {
+    padding: 0.5rem;
+}
+.p-4 {
+    padding: 1rem;
+}
+.p-6 {
+    padding: 1.5rem;
+}
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+.pt-0 {
+    padding-top: 0;
+}
+.pb-0 {
+    padding-bottom: 0;
+}
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+.ml-2 {
+    margin-left: 0.5rem;
+}
+.mr-2 {
+    margin-right: 0.5rem;
+}
+.mt-1 {
+    margin-top: 0.25rem;
+}
+.mt-6 {
+    margin-top: 1.5rem;
+}
+.h-8 {
+    height: 2rem;
+}
+.h-10 {
+    height: 2.5rem;
+}
+.h-16 {
+    height: 4rem;
+}
+.w-2 {
+    width: 0.5rem;
+}
+.w-4 {
+    width: 1rem;
+}
+.w-6 {
+    width: 1.5rem;
+}
+.w-40 {
+    width: 10rem;
+}
+.gap-x-2 {
+    column-gap: 0.5rem;
+}
+.gap-y-1 {
+    row-gap: 0.25rem;
+}
+.grid {
+    display: grid;
+}
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.border {
+    border-width: 1px;
+}
+.border-b {
+    border-bottom-width: 1px;
+}
+.border-r {
+    border-right-width: 1px;
+}
+.border-t {
+    border-top-width: 1px;
+}
+.border-l {
+    border-left-width: 1px;
+}
+.left-0 {
+    left: 0;
+}
+.right-0 {
+    right: 0;
+}
+.top-0 {
+    top: 0;
+}
+.bottom-0 {
+    bottom: 0;
+}
+.left-1 {
+    left: 0.25rem;
+}
+.right-1 {
+    right: 0.25rem;
+}
+.bottom-1 {
+    bottom: 0.25rem;
+}
+.left-1\/2 {
+    left: 50%;
+}
+.top-1\/2 {
+    top: 50%;
+}
+.transform {
+    transform: translateX(0);
+}
+.translate-x-1\/2 {
+    transform: translateX(50%);
+}
+.-translate-x-1\/2 {
+    transform: translateX(-50%);
+}
+.translate-y-1\/2 {
+    transform: translateY(50%);
+}
+.-translate-y-1\/2 {
+    transform: translateY(-50%);
+}
+.scale-110 {
+    transform: scale(1.1);
+}
+.transition-all {
+    transition-property: all;
+}
+.transition-colors {
+    transition-property: color, background-color, border-color;
+}
+.transition-shadow {
+    transition-property: box-shadow;
+}
+.duration-150 {
+    transition-duration: 150ms;
+}
+.duration-200 {
+    transition-duration: 200ms;
+}
+.duration-300 {
+    transition-duration: 300ms;
+}
+.ease-in-out {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cursor-move {
+    cursor: move;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.cursor-ew-resize {
+    cursor: ew-resize;
+}
+.cursor-grabbing {
+    cursor: grabbing;
+}
+.space-x-1 > * + * {
+    margin-left: 0.25rem;
+}
+.space-x-2 > * + * {
+    margin-left: 0.5rem;
+}
+.space-x-4 > * + * {
+    margin-left: 1rem;
+}
+.space-y-1 > * + * {
+    margin-top: 0.25rem;
+}
+.text-center {
+    text-align: center;
+}
+.text-left {
+    text-align: left;
+}
+.text-right {
+    text-align: right;
+}
+
+/* Color utility classes */
+.bg-white {
+    background-color: var(--color-white);
+}
+.bg-gray-50 {
+    background-color: var(--color-gray-50);
+}
+.bg-gray-100 {
+    background-color: var(--color-gray-100);
+}
+.bg-gray-700 {
+    background-color: var(--color-gray-700);
+}
+.bg-gray-800 {
+    background-color: var(--color-gray-800);
+}
+.bg-blue-50 {
+    background-color: var(--color-blue-50);
+}
+.bg-blue-500 {
+    background-color: var(--color-blue-500);
+}
+.bg-blue-600 {
+    background-color: var(--color-blue-600);
+}
+.bg-indigo-500 {
+    background-color: var(--color-indigo-500);
+}
+.bg-indigo-600 {
+    background-color: var(--color-indigo-600);
+}
+.bg-red-500 {
+    background-color: var(--color-red-500);
+}
+.bg-gantt-bg {
+    background-color: var(--color-gantt-bg);
+}
+.bg-gantt-highlight {
+    background-color: var(--color-gantt-highlight);
+}
+.bg-gantt-marker {
+    background-color: var(--color-gantt-marker);
+}
+.bg-gantt-task {
+    background-color: var(--color-gantt-task);
+}
+
+.text-white {
+    color: var(--color-white);
+}
+.text-black {
+    color: var(--color-black);
+}
+.text-gray-200 {
+    color: var(--color-gray-200);
+}
+.text-gray-400 {
+    color: var(--color-gray-400);
+}
+.text-gray-500 {
+    color: var(--color-gray-500);
+}
+.text-gray-700 {
+    color: var(--color-gray-700);
+}
+.text-gray-800 {
+    color: var(--color-gray-800);
+}
+.text-blue-400 {
+    color: var(--color-blue-400);
+}
+.text-blue-500 {
+    color: var(--color-blue-500);
+}
+.text-gantt-text {
+    color: var(--color-gantt-text);
+}
+.text-gantt-task-text {
+    color: var(--color-gantt-task-text);
+}
+
+.border-gray-200 {
+    border-color: var(--color-gray-200);
+}
+.border-gray-700 {
+    border-color: var(--color-gray-700);
+}
+.border-blue-500 {
+    border-color: var(--color-blue-500);
+}
+.border-blue-400 {
+    border-color: var(--color-blue-400);
+}
+.border-gantt-border {
+    border-color: var(--color-gantt-border);
+}
+
+/* Component styles */
+.rmg-gantt-chart {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial,
+        sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-gantt-text);
+    background-color: var(--color-gantt-bg);
 }
 
 /* Hover and active states for task items */
@@ -124,12 +562,6 @@
 
 [data-task-id]:hover .rmg-resize-handle {
     opacity: 1;
-}
-
-/* Hardware acceleration for smoother animations */
-.rmg-gantt-chart {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Add subtle pulse animation to today marker */
@@ -255,4 +687,11 @@
 .rmg-progress-handle.dragging + .rmg-progress-tooltip {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .w-40 {
+        width: 6rem;
+    }
 }

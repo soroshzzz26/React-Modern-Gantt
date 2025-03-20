@@ -1,4 +1,3 @@
-import "./styles/gantt.css";
 /**
  * React Modern Gantt
  * A flexible, customizable Gantt chart component for React applications
@@ -6,9 +5,13 @@ import "./styles/gantt.css";
  * @module react-modern-gantt
  */
 
-// Core components
-// export { default as GanttChart } from "./components/core/GanttChart";
-export { default as NextGanttChart } from "./components/core/NextGanttChart";
+// Re-export self-contained GanttChart as default export
+import GanttChartWithStyles from "./with-styles";
+export default GanttChartWithStyles;
+
+// For users who want specific components
+export { GanttChart } from "./components/core";
+export { GanttChartWithStyles } from "./with-styles"; // For explicit imports
 
 // Task components
 export { TaskItem, TaskList, TaskRow } from "./components/task";
@@ -18,9 +21,6 @@ export { Timeline, TodayMarker } from "./components/timeline";
 
 // UI components
 export { Tooltip, ViewModeSelector } from "./components/ui";
-
-// Convenience exports with auto-styling
-export { default as GanttChart } from "./with-styles";
 
 // Types
 export type {
