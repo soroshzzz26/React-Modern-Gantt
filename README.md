@@ -32,10 +32,52 @@ yarn add react-modern-gantt
 
 ## Quick Start
 
+There are multiple ways to integrate React Modern Gantt into your application:
+
+### Option 1: Standard Import with CSS (Recommended)
+
 ```jsx
 import { GanttChart } from "react-modern-gantt";
-import "react-modern-gantt/dist/index.css"; // Load Tailwindcss styles
+import "react-modern-gantt/dist/index.css"; // Import CSS styles
 
+function MyGanttChart() {
+    return (
+
+    );
+}
+```
+
+### Option 2: Auto-Styled Component (No CSS Import Needed)
+
+```jsx
+import { GanttChartWithStyles } from "react-modern-gantt";
+// No need for separate CSS import!
+
+function MyGanttChart() {
+    return (
+
+    );
+}
+```
+
+### Option 3: NextJS Integration (Client-Side Only)
+
+For Next.js applications, use the NextGanttChart component to avoid SSR errors:
+
+```jsx
+import { NextGanttChart } from "react-modern-gantt";
+import "react-modern-gantt/dist/index.css"; // Import CSS styles
+
+function MyNextJsGanttChart() {
+    return (
+
+    );
+}
+```
+
+### Create your task data
+
+```jsx
 // Create your task data
 const tasks = [
     {
@@ -62,19 +104,6 @@ const handleTaskUpdate = (groupId, updatedTask) => {
     // Update your task data here
     console.log("Task updated:", updatedTask);
 };
-
-// Render the Gantt chart
-function MyGanttChart() {
-    return (
-        <GanttChart
-            tasks={tasks}
-            title="Project Timeline"
-            showProgress={true}
-            onTaskUpdate={handleTaskUpdate}
-            viewMode="month" // Options: "day", "week", "month", "quarter", "year"
-        />
-    );
-}
 ```
 
 ## Core Concepts

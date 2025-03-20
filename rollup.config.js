@@ -29,7 +29,7 @@ export default {
         peerDepsExternal(),
         resolve(),
         commonjs(),
-        // Custom plugin to handle "use client" directive with proper sourcemap support
+        // Handle "use client" directive with proper sourcemap support
         {
             name: "replace-use-client",
             transform(code, id) {
@@ -38,18 +38,40 @@ export default {
                 if (!filter(id)) return null;
 
                 // If the file doesn't include 'use client', return null (no transformation needed)
-                if (!code.includes('"use client"')) return null;
+                if (!code.includes('"use client"') && !code.includes("'use client'")) return null;
 
                 // Replace the directive
                 return {
-                    code: code.replace(/"use client";?\s*/, ""),
+                    code: code.replace(/'use client';?\s*|"use client";?\s*/g, ""),
                     map: { mappings: "" },
                 };
             },
         },
+        // Add banner to direct users to import styles if needed
+        {
+            name: "add-style-warning",
+            renderChunk(code, chunk, options) {
+                if (chunk.fileName.endsWith(".js") || chunk.fileName.endsWith(".esm.js")) {
+                    return {
+                        code: `/**
+ * React Modern Gantt
+ *
+ * IMPORTANT: You may need to import the stylesheet:
+ * import "react-modern-gantt/dist/index.css";
+ *
+ * Or import the withStyles variant:
+ * import { GanttChartWithStyles } from "react-modern-gantt";
+ */
+${code}`,
+                        map: { mappings: "" },
+                    };
+                }
+                return null;
+            },
+        },
         typescript({
             tsconfig: "./tsconfig.json",
-            exclude: ["**/__tests__/**", "**/examples/**"],
+            exclude: ["**/__tests__/**", "**/examples/**", "**/example/**"],
             compilerOptions: {
                 rootDir: "./src",
                 declaration: true,
@@ -59,15 +81,13 @@ export default {
         postcss({
             plugins: [tailwindcss(), autoprefixer()],
             minimize: true,
-            // extract: "dist/styles.css",
             modules: false,
             inject: false,
-            // Ensure all Tailwind classes are included
-            extract: true,
+            // Extract styles to separate file
+            extract: "index.css",
             config: {
                 path: "./postcss.config.mjs",
                 ctx: {
-                    // Ensure purge is disabled
                     env: "production",
                     tailwindcss: {
                         content: ["./src/**/*.{js,jsx,ts,tsx}"],
@@ -78,5 +98,5 @@ export default {
         }),
         terser(),
     ],
-    external: ["react", "react-dom", "date-fns"],
+    external: ["react", "react-dom", "date-fns", "next/dynamic"],
 };

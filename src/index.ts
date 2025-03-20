@@ -18,6 +18,9 @@ export { Timeline, TodayMarker } from "./components/timeline";
 // UI components
 export { Tooltip, ViewModeSelector } from "./components/ui";
 
+// Convenience exports with auto-styling
+export { default as GanttChartWithStyles } from "./with-styles";
+
 // Types
 export type {
     // Core types
@@ -47,7 +50,7 @@ export type {
     TaskInteraction,
 } from "./types";
 
-// Enmus
+// Enums
 export {
     // Enums
     ViewMode,
