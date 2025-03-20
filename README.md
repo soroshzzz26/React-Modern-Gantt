@@ -34,6 +34,7 @@ yarn add react-modern-gantt
 
 ```jsx
 import { GanttChart } from "react-modern-gantt";
+import "react-modern-gantt/dist/index.css"; // Load Tailwindcss styles
 
 // Create your task data
 const tasks = [
