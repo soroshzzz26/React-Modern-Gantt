@@ -7,7 +7,7 @@ import "./styles/gantt.css";
  */
 
 // Core components
-export { GanttChart } from "./components/core";
+// export { default as GanttChart } from "./components/core/GanttChart";
 export { default as NextGanttChart } from "./components/core/NextGanttChart";
 
 // Task components
@@ -20,7 +20,7 @@ export { Timeline, TodayMarker } from "./components/timeline";
 export { Tooltip, ViewModeSelector } from "./components/ui";
 
 // Convenience exports with auto-styling
-export { default as GanttChartWithStyles } from "./with-styles";
+export { default as GanttChart } from "./with-styles";
 
 // Types
 export type {

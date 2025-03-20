@@ -1,6 +1,6 @@
 import React from "react";
 import { GanttChartProps } from "./types";
-import { GanttChart } from "./components/core";
+import { GanttChart as UnstyledGanttChart } from "./components/core";
 import "./styles/gantt.css";
 
 /**
@@ -11,8 +11,8 @@ import "./styles/gantt.css";
  * import { GanttChartWithStyles } from 'react-modern-gantt';
  * // No need to import 'react-modern-gantt/dist/index.css'
  */
-const GanttChartWithStyles: React.FC<GanttChartProps> = props => {
-    return <GanttChart {...props} />;
+const GanttChart: React.FC<GanttChartProps> = props => {
+    return <UnstyledGanttChart {...props} />;
 };
 
-export default GanttChartWithStyles;
+export default GanttChart;
