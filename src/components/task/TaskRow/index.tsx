@@ -757,7 +757,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     return (
         <div
-            className={`relative border-b border-gray-200 dark:border-gray-700 ${className}`}
+            className={`relative border-b border-gray-200 dark:border-gray-700 text-gantt-task-text ${className}`}
             style={{ height: `${rowHeight}px` }}
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}

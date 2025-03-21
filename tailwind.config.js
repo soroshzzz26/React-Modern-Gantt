@@ -12,6 +12,7 @@ module.exports = {
                 "gantt-marker": "var(--color-gantt-marker)",
                 "gantt-task": "var(--color-gantt-task)",
                 "gantt-task-text": "var(--color-gantt-task-text)",
+                "border-gantt-border": "var(--color-border-gantt-border)",
             },
         },
     },

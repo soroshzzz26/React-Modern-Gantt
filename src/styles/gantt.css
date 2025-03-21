@@ -43,6 +43,7 @@
     --color-gantt-marker: var(--color-red-500);
     --color-gantt-task: var(--color-blue-500);
     --color-gantt-task-text: var(--color-white);
+    --color-border-gantt-border: var(--color-gray-200);
 
     /* Utility variables */
     --rmg-tooltip-bg: var(--color-white);
@@ -77,6 +78,7 @@
     --color-gantt-marker: var(--color-red-500);
     --color-gantt-task: var(--color-indigo-600);
     --color-gantt-task-text: var(--color-white);
+    --color-border-gantt-border: var(--color-gray-700);
 
     --rmg-tooltip-bg: var(--color-gray-800);
     --rmg-tooltip-text: var(--color-gray-100);

@@ -76,6 +76,7 @@ const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }: DemoViewModes
                 darkMode={darkMode}
                 showProgress={true}
                 viewMode={viewMode}
+                viewModes={[ViewMode.DAY, ViewMode.WEEK, ViewMode.MONTH, ViewMode.QUARTER, ViewMode.YEAR]}
                 onViewModeChange={handleViewModeChange}
                 onTaskUpdate={handleTaskUpdate}
             />

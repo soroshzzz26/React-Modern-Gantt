@@ -68,10 +68,11 @@ export interface GanttChartProps {
     locale?: string;
     styles?: GanttStyles;
     viewMode?: ViewMode;
-    showViewModeSelector?: boolean;
+    viewModes?: ViewMode[] | false;
     smoothDragging?: boolean;
     movementThreshold?: number;
     animationSpeed?: number;
+    minuteStep?: number;
     renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;
     renderTask?: (props: TaskRenderProps) => React.ReactNode;
     renderTooltip?: (props: TooltipRenderProps) => React.ReactNode;

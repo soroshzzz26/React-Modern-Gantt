@@ -1,4 +1,6 @@
 export declare enum ViewMode {
+    MINUTE = "minute",
+    HOUR = "hour",
     DAY = "day",
     WEEK = "week",
     MONTH = "month",

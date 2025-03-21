@@ -25,6 +25,10 @@ const Timeline: React.FC<TimelineProps> = ({
         if (!(date instanceof Date) || !isValid(date)) return "";
 
         switch (viewMode) {
+            case ViewMode.MINUTE:
+                return format(date, "HH:mm", { locale: getLocale() });
+            case ViewMode.HOUR:
+                return format(date, "HH:00", { locale: getLocale() });
             case ViewMode.DAY:
                 return format(date, "d", { locale: getLocale() });
             case ViewMode.WEEK:
@@ -42,11 +46,15 @@ const Timeline: React.FC<TimelineProps> = ({
         }
     };
 
-    // Format for the higher-level header (months/years)
+    // Format for the higher-level header (hours/days/months/years)
     const formatHigherLevelHeader = (date: Date): string => {
         if (!(date instanceof Date)) return "";
 
         switch (viewMode) {
+            case ViewMode.MINUTE:
+                return format(date, "HH:00", { locale: getLocale() });
+            case ViewMode.HOUR:
+                return format(date, "MMM d", { locale: getLocale() });
             case ViewMode.DAY:
             case ViewMode.WEEK:
                 return format(date, "MMM yyyy", { locale: getLocale() });
@@ -55,13 +63,74 @@ const Timeline: React.FC<TimelineProps> = ({
         }
     };
 
-    // Get months for the higher-level header
-    const getHigherLevelMonths = (): { date: Date; span: number }[] => {
-        if (![ViewMode.DAY, ViewMode.WEEK].includes(viewMode) || months.length === 0) {
+    // Get higher-level units for the hierarchical header
+    const getHigherLevelUnits = (): { date: Date; span: number }[] => {
+        if (![ViewMode.MINUTE, ViewMode.HOUR, ViewMode.DAY, ViewMode.WEEK].includes(viewMode) || months.length === 0) {
             return [];
         }
 
         const result: { date: Date; span: number }[] = [];
+
+        // For minute view, group by hour
+        if (viewMode === ViewMode.MINUTE) {
+            let currentHour = new Date(months[0]);
+            currentHour.setMinutes(0, 0, 0);
+            let currentSpan = 0;
+
+            months.forEach(date => {
+                if (
+                    date.getHours() === currentHour.getHours() &&
+                    date.getDate() === currentHour.getDate() &&
+                    date.getMonth() === currentHour.getMonth() &&
+                    date.getFullYear() === currentHour.getFullYear()
+                ) {
+                    currentSpan += 1;
+                } else {
+                    result.push({ date: currentHour, span: currentSpan });
+                    currentHour = new Date(date);
+                    currentHour.setMinutes(0, 0, 0);
+                    currentSpan = 1;
+                }
+            });
+
+            // Add the last group
+            if (currentSpan > 0) {
+                result.push({ date: currentHour, span: currentSpan });
+            }
+
+            return result;
+        }
+
+        // For hour view, group by day
+        if (viewMode === ViewMode.HOUR) {
+            let currentDay = new Date(months[0]);
+            currentDay.setHours(0, 0, 0, 0);
+            let currentSpan = 0;
+
+            months.forEach(date => {
+                if (
+                    date.getDate() === currentDay.getDate() &&
+                    date.getMonth() === currentDay.getMonth() &&
+                    date.getFullYear() === currentDay.getFullYear()
+                ) {
+                    currentSpan += 1;
+                } else {
+                    result.push({ date: currentDay, span: currentSpan });
+                    currentDay = new Date(date);
+                    currentDay.setHours(0, 0, 0, 0);
+                    currentSpan = 1;
+                }
+            });
+
+            // Add the last group
+            if (currentSpan > 0) {
+                result.push({ date: currentDay, span: currentSpan });
+            }
+
+            return result;
+        }
+
+        // For day/week view, group by month
         let currentMonth = new Date(months[0]);
         let currentSpan = 0;
 
@@ -84,10 +153,10 @@ const Timeline: React.FC<TimelineProps> = ({
     };
 
     // Get whether we need a hierarchical display
-    const needsHierarchicalDisplay = [ViewMode.DAY, ViewMode.WEEK].includes(viewMode);
+    const needsHierarchicalDisplay = [ViewMode.MINUTE, ViewMode.HOUR, ViewMode.DAY, ViewMode.WEEK].includes(viewMode);
 
-    // Get higher-level months for hierarchical display
-    const higherLevelMonths = getHigherLevelMonths();
+    // Get higher-level units for hierarchical display
+    const higherLevelUnits = getHigherLevelUnits();
 
     // Determine CSS width property based on viewMode
     const timeUnitWidthClass = `w-[var(--gantt-unit-width)]`;
@@ -96,10 +165,10 @@ const Timeline: React.FC<TimelineProps> = ({
         <div
             className={`rmg-timeline ${className}`}
             style={{ "--gantt-unit-width": `${unitWidth}px` } as React.CSSProperties}>
-            {/* Higher-level header for months/years (only for day/week views) */}
+            {/* Higher-level header for minutes/hours/days/months/years */}
             {needsHierarchicalDisplay && (
                 <div className="flex border-b border-gantt-border">
-                    {higherLevelMonths.map((item, index) => (
+                    {higherLevelUnits.map((item, index) => (
                         <div
                             key={`higher-level-${index}`}
                             className="flex-shrink-0 p-2 font-semibold text-center text-gray-800 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700 h-10"

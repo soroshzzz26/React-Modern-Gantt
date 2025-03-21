@@ -74,10 +74,14 @@ export interface GanttChartProps {
     locale?: string;
     styles?: GanttStyles;
     viewMode?: ViewMode;
-    showViewModeSelector?: boolean;
+
+    // Updated ViewMode configuration
+    viewModes?: ViewMode[] | false; // Array of allowed modes, or false to hide selector
+
     smoothDragging?: boolean;
     movementThreshold?: number;
     animationSpeed?: number;
+    minuteStep?: number; // For minute view granularity (e.g., 5, 10, 15 minutes)
 
     // Custom rendering functions
     renderTaskList?: (props: TaskListRenderProps) => React.ReactNode;

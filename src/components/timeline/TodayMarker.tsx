@@ -23,12 +23,28 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
         const currentDay = dayOfMonth || today.getDate();
 
         switch (viewMode) {
+            case ViewMode.MINUTE:
+                const minuteOfHour = today.getMinutes();
+                const secondOfMinute = today.getSeconds();
+                // Position based on minute and seconds
+                const minutePosition = (minuteOfHour + secondOfMinute / 60) / 60;
+                return currentMonthIndex * unitWidth + unitWidth * minutePosition;
+
+            case ViewMode.HOUR:
+                const minuteOfCurrentHour = today.getMinutes();
+                // Position based on minutes within the hour
+                const hourPosition = minuteOfCurrentHour / 60;
+                return currentMonthIndex * unitWidth + unitWidth * hourPosition;
+
             case ViewMode.DAY:
                 return currentMonthIndex * unitWidth + unitWidth / 2;
 
             case ViewMode.WEEK:
                 const dayOfWeek = today.getDay();
-                const dayPosition = dayOfWeek / 7;
+                // Normalize to ensure it's between 0 and 6 even with custom week configurations
+                const normalizedDayOfWeek = (dayOfWeek + 7) % 7;
+                // Use the normalized position for more accurate placement
+                const dayPosition = normalizedDayOfWeek / 6; // Use 6 instead of 7 for better visual placement
                 return currentMonthIndex * unitWidth + unitWidth * dayPosition;
 
             case ViewMode.MONTH:

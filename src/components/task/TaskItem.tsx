@@ -56,7 +56,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         onMouseDown(e, task, "resize-right");
     };
 
-    // Progress bubble drag handlers
+    // Progress bubble drag handlers with improved smoothness
     const handleProgressMouseDown = (e: React.MouseEvent) => {
         if (!editMode || !showProgress) return;
 
@@ -64,6 +64,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
         e.preventDefault();
 
         setIsDraggingProgress(true);
+
+        // Apply a smooth transition during drag for better visual feedback
+        if (progressBarRef.current) {
+            progressBarRef.current.style.transition = "width 0.05s ease-out";
+        }
 
         // Add global event listeners
         document.addEventListener("mousemove", handleProgressMouseMove);
@@ -84,6 +89,14 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
             // Update progress value with constraints
             setProgressPercent(Math.max(0, Math.min(100, newPercent)));
+
+            // Apply smooth visual update directly to the DOM for immediate feedback
+            if (progressBarRef.current && progressBarRef.current.firstChild) {
+                (progressBarRef.current.firstChild as HTMLElement).style.width = `${Math.max(
+                    0,
+                    Math.min(100, newPercent)
+                )}%`;
+            }
         },
         [isDraggingProgress]
     );
@@ -96,6 +109,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
         // Remove global event listeners
         document.removeEventListener("mousemove", handleProgressMouseMove);
         document.removeEventListener("mouseup", handleProgressMouseUp);
+
+        // Reset transition after update for normal behavior
+        if (progressBarRef.current) {
+            progressBarRef.current.style.transition = "";
+        }
 
         // Call update handler with the updated progress
         if (onProgressUpdate && progressPercent !== task.percent) {
@@ -165,7 +183,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
     return (
         <div
             ref={taskRef}
-            className={`absolute h-8 rounded ${bgColorClass} ${borderColorClass} ${textColor} flex items-center px-2 text-xs font-medium ${
+            className={`absolute h-8 rounded ${bgColorClass} ${borderColorClass} ${textColor} flex items-center px-2 text-xs font-medium text-gantt-task-text ${
                 editMode ? "cursor-move" : "cursor-pointer"
             } ${isDragging ? "shadow-lg dark:shadow-gray-900" : ""}`}
             style={{

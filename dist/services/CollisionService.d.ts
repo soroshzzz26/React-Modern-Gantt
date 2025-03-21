@@ -11,12 +11,12 @@ export declare class CollisionService {
     static detectOverlaps(tasks: Task[], viewMode?: ViewMode): Task[][];
     /**
      * Check if tasks visually overlap
-     * Uses a more precise algorithm that matches visual representation
+     * Uses a more precise algorithm that matches visual representation based on view mode
      */
     static tasksVisuallyOverlap(taskA: Task, taskB: Task, viewMode?: ViewMode): boolean;
     /**
      * Get appropriate collision buffer based on view mode
-     * Smaller buffer for day view, larger for year view
+     * Smaller buffer for minute/hour view, larger for year view
      */
     private static getCollisionBufferByViewMode;
     /**

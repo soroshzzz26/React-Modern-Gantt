@@ -4,7 +4,7 @@ import { getMonthsBetween, findEarliestDate, findLatestDate } from "@/utils";
 import { Timeline, TodayMarker } from "@/components/timeline";
 import { ViewModeSelector } from "@/components/ui";
 import { TaskRow, TaskList } from "@/components/task";
-import { addDays, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
+import { addDays, addHours, addMinutes, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
 import { CollisionService } from "@/services/CollisionService";
 
 /**
@@ -26,10 +26,11 @@ const GanttChart: React.FC<GanttChartProps> = ({
     locale = "default",
     styles = {},
     viewMode = ViewMode.MONTH,
-    showViewModeSelector = true,
+    viewModes, // New: Array of allowed view modes or false to hide
     smoothDragging = true,
     movementThreshold = 3,
     animationSpeed = 0.25,
+    minuteStep = 5, // Default to 5-minute intervals
 
     // Custom rendering functions
     renderTaskList,
@@ -70,6 +71,10 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Time unit calculation functions
     const getTimeUnits = () => {
         switch (activeViewMode) {
+            case ViewMode.MINUTE:
+                return getMinutesBetween(derivedStartDate, derivedEndDate, minuteStep);
+            case ViewMode.HOUR:
+                return getHoursBetween(derivedStartDate, derivedEndDate);
             case ViewMode.DAY:
                 return getDaysBetween(derivedStartDate, derivedEndDate);
             case ViewMode.WEEK:
@@ -83,6 +88,45 @@ const GanttChart: React.FC<GanttChartProps> = ({
             default:
                 return getMonthsBetween(derivedStartDate, derivedEndDate);
         }
+    };
+
+    // Get minutes between dates with configurable step
+    const getMinutesBetween = (start: Date, end: Date, step: number = 5): Date[] => {
+        const minutes: Date[] = [];
+        let currentDate = new Date(start);
+        currentDate.setSeconds(0, 0);
+
+        // Round to nearest minute step
+        const currentMinutes = currentDate.getMinutes();
+        const roundedMinutes = Math.floor(currentMinutes / step) * step;
+        currentDate.setMinutes(roundedMinutes);
+
+        const endDateAdjusted = new Date(end);
+        endDateAdjusted.setMinutes(endDateAdjusted.getMinutes(), 59, 999);
+
+        while (currentDate <= endDateAdjusted) {
+            minutes.push(new Date(currentDate));
+            currentDate = addMinutes(currentDate, step);
+        }
+
+        return minutes;
+    };
+
+    // Get hours between dates
+    const getHoursBetween = (start: Date, end: Date): Date[] => {
+        const hours: Date[] = [];
+        let currentDate = new Date(start);
+        currentDate.setMinutes(0, 0, 0);
+
+        const endDateAdjusted = new Date(end);
+        endDateAdjusted.setHours(endDateAdjusted.getHours(), 59, 59, 999);
+
+        while (currentDate <= endDateAdjusted) {
+            hours.push(new Date(currentDate));
+            currentDate = addHours(currentDate, 1);
+        }
+
+        return hours;
     };
 
     // Get days between dates
@@ -146,6 +190,24 @@ const GanttChart: React.FC<GanttChartProps> = ({
         const today = new Date();
 
         switch (activeViewMode) {
+            case ViewMode.MINUTE:
+                return timeUnits.findIndex(
+                    date =>
+                        date.getHours() === today.getHours() &&
+                        Math.floor(date.getMinutes() / (minuteStep || 5)) ===
+                            Math.floor(today.getMinutes() / (minuteStep || 5)) &&
+                        date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear()
+                );
+            case ViewMode.HOUR:
+                return timeUnits.findIndex(
+                    date =>
+                        date.getHours() === today.getHours() &&
+                        date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear()
+                );
             case ViewMode.DAY:
                 return timeUnits.findIndex(
                     date =>
@@ -174,6 +236,22 @@ const GanttChart: React.FC<GanttChartProps> = ({
             default:
                 return -1;
         }
+    };
+
+    // Get available view modes based on props
+    const getAvailableViewModes = (): ViewMode[] | false => {
+        // If viewModes is explicitly set to false, return false to hide selector
+        if (viewModes === false) {
+            return false;
+        }
+
+        // If viewModes is provided as an array, use it
+        if (Array.isArray(viewModes)) {
+            return viewModes;
+        }
+
+        // Default standard view modes
+        return [ViewMode.DAY, ViewMode.WEEK, ViewMode.MONTH, ViewMode.QUARTER, ViewMode.YEAR];
     };
 
     // Get time units and calculate current unit index
@@ -247,6 +325,12 @@ const GanttChart: React.FC<GanttChartProps> = ({
 
         // Adjust unit width based on view mode
         switch (newMode) {
+            case ViewMode.MINUTE:
+                setViewUnitWidth(30); // Narrow width for minutes
+                break;
+            case ViewMode.HOUR:
+                setViewUnitWidth(40); // Narrower width for hours
+                break;
             case ViewMode.DAY:
                 setViewUnitWidth(50);
                 break;
@@ -306,6 +390,9 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Merge default styles with provided styles
     const mergedStyles = { ...defaultStyles, ...styles };
 
+    // Determine if we should show the view mode selector
+    const shouldShowViewModeSelector = getAvailableViewModes() !== false;
+
     // Custom render function for the header
     const renderHeaderContent = () => {
         if (renderHeader) {
@@ -314,7 +401,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 darkMode,
                 viewMode: activeViewMode,
                 onViewModeChange: handleViewModeChange,
-                showViewModeSelector,
+                showViewModeSelector: shouldShowViewModeSelector,
             });
         }
 
@@ -323,26 +410,21 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 <div className="flex justify-between items-center">
                     <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
 
-                    {showViewModeSelector && (
+                    {shouldShowViewModeSelector && (
                         <div className="flex space-x-2">
                             {renderViewModeSelector ? (
                                 renderViewModeSelector({
                                     activeMode: activeViewMode,
                                     onChange: handleViewModeChange,
                                     darkMode,
-                                    availableModes: [
-                                        ViewMode.DAY,
-                                        ViewMode.WEEK,
-                                        ViewMode.MONTH,
-                                        ViewMode.QUARTER,
-                                        ViewMode.YEAR,
-                                    ],
+                                    availableModes: getAvailableViewModes() as ViewMode[],
                                 })
                             ) : (
                                 <ViewModeSelector
                                     activeMode={activeViewMode}
                                     onChange={handleViewModeChange}
                                     darkMode={darkMode}
+                                    availableModes={getAvailableViewModes() as ViewMode[]}
                                 />
                             )}
                         </div>
@@ -379,7 +461,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     return (
         <div
             ref={containerRef}
-            className={`rmg-gantt-chart w-full bg-gantt-bg text-gantt-text rounded-xl shadow-lg overflow-hidden ${themeClass} ${mergedStyles.container}`}
+            className={`rmg-gantt-chart w-full border border-gantt-border bg-gantt-bg text-gantt-text rounded-xl shadow-lg overflow-hidden ${themeClass} ${mergedStyles.container}`}
             style={
                 {
                     ...style,

@@ -35,29 +35,45 @@ export class TaskService {
             let newStartDate = new Date(timelineStartTime + startOffset);
             let newEndDate = new Date(timelineStartTime + startOffset + durationMs);
 
-            // Special handling for day view mode to ensure proper day boundaries
-            if (viewMode === ViewMode.DAY) {
-                // Calculate how many units (days) from the start
-                const daysFromStart = Math.round(left / unitWidth);
+            // Special handling for different view modes
+            switch (viewMode) {
+                case ViewMode.MINUTE:
+                    // Round to the nearest minute for more precise placement
+                    newStartDate.setSeconds(0, 0);
+                    newEndDate.setSeconds(59, 999);
+                    break;
 
-                // Calculate how many days the task spans
-                const daySpan = Math.max(1, Math.round(width / unitWidth));
+                case ViewMode.HOUR:
+                    // Set minutes to full hours for cleaner representation
+                    newStartDate.setMinutes(0, 0, 0);
+                    newEndDate.setMinutes(59, 59, 999);
+                    break;
 
-                // Create new dates based on exact day offsets from the start date
-                const baseDate = new Date(startDate);
-                baseDate.setHours(0, 0, 0, 0);
+                case ViewMode.DAY:
+                    // Calculate how many units (days) from the start
+                    const daysFromStart = Math.round(left / unitWidth);
 
-                // Apply precise day calculations to avoid any off-by-one errors
-                newStartDate = new Date(baseDate);
-                newStartDate.setDate(baseDate.getDate() + daysFromStart);
-                newStartDate.setHours(0, 0, 0, 0);
+                    // Calculate how many days the task spans
+                    const daySpan = Math.max(1, Math.round(width / unitWidth));
 
-                newEndDate = new Date(newStartDate);
-                newEndDate.setDate(newStartDate.getDate() + daySpan - 1);
-                newEndDate.setHours(23, 59, 59, 999);
-            } else {
-                newStartDate = startOfDay(newStartDate);
-                newEndDate = endOfDay(newEndDate);
+                    // Create new dates based on exact day offsets from the start date
+                    const baseDate = new Date(startDate);
+                    baseDate.setHours(0, 0, 0, 0);
+
+                    // Apply precise day calculations to avoid any off-by-one errors
+                    newStartDate = new Date(baseDate);
+                    newStartDate.setDate(baseDate.getDate() + daysFromStart);
+                    newStartDate.setHours(0, 0, 0, 0);
+
+                    newEndDate = new Date(newStartDate);
+                    newEndDate.setDate(newStartDate.getDate() + daySpan - 1);
+                    newEndDate.setHours(23, 59, 59, 999);
+                    break;
+
+                default:
+                    newStartDate = startOfDay(newStartDate);
+                    newEndDate = endOfDay(newEndDate);
+                    break;
             }
 
             // Ensure dates don't extend beyond the timeline boundaries
@@ -112,55 +128,93 @@ export class TaskService {
             let taskStartTime = Math.max(task.startDate.getTime(), startDate.getTime());
             let taskEndTime = Math.min(task.endDate.getTime(), endDate.getTime());
 
-            // Apply special handling for day view mode
-            if (viewMode === ViewMode.DAY) {
-                // Ensure consistent day boundaries using midnight as reference
-                const startOfDayTime = new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth(),
-                    startDate.getDate(),
-                    0,
-                    0,
-                    0,
-                    0
-                ).getTime();
+            // Apply special handling for view modes
+            if (viewMode === ViewMode.MINUTE || viewMode === ViewMode.HOUR || viewMode === ViewMode.DAY) {
+                // Ensure consistent boundaries using appropriate precision
+                let startPrecision, endPrecision;
 
-                const endOfDayTime = new Date(
-                    endDate.getFullYear(),
-                    endDate.getMonth(),
-                    endDate.getDate(),
-                    23,
-                    59,
-                    59,
-                    999
-                ).getTime();
+                if (viewMode === ViewMode.MINUTE) {
+                    // No special rounding for minute view
+                    startPrecision = timelineStartTime;
+                    endPrecision = timelineEndTime;
+                } else if (viewMode === ViewMode.HOUR) {
+                    // Round to hours
+                    const startHourTime = new Date(
+                        startDate.getFullYear(),
+                        startDate.getMonth(),
+                        startDate.getDate(),
+                        startDate.getHours(),
+                        0,
+                        0,
+                        0
+                    ).getTime();
 
-                timelineStartTime = startOfDayTime;
-                timelineEndTime = endOfDayTime;
+                    const endHourTime = new Date(
+                        endDate.getFullYear(),
+                        endDate.getMonth(),
+                        endDate.getDate(),
+                        endDate.getHours(),
+                        59,
+                        59,
+                        999
+                    ).getTime();
 
-                // Normalize task dates to align with day boundaries
-                const taskStartDay = new Date(
-                    new Date(taskStartTime).getFullYear(),
-                    new Date(taskStartTime).getMonth(),
-                    new Date(taskStartTime).getDate(),
-                    0,
-                    0,
-                    0,
-                    0
-                ).getTime();
+                    startPrecision = startHourTime;
+                    endPrecision = endHourTime;
+                } else {
+                    // Round to days for day view
+                    const startOfDayTime = new Date(
+                        startDate.getFullYear(),
+                        startDate.getMonth(),
+                        startDate.getDate(),
+                        0,
+                        0,
+                        0,
+                        0
+                    ).getTime();
 
-                const taskEndDay = new Date(
-                    new Date(taskEndTime).getFullYear(),
-                    new Date(taskEndTime).getMonth(),
-                    new Date(taskEndTime).getDate(),
-                    23,
-                    59,
-                    59,
-                    999
-                ).getTime();
+                    const endOfDayTime = new Date(
+                        endDate.getFullYear(),
+                        endDate.getMonth(),
+                        endDate.getDate(),
+                        23,
+                        59,
+                        59,
+                        999
+                    ).getTime();
 
-                taskStartTime = taskStartDay;
-                taskEndTime = taskEndDay;
+                    startPrecision = startOfDayTime;
+                    endPrecision = endOfDayTime;
+                }
+
+                timelineStartTime = startPrecision;
+                timelineEndTime = endPrecision;
+
+                // Also normalize task times to the appropriate precision
+                if (viewMode === ViewMode.DAY) {
+                    const taskStartDay = new Date(
+                        new Date(taskStartTime).getFullYear(),
+                        new Date(taskStartTime).getMonth(),
+                        new Date(taskStartTime).getDate(),
+                        0,
+                        0,
+                        0,
+                        0
+                    ).getTime();
+
+                    const taskEndDay = new Date(
+                        new Date(taskEndTime).getFullYear(),
+                        new Date(taskEndTime).getMonth(),
+                        new Date(taskEndTime).getDate(),
+                        23,
+                        59,
+                        59,
+                        999
+                    ).getTime();
+
+                    taskStartTime = taskStartDay;
+                    taskEndTime = taskEndDay;
+                }
             }
 
             // Calculate the full timeline range
@@ -179,14 +233,25 @@ export class TaskService {
             let leftPx = leftPercent * totalPixelWidth;
             let widthPx = widthPercent * totalPixelWidth;
 
-            // Add day view specific adjustments for proper alignment
-            if (viewMode === ViewMode.DAY) {
+            // Add view mode specific adjustments for alignment
+            if (viewMode === ViewMode.MINUTE) {
+                // Fine adjustments for minute view
+                leftPx = Math.round(leftPx);
+                widthPx = Math.max(10, Math.round(widthPx));
+            } else if (viewMode === ViewMode.HOUR) {
+                // Round to hour boundaries for cleaner display
+                leftPx = Math.round(leftPx);
+                widthPx = Math.max(15, Math.round(widthPx));
+            } else if (viewMode === ViewMode.DAY) {
+                // Snap to day boundaries
                 leftPx = Math.round(leftPx / unitWidth) * unitWidth;
                 widthPx = Math.max(unitWidth, Math.round(widthPx / unitWidth) * unitWidth);
             }
 
             // Apply view mode specific adjustments for minimum width
             const minWidthByViewMode = {
+                [ViewMode.MINUTE]: 10, // Narrower for minute view
+                [ViewMode.HOUR]: 15, // Narrow for hour view
                 [ViewMode.DAY]: 20,
                 [ViewMode.WEEK]: 20,
                 [ViewMode.MONTH]: 20,

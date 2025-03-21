@@ -13,25 +13,25 @@ A flexible, customizable Gantt chart component for React applications with drag-
 
 ## Features
 
--   📊 **Interactive timeline** with drag-and-drop task scheduling
--   🎨 **Fully customizable** with Tailwind CSS or custom styling
--   🕒 **Multiple view modes** (Day, Week, Month, Quarter, Year)
--   🌙 **Dark mode support** built-in
--   📱 **Responsive design** that works across devices
--   📈 **Progress tracking** with visual indicators and interactive updates
--   🔄 **Task dependencies** and relationship management
--   🎯 **Event handling** for clicks, updates, selections
--   🧩 **Composable API** with extensive custom render props for advanced customization
--   🌊 **Smooth animations** with configurable speeds and thresholds
--   🔄 **Auto-scrolling** during drag operations
+- 📊 **Interactive timeline** with drag-and-drop task scheduling
+- 🎨 **Fully customizable** with Tailwind CSS or custom styling
+- 🕒 **Multiple view modes** (Day, Week, Month, Quarter, Year)
+- 🌙 **Dark mode support** built-in
+- 📱 **Responsive design** that works across devices
+- 📈 **Progress tracking** with visual indicators and interactive updates
+- 🔄 **Task dependencies** and relationship management
+- 🎯 **Event handling** for clicks, updates, selections
+- 🧩 **Composable API** with extensive custom render props for advanced customization
+- 🌊 **Smooth animations** with configurable speeds and thresholds
+- 🔄 **Auto-scrolling** during drag operations
 
 ## Compatibility
 
 React Modern Gantt is designed to be compatible with a wide range of project setups:
 
--   **React**: Works with React 17, 18, and 19
--   **Tailwind CSS**: Compatible with both Tailwind CSS v3 and v4
--   **TypeScript/JavaScript**: Full TypeScript type definitions included, but works perfectly with JavaScript projects too
+- **React**: Works with React 17, 18, and 19
+- **Tailwind CSS**: Compatible with both Tailwind CSS v3 and v4
+- **TypeScript/JavaScript**: Full TypeScript type definitions included, but works perfectly with JavaScript projects too
 
 ## Installation & Usage
 
@@ -537,10 +537,10 @@ const handleTaskUpdate = (groupId, updatedTask) => {
 
 ## Browser Support
 
--   Chrome (latest)
--   Firefox (latest)
--   Safari (latest)
--   Edge (latest)
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## Contributing
 

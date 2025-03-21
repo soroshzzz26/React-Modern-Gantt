@@ -12,8 +12,10 @@ interface ViewModeSelectorProps {
  * ViewModeSelector Component - Allows switching between different timeline views
  */
 const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({ activeMode, onChange, darkMode, availableModes }) => {
-    // Default view modes
-    const defaultViewModes = [
+    // All possible view modes
+    const allViewModes = [
+        { id: ViewMode.MINUTE, label: "Minute" },
+        { id: ViewMode.HOUR, label: "Hour" },
         { id: ViewMode.DAY, label: "Day" },
         { id: ViewMode.WEEK, label: "Week" },
         { id: ViewMode.MONTH, label: "Month" },
@@ -21,10 +23,14 @@ const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({ activeMode, onChang
         { id: ViewMode.YEAR, label: "Year" },
     ];
 
+    // Default standard view modes (excluding MINUTE and HOUR)
+    const standardViewModes = [ViewMode.DAY, ViewMode.WEEK, ViewMode.MONTH, ViewMode.QUARTER, ViewMode.YEAR];
+
     // Filter view modes based on availableModes prop if provided
+    // Otherwise use the standard view modes
     const viewModes = availableModes
-        ? defaultViewModes.filter(mode => availableModes.includes(mode.id))
-        : defaultViewModes;
+        ? allViewModes.filter(mode => availableModes.includes(mode.id))
+        : allViewModes.filter(mode => standardViewModes.includes(mode.id));
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [highlightStyle, setHighlightStyle] = useState({ left: "0px", width: "0px" });
@@ -56,7 +62,7 @@ const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({ activeMode, onChang
     relative z-10 px-3 py-1 text-xs font-medium
     transition-all duration-200 ease-in-out
     ${isActive ? "text-white" : darkMode ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}
-    focus:outline-none
+    focus:outline-none border-none
     `;
 
     return (

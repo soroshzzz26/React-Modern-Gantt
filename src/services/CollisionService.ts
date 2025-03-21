@@ -51,14 +51,14 @@ export class CollisionService {
 
     /**
      * Check if tasks visually overlap
-     * Uses a more precise algorithm that matches visual representation
+     * Uses a more precise algorithm that matches visual representation based on view mode
      */
     public static tasksVisuallyOverlap(taskA: Task, taskB: Task, viewMode: ViewMode = ViewMode.MONTH): boolean {
         if (!taskA.startDate || !taskA.endDate || !taskB.startDate || !taskB.endDate) {
             return false;
         }
 
-        // Get timestamps for comparison - no normalization to avoid over-detection
+        // Get timestamps for comparison
         const startA = taskA.startDate.getTime();
         const endA = taskA.endDate.getTime();
         const startB = taskB.startDate.getTime();
@@ -67,11 +67,11 @@ export class CollisionService {
         // Apply a small buffer based on view mode to prevent over-eager collision detection
         const timeBuffer = this.getCollisionBufferByViewMode(viewMode);
 
-        // Modified overlap check with buffer
+        // Check if tasks overlap with appropriate buffer
         return (
             // Check if A overlaps with B (with buffer)
             (startA + timeBuffer < endB - timeBuffer && endA - timeBuffer > startB + timeBuffer) ||
-            // Special case: very short tasks that could be visually overlapping due to minimum width
+            // Check for very short tasks that might visually overlap due to minimum width
             Math.abs(startA - startB) < timeBuffer * 2 ||
             Math.abs(endA - endB) < timeBuffer * 2
         );
@@ -79,14 +79,19 @@ export class CollisionService {
 
     /**
      * Get appropriate collision buffer based on view mode
-     * Smaller buffer for day view, larger for year view
+     * Smaller buffer for minute/hour view, larger for year view
      */
     private static getCollisionBufferByViewMode(viewMode: ViewMode): number {
         // Define buffers in milliseconds
+        const minute = 60 * 1000;
         const hour = 3600 * 1000;
         const day = 24 * hour;
 
         switch (viewMode) {
+            case ViewMode.MINUTE:
+                return minute / 2; // 30 seconds buffer for minute view
+            case ViewMode.HOUR:
+                return minute * 15; // 15 minutes buffer for hour view
             case ViewMode.DAY:
                 return hour; // 1 hour buffer for day view
             case ViewMode.WEEK:
