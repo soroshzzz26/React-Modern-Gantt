@@ -6,8 +6,10 @@ A flexible, customizable Gantt chart component for React applications with drag-
 [![license](https://img.shields.io/npm/l/react-modern-gantt.svg)](https://github.com/MikaStiebitz/React-Modern-Gantt/blob/main/LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/react-modern-gantt.svg)](https://bundlephobia.com/result?p=react-modern-gantt)
 
-![Dark](https://github.com/user-attachments/assets/cbde6c0b-48f1-4233-a935-72f2b6147162)
-![Light](https://github.com/user-attachments/assets/ad98154d-ad55-48a3-b06d-5e9adfb7d434)
+![Light](https://github.com/user-attachments/assets/cbde6c0b-48f1-4233-a935-72f2b6147162)
+![Dark](https://github.com/user-attachments/assets/110b971a-0386-42b8-a237-d7d1d6eae132)
+
+# ![LIVE DEMO](react-gantt-demo.vercel.app)
 
 ## Features
 
