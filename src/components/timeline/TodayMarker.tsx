@@ -3,6 +3,7 @@ import { TodayMarkerProps, ViewMode } from "@/types";
 
 /**
  * TodayMarker Component - Displays a vertical line indicating the current date
+ * Updated to handle full height properly and improve visual appearance
  */
 const TodayMarker: React.FC<TodayMarkerProps> = ({
     currentMonthIndex,
@@ -31,9 +32,10 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
                 return currentMonthIndex * unitWidth + unitWidth * dayPosition;
 
             case ViewMode.MONTH:
-                const monthDayOfWeek = today.getDay();
-                const monthDayPosition = monthDayOfWeek / 7;
-                return currentMonthIndex * unitWidth + unitWidth * monthDayPosition;
+                // Calculate position within the month based on day
+                const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                const dayPercentage = (currentDay - 1) / daysInMonth;
+                return currentMonthIndex * unitWidth + unitWidth * dayPercentage;
 
             case ViewMode.QUARTER:
                 const monthOfQuarter = today.getMonth() % 3;
@@ -52,16 +54,21 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
 
     const markerPosition = calculateMarkerPosition();
 
+    // Ensure minimum height to avoid invisible marker
+    const finalHeight = Math.max(100, height);
+
     return (
         <div
             className={`absolute top-0 w-px ${markerClass} z-10 ${className}`}
             style={{
                 left: `${markerPosition}px`,
-                height: `${height}px`,
+                height: `${finalHeight}px`,
+                // Add subtle shadow for better visibility across backgrounds
+                boxShadow: "0 0 4px rgba(239, 68, 68, 0.5)",
             }}
             data-testid="today-marker">
             <div
-                className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${markerClass} px-1 py-0.5 rounded text-xs text-white dark:text-white whitespace-nowrap`}>
+                className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${markerClass} px-1.5 py-0.5 rounded text-xs text-white dark:text-white whitespace-nowrap shadow-sm`}>
                 {label}
             </div>
         </div>

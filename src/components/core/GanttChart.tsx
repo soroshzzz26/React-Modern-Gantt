@@ -5,6 +5,7 @@ import { Timeline, TodayMarker } from "@/components/timeline";
 import { ViewModeSelector } from "@/components/ui";
 import { TaskRow, TaskList } from "@/components/task";
 import { addDays, addQuarters, startOfQuarter, addYears, startOfYear } from "date-fns";
+import { CollisionService } from "@/services/CollisionService";
 
 /**
  * GanttChart Component with ViewMode support
@@ -418,7 +419,12 @@ const GanttChart: React.FC<GanttChartProps> = ({
                             {showCurrentDateMarker && currentUnitIndex >= 0 && (
                                 <TodayMarker
                                     currentMonthIndex={currentUnitIndex}
-                                    height={tasks.length * 60} // Simplified calculation
+                                    // Calculate height based on actual row heights including collisions
+                                    height={tasks.reduce((total, group) => {
+                                        if (!group || !Array.isArray(group.tasks)) return total + 60;
+                                        const taskRows = CollisionService.detectOverlaps(group.tasks, activeViewMode);
+                                        return total + Math.max(60, taskRows.length * 40 + 20);
+                                    }, 0)}
                                     label={todayLabel}
                                     dayOfMonth={currentDate.getDate()}
                                     className={mergedStyles.todayMarker}
