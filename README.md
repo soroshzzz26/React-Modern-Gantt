@@ -8,8 +8,7 @@ A flexible, customizable Gantt chart component for React applications with drag-
 
 ![Dark](https://github.com/user-attachments/assets/110b971a-0386-42b8-a237-d7d1d6eae132)
 
-<a href="react-gantt-demo.vercel.app">LIVE DEMO</a>
-
+<a href="react-gantt-demo.vercel.app" target="_blank" rel="noopener noreferrer">LIVE DEMO</a>
 
 ## Features
 
