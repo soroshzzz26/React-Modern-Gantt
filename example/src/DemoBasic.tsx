@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import * as React from "react";
 import GanttChart, { Task, TaskGroup } from "react-modern-gantt";
 import { basicDemoData } from "./data";
 
@@ -6,8 +6,8 @@ interface DemoBasicProps {
     darkMode: boolean;
 }
 
-const DemoBasic: React.FC<DemoBasicProps> = ({ darkMode }) => {
-    const [tasks, setTasks] = useState<TaskGroup[]>(basicDemoData);
+const DemoBasic: React.FC<DemoBasicProps> = ({ darkMode }: DemoBasicProps) => {
+    const [tasks, setTasks] = React.useState<TaskGroup[]>(basicDemoData);
 
     // Handle task updates
     const handleTaskUpdate = (groupId: string, updatedTask: Task) => {

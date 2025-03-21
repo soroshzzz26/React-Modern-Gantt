@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DemoBasic from "./DemoBasic";
 import DemoCustomized from "./DemoCustomized";
 import DemoViewModes from "./DemoViewModes";
@@ -6,10 +6,10 @@ import DemoViewModes from "./DemoViewModes";
 const App: React.FC = () => {
     const [darkMode, setDarkMode] = useState(false);
 
-    const toggleDarkMode = () => setDarkMode(!darkMode);
+    const toggleDarkMode = () => setDarkMode(prev => !prev);
 
     // Apply dark mode to the body element
-    React.useEffect(() => {
+    useEffect(() => {
         if (darkMode) {
             document.body.classList.add("dark");
             document.body.style.backgroundColor = "#1f2937";

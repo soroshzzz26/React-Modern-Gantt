@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import * as React from "react";
 import GanttChart, { Task, TaskGroup, ViewMode } from "react-modern-gantt";
 import { complexDemoData, yearLongProjectData } from "./data";
 
@@ -6,10 +6,10 @@ interface DemoViewModesProps {
     darkMode: boolean;
 }
 
-const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }) => {
-    const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.MONTH);
-    const [demoType, setDemoType] = useState<"complex" | "yearLong">("complex");
-    const [tasks, setTasks] = useState<TaskGroup[]>(complexDemoData);
+const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }: DemoViewModesProps) => {
+    const [viewMode, setViewMode] = React.useState<ViewMode>(ViewMode.MONTH);
+    const [demoType, setDemoType] = React.useState<"complex" | "yearLong">("complex");
+    const [tasks, setTasks] = React.useState<TaskGroup[]>(complexDemoData);
 
     // Handle view mode change
     const handleViewModeChange = (newMode: ViewMode) => {

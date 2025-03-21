@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import * as React from "react";
+import { useState } from "react";
 import GanttChart, { Task, TaskGroup } from "react-modern-gantt";
 import { complexDemoData } from "./data";
 import { format } from "date-fns";
@@ -7,7 +8,7 @@ interface DemoCustomizedProps {
     darkMode: boolean;
 }
 
-const DemoCustomized: React.FC<DemoCustomizedProps> = ({ darkMode }) => {
+const DemoCustomized: React.FC<DemoCustomizedProps> = ({ darkMode }: DemoCustomizedProps) => {
     const [tasks, setTasks] = useState<TaskGroup[]>(complexDemoData);
     const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
@@ -31,7 +32,15 @@ const DemoCustomized: React.FC<DemoCustomizedProps> = ({ darkMode }) => {
     };
 
     // Custom task color function
-    const getTaskColor = ({ task, isHovered, isDragging }: { task: Task; isHovered: boolean; isDragging: boolean }) => {
+    const getTaskColor = ({
+        task,
+        isHovered: _isHovered,
+        isDragging: _isDragging,
+    }: {
+        task: Task;
+        isHovered: boolean;
+        isDragging: boolean;
+    }) => {
         // Highlight selected task
         if (task.id === selectedTaskId) {
             return {
@@ -138,7 +147,7 @@ const DemoCustomized: React.FC<DemoCustomizedProps> = ({ darkMode }) => {
     // Custom tooltip renderer
     const renderTooltip = ({
         task,
-        position,
+        position: _position,
         dragType,
         startDate,
         endDate,
