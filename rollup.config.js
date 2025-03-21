@@ -2,11 +2,11 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
 import postcss from "rollup-plugin-postcss";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import autoprefixer from "autoprefixer";
 import { createFilter } from "@rollup/pluginutils";
-import pkg from "./package.json";
+import pkg from "./package.json" assert { type: "json" };
 
 export default {
     input: "src/index.ts",
