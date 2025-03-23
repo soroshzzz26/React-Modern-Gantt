@@ -15,3 +15,4 @@ export type { Task, TaskGroup, GanttStyles, GanttChartProps, TaskItemProps, Task
 export { ViewMode, DateDisplayFormat, } from "./types";
 export { CollisionService, TaskService } from "./services";
 export { formatDate, formatMonth, getMonthsBetween, getDaysInMonth, formatDateRange, calculateDuration, getDuration, findEarliestDate, findLatestDate, calculateTaskPosition, detectTaskOverlaps, } from "./utils";
+export { defaultTheme, darkTheme } from "./themes";

@@ -8,10 +8,10 @@ import { TodayMarkerProps, ViewMode } from "@/types";
 const TodayMarker: React.FC<TodayMarkerProps> = ({
     currentMonthIndex,
     height,
-    markerClass = "bg-red-500",
     label = "Today",
     dayOfMonth,
     className = "",
+    markerClass = "",
     viewMode = ViewMode.MONTH,
     unitWidth = 150,
 }) => {
@@ -75,16 +75,14 @@ const TodayMarker: React.FC<TodayMarkerProps> = ({
 
     return (
         <div
-            className={`absolute top-0 w-px ${markerClass} z-10 ${className}`}
+            className={`rmg-today-marker ${className} ${markerClass}`}
             style={{
                 left: `${markerPosition}px`,
                 height: `${finalHeight}px`,
-                // Add subtle shadow for better visibility across backgrounds
-                boxShadow: "0 0 4px rgba(239, 68, 68, 0.5)",
             }}
-            data-testid="today-marker">
-            <div
-                className={`absolute -top-3 left-1/2 transform -translate-x-1/2 ${markerClass} px-1.5 py-0.5 rounded text-xs text-white dark:text-white whitespace-nowrap shadow-sm`}>
+            data-testid="today-marker"
+            data-rmg-component="today-marker">
+            <div className="rmg-today-marker-label" data-rmg-component="today-marker-label">
                 {label}
             </div>
         </div>

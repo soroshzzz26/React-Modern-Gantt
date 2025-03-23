@@ -1,6 +1,6 @@
 /**
  * React Modern Gantt - Standalone CSS
- * This version contains all necessary styling without depending on Tailwind processing
+ * A self-contained styling solution without external dependencies
  */
 
 /* Set up color variables */
@@ -36,117 +36,295 @@
     --color-indigo-600: #4f46e5;
 
     /* Component-specific colors */
-    --color-gantt-bg: var(--color-white);
-    --color-gantt-text: var(--color-gray-800);
-    --color-gantt-border: var(--color-gray-200);
-    --color-gantt-highlight: var(--color-blue-50);
-    --color-gantt-marker: var(--color-red-500);
-    --color-gantt-task: var(--color-blue-500);
-    --color-gantt-task-text: var(--color-white);
-    --color-border-gantt-border: var(--color-gray-200);
+    --rmg-bg-color: var(--color-white);
+    --rmg-text-color: var(--color-gray-800);
+    --rmg-border-color: var(--color-gray-200);
+    --rmg-highlight-color: var(--color-blue-50);
+    --rmg-marker-color: var(--color-red-500);
+    --rmg-task-color: var(--color-blue-500);
+    --rmg-task-text-color: var(--color-white);
 
     /* Utility variables */
     --rmg-tooltip-bg: var(--color-white);
     --rmg-tooltip-text: var(--color-gray-800);
     --rmg-tooltip-border: var(--color-gray-200);
-    --rmg-resize-handle: rgba(255, 255, 255, 0.3);
+    --rmg-resize-handle-bg: rgba(255, 255, 255, 0.3);
     --rmg-progress-bg: rgba(0, 0, 0, 0.2);
     --rmg-progress-fill: var(--color-white);
-    --rmg-shadow: rgba(0, 0, 0, 0.1);
+    --rmg-shadow-color: rgba(0, 0, 0, 0.1);
     --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
     --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
 
+    /* Animation speeds */
+    --rmg-animation-speed: 0.25; /* Default animation speed */
+
     /* Animation variables */
-    --rmg-task-hover-transition: transform 0.15s cubic-bezier(0.2, 0, 0.13, 2),
-        box-shadow 0.15s cubic-bezier(0.2, 0, 0.13, 2);
-    --rmg-task-drag-transition: transform 0.05s cubic-bezier(0.2, 0, 0.13, 2),
-        box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
+    --rmg-task-hover-transition:
+        transform 0.15s cubic-bezier(0.2, 0, 0.13, 2), box-shadow 0.15s cubic-bezier(0.2, 0, 0.13, 2);
+    --rmg-task-drag-transition:
+        transform 0.05s cubic-bezier(0.2, 0, 0.13, 2), box-shadow 0.05s cubic-bezier(0.2, 0, 0.13, 2);
     --rmg-task-release-transition: all 0.2s cubic-bezier(0.2, 0, 0.13, 2);
 
-    --scrollbar-track: rgba(229, 231, 235, 0.5);
-    --scrollbar-thumb: rgba(156, 163, 175, 0.7);
-    --scrollbar-thumb-hover: rgba(107, 114, 128, 0.8);
-    --scrollbar-size: 8px;
+    /* Scrollbar styling */
+    --rmg-scrollbar-track: rgba(229, 231, 235, 0.5);
+    --rmg-scrollbar-thumb: rgba(156, 163, 175, 0.7);
+    --rmg-scrollbar-thumb-hover: rgba(107, 114, 128, 0.8);
+    --rmg-scrollbar-size: 8px;
+
+    /* Layout variables */
+    --rmg-row-height: 40px;
+    --rmg-header-height: 40px;
+    --rmg-border-radius: 8px;
+    --rmg-task-height: 32px;
+    --rmg-task-border-radius: 4px;
 }
 
 /* Dark mode theme */
-.dark {
-    --color-gantt-bg: var(--color-gray-800);
-    --color-gantt-text: var(--color-gray-100);
-    --color-gantt-border: var(--color-gray-700);
-    --color-gantt-highlight: var(--color-gray-700);
-    --color-gantt-marker: var(--color-red-500);
-    --color-gantt-task: var(--color-indigo-600);
-    --color-gantt-task-text: var(--color-white);
-    --color-border-gantt-border: var(--color-gray-700);
+.rmg-dark {
+    --rmg-bg-color: var(--color-gray-800);
+    --rmg-text-color: var(--color-gray-100);
+    --rmg-border-color: var(--color-gray-700);
+    --rmg-highlight-color: var(--color-gray-700);
+    --rmg-marker-color: var(--color-red-500);
+    --rmg-task-color: var(--color-indigo-600);
+    --rmg-task-text-color: var(--color-white);
 
     --rmg-tooltip-bg: var(--color-gray-800);
     --rmg-tooltip-text: var(--color-gray-100);
     --rmg-tooltip-border: var(--color-gray-700);
-    --rmg-resize-handle: rgba(255, 255, 255, 0.4);
-    --rmg-progress-bg: rgba(0, 0, 0, 0.3);
+    --rmg-resize-handle-bg: rgba(255, 255, 255, 0.4);
+    --rmg-progress-bg: rgba(255, 255, 255, 0.3);
     --rmg-progress-fill: var(--color-gray-200);
-    --rmg-shadow: rgba(0, 0, 0, 0.3);
+    --rmg-shadow-color: rgba(0, 0, 0, 0.3);
     --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
     --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
 
-    --scrollbar-track: rgba(55, 65, 81, 0.5);
-    --scrollbar-thumb: rgba(75, 85, 99, 0.7);
-    --scrollbar-thumb-hover: rgba(107, 114, 128, 0.8);
+    --rmg-scrollbar-track: rgba(55, 65, 81, 0.5);
+    --rmg-scrollbar-thumb: rgba(75, 85, 99, 0.7);
+    --rmg-scrollbar-thumb-hover: rgba(107, 114, 128, 0.8);
 }
 
-/* Component styles */
+/* Base styles */
 .rmg-gantt-chart {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial,
+    font-family:
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
         sans-serif;
     font-size: 16px;
     line-height: 1.5;
-    color: var(--color-gantt-text);
-    background-color: var(--color-gantt-bg);
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    color: var(--rmg-text-color);
+    background-color: var(--rmg-bg-color);
+    border: 1px solid var(--rmg-border-color);
+    border-radius: var(--rmg-border-radius);
+    box-shadow: 0 4px 6px -1px var(--rmg-shadow-color);
     overflow: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hover and active states for task items */
-[data-task-id]:not([data-dragging="true"]) {
+/* Header styles */
+.rmg-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--rmg-border-color);
+    background-color: var(--rmg-bg-color);
+}
+
+.rmg-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rmg-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--rmg-text-color);
+    margin: 0;
+}
+
+/* Layout container */
+.rmg-container {
+    display: flex;
+    position: relative;
+}
+
+/* Task list styles */
+.rmg-task-list {
+    width: 160px;
+    flex-shrink: 0;
+    background-color: var(--rmg-bg-color);
+    border-right: 1px solid var(--rmg-border-color);
+    z-index: 10;
+    box-shadow: 2px 0 4px -2px var(--rmg-shadow-color);
+}
+
+.rmg-task-list-header {
+    padding: 0.5rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--rmg-border-color);
+    height: var(--rmg-header-height);
+}
+
+.rmg-task-group {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--rmg-border-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.rmg-task-group:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.rmg-dark .rmg-task-group:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rmg-task-group-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rmg-task-group-description {
+    font-size: 0.75rem;
+    color: var(--color-gray-500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.25rem;
+}
+
+.rmg-dark .rmg-task-group-description {
+    color: var(--color-gray-400);
+}
+
+/* Timeline styles */
+.rmg-timeline-container {
+    flex-grow: 1;
+    overflow-x: auto;
+    position: relative;
+}
+
+.rmg-timeline {
+    min-width: max-content;
+}
+
+.rmg-timeline-header {
+    display: flex;
+    border-bottom: 1px solid var(--rmg-border-color);
+}
+
+.rmg-timeline-header-higher {
+    display: flex;
+    border-bottom: 1px solid var(--rmg-border-color);
+}
+
+.rmg-timeline-unit {
+    flex-shrink: 0;
+    padding: 0.5rem;
+    font-weight: 600;
+    text-align: center;
+    border-right: 1px solid var(--rmg-border-color);
+    height: var(--rmg-header-height);
+}
+
+.rmg-timeline-unit:last-child {
+    border-right: none;
+}
+
+.rmg-timeline-unit-current {
+    background-color: var(--rmg-highlight-color);
+}
+
+/* Task row styles */
+.rmg-task-row {
+    position: relative;
+    border-bottom: 1px solid var(--rmg-border-color);
+    min-height: var(--rmg-row-height);
+}
+
+/* Task item styles */
+.rmg-task-item {
+    position: absolute;
+    height: var(--rmg-task-height);
+    background-color: var(--rmg-task-color);
+    border-radius: var(--rmg-task-border-radius);
+    color: var(--rmg-task-text-color);
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    box-shadow: 0 1px 3px var(--rmg-shadow-color);
+    cursor: pointer;
     transition: var(--rmg-task-hover-transition);
     will-change: transform, box-shadow;
     backface-visibility: hidden;
     transform: translateZ(0);
+    z-index: 1;
 }
 
-[data-task-id]:hover {
+.rmg-task-item:hover {
     transform: translateY(-1px);
     box-shadow: 0 3px 10px var(--rmg-shadow-hover);
     z-index: 20;
 }
 
-[data-task-id][data-dragging="true"] {
-    transition: var(--rmg-task-drag-transition);
+.rmg-task-item-dragging {
     z-index: 100;
     cursor: grabbing;
     box-shadow: 0 5px 15px var(--rmg-shadow-drag);
     opacity: 0.95;
 }
 
-/* Improve tooltip animations */
-.rmg-task-tooltip {
-    opacity: 0;
-    transform: translateY(5px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+.rmg-task-item-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     pointer-events: none;
+    user-select: none;
 }
 
-.rmg-task-tooltip.visible {
+/* Resize handles */
+.rmg-resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background-color: var(--rmg-resize-handle-bg);
+    cursor: ew-resize;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.rmg-resize-handle-left {
+    left: 0;
+    border-top-left-radius: var(--rmg-task-border-radius);
+    border-bottom-left-radius: var(--rmg-task-border-radius);
+}
+
+.rmg-resize-handle-right {
+    right: 0;
+    border-top-right-radius: var(--rmg-task-border-radius);
+    border-bottom-right-radius: var(--rmg-task-border-radius);
+}
+
+.rmg-task-item:hover .rmg-resize-handle {
     opacity: 1;
-    transform: translateY(0);
 }
 
-/* Improve progress bar appearance */
-.rmg-task-progress {
+/* Progress bar */
+.rmg-progress-bar {
     position: absolute;
     bottom: 3px;
     left: 3px;
@@ -157,77 +335,165 @@
     overflow: hidden;
 }
 
-.rmg-task-progress-fill {
+.rmg-progress-fill {
     height: 100%;
     background-color: var(--rmg-progress-fill);
     border-radius: 4px;
     transition: width 0.3s ease-out;
 }
 
-/* Timeline hover effect */
-.rmg-timeline-unit:hover {
-    background-color: var(--rmg-highlight);
-    transition: background-color 0.15s ease;
-}
-
-/* Resize handles hover effect */
-.rmg-resize-handle {
+/* Progress handle */
+.rmg-progress-handle {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(50%, -50%);
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background-color: white;
+    border: 2px solid var(--rmg-task-color);
+    box-shadow: 0 1px 3px var(--rmg-shadow-color);
+    cursor: ew-resize;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition:
+        opacity 0.2s ease,
+        transform 0.15s ease;
+    z-index: 10;
 }
 
-[data-task-id]:hover .rmg-resize-handle {
+.rmg-task-item:hover .rmg-progress-handle {
     opacity: 1;
 }
 
-/* Add subtle pulse animation to today marker */
+.rmg-progress-handle:hover,
+.rmg-progress-handle-dragging {
+    transform: translate(50%, -50%) scale(1.2);
+    box-shadow: 0 2px 5px var(--rmg-shadow-hover);
+}
+
+/* Today marker */
 .rmg-today-marker {
-    animation: pulse 3s infinite ease-in-out;
+    position: absolute;
+    top: 0;
+    width: 1px;
+    background-color: var(--rmg-marker-color);
+    z-index: 10;
+    box-shadow: 0 0 4px var(--rmg-marker-color);
 }
 
-/* Ensure scrollbar styles are applied to vertical content */
-.rmg-gantt-scroll-container {
+.rmg-today-marker-label {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--rmg-marker-color);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px var(--rmg-shadow-color);
+}
+
+/* Tooltip */
+.rmg-tooltip {
+    position: absolute;
+    z-index: 1000;
+    background-color: var(--rmg-tooltip-bg);
+    color: var(--rmg-tooltip-text);
+    border: 1px solid var(--rmg-tooltip-border);
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 8px var(--rmg-shadow-color);
+    opacity: 0;
+    transform: translateY(5px);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    pointer-events: none;
+    min-width: 12rem;
+}
+
+.rmg-tooltip-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* View mode selector */
+.rmg-view-mode-selector {
+    display: inline-flex;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 9999px;
+    padding: 2px;
+    border: 1px solid var(--rmg-border-color);
+}
+
+.rmg-dark .rmg-view-mode-selector {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rmg-view-mode-button {
+    border: none;
+    background: transparent;
+    color: var(--rmg-text-color);
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.rmg-view-mode-button-active {
+    background-color: var(--rmg-task-color);
+    color: white;
+}
+
+/* Scrollbar styling */
+.rmg-timeline-container {
     scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-color: var(--rmg-scrollbar-thumb) var(--rmg-scrollbar-track);
 }
 
-/* WebKit specific scrollbar styling (Chrome, Safari, newer Edge) */
-.rmg-gantt-chart::-webkit-scrollbar,
-.rmg-gantt-scroll-container::-webkit-scrollbar {
-    width: var(--scrollbar-size);
-    height: var(--scrollbar-size);
+.rmg-timeline-container::-webkit-scrollbar {
+    width: var(--rmg-scrollbar-size);
+    height: var(--rmg-scrollbar-size);
 }
 
-.rmg-gantt-chart::-webkit-scrollbar-track,
-.rmg-gantt-scroll-container::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
+.rmg-timeline-container::-webkit-scrollbar-track {
+    background: var(--rmg-scrollbar-track);
     border-radius: 12px;
 }
 
-.rmg-gantt-chart::-webkit-scrollbar-thumb,
-.rmg-gantt-scroll-container::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb);
+.rmg-timeline-container::-webkit-scrollbar-thumb {
+    background-color: var(--rmg-scrollbar-thumb);
     border-radius: 12px;
     border: 2px solid transparent;
     background-clip: content-box;
 }
 
-.rmg-gantt-chart::-webkit-scrollbar-thumb:hover,
-.rmg-gantt-scroll-container::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scrollbar-thumb-hover);
+.rmg-timeline-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--rmg-scrollbar-thumb-hover);
 }
 
-/* Scrollbar corner */
-.rmg-gantt-chart::-webkit-scrollbar-corner,
-.rmg-gantt-scroll-container::-webkit-scrollbar-corner {
+.rmg-timeline-container::-webkit-scrollbar-corner {
     background-color: transparent;
 }
 
-.rmg-gantt-scroll-container:focus {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--color-blue-500);
+/* Smooth scrolling */
+.rmg-timeline-container {
+    scroll-behavior: smooth;
 }
 
+/* Auto-scrolling disabled smooth behavior */
+.rmg-auto-scrolling {
+    scroll-behavior: auto !important;
+}
+
+/* Animations */
 @keyframes pulse {
     0% {
         opacity: 0.8;
@@ -240,7 +506,6 @@
     }
 }
 
-/* Add a smooth transition for update flash */
 @keyframes update-flash {
     0% {
         box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
@@ -257,100 +522,26 @@
     animation: update-flash 1s cubic-bezier(0.2, 0, 0.13, 2);
 }
 
-/* Smooth scrolling for container */
-.rmg-gantt-scroll-container {
-    scroll-behavior: smooth;
+.rmg-today-marker {
+    animation: pulse 3s infinite ease-in-out;
 }
 
-/* Utility class for when auto-scrolling is active */
-.rmg-auto-scrolling {
-    scroll-behavior: auto !important;
-}
-
-/* Improved task appearance */
-[data-task-id] {
-    box-shadow: 0 1px 3px var(--rmg-shadow);
-    border-radius: 4px;
-}
-
-[data-task-id] .rmg-progress-bar {
-    position: absolute;
-    bottom: 3px;
-    left: 3px;
-    right: 3px;
-    height: 2px;
-    background-color: var(--rmg-progress-bg);
-    border-radius: 4px;
-    overflow: hidden;
-    transition: height 0.15s ease-out;
-}
-
-[data-task-id]:hover .rmg-progress-bar {
-    height: 3px;
-}
-
-.rmg-progress-fill {
-    height: 100%;
-    background-color: var(--rmg-progress-fill);
-    border-radius: 4px;
+/* Utility classes for external styling */
+[data-rmg-component] {
     position: relative;
-    transition: width 0.15s ease-out;
-}
-
-/* Progress handle bubble */
-.rmg-progress-handle {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translate(50%, -50%);
-    height: 10px;
-    width: 10px;
-    border-radius: 50%;
-    background-color: white;
-    border: 2px solid var(--rmg-task);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    cursor: ew-resize;
-    opacity: 0;
-    transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
-    z-index: 10;
-}
-
-[data-task-id]:hover .rmg-progress-handle {
-    opacity: 1;
-}
-
-.rmg-progress-handle:hover,
-.rmg-progress-handle.dragging {
-    transform: translate(50%, -50%) scale(1.2);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-/* Progress percentage text tooltip */
-.rmg-progress-tooltip {
-    position: absolute;
-    top: -20px;
-    right: 0;
-    background-color: var(--rmg-tooltip-bg);
-    color: var(--rmg-tooltip-text);
-    border-radius: 3px;
-    padding: 2px 5px;
-    font-size: 10px;
-    opacity: 0;
-    transform: translateY(5px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-.rmg-progress-handle:hover + .rmg-progress-tooltip,
-.rmg-progress-handle.dragging + .rmg-progress-tooltip {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-    .w-40 {
-        width: 6rem;
+    .rmg-task-list {
+        width: 100px;
+    }
+
+    .rmg-header {
+        padding: 0.75rem;
+    }
+
+    .rmg-title {
+        font-size: 1.25rem;
     }
 }

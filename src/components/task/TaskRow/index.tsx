@@ -31,14 +31,14 @@ const TaskRow: React.FC<TaskRowProps> = ({
     getTaskColor,
 }) => {
     if (!taskGroup || !taskGroup.id || !Array.isArray(taskGroup.tasks)) {
-        return <div className="relative h-16 text-gantt-text">Invalid task group data</div>;
+        return <div className="rmg-task-row rmg-task-row-invalid">Invalid task group data</div>;
     }
 
     // Ensure valid dates
     const validStartDate = startDate instanceof Date ? startDate : new Date();
     const validEndDate = endDate instanceof Date ? endDate : new Date();
 
-    // Task interaction states - Direct approach from original code
+    // Task interaction states
     const [hoveredTask, setHoveredTask] = useState<Task | null>(null);
     const [draggingTask, setDraggingTask] = useState<Task | null>(null);
     const [dragType, setDragType] = useState<"move" | "resize-left" | "resize-right" | null>(null);
@@ -60,7 +60,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
     const velocityRef = useRef<{ left: number; width: number }>({ left: 0, width: 0 });
     const lastUpdateTimeRef = useRef<number>(0);
 
-    // Auto-scrolling refs from original code
+    // Auto-scrolling refs
     const autoScrollActive = useRef<boolean>(false);
     const autoScrollTimerRef = useRef<number | null>(null);
     const autoScrollSpeedRef = useRef<number>(0);
@@ -103,8 +103,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         previewTaskRef.current = taskCopy;
     };
 
-    // CRITICAL FIX 1: Calculate task rows directly in the component using state
-    // This ensures proper re-rendering when preview state changes
+    // Calculate task rows directly in the component using state
     const taskRows = previewTask
         ? CollisionService.getPreviewArrangement(previewTask, taskGroup.tasks, viewMode)
         : CollisionService.detectOverlaps(taskGroup.tasks, viewMode);
@@ -120,7 +119,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         };
     }, [totalMonths, monthWidth]);
 
-    // Animation function from original code
+    // Animation function
     const animateTaskMovement = () => {
         if (!taskElementRef.current || !targetPositionRef.current || !currentPositionRef.current) {
             animationFrameRef.current = null;
@@ -228,7 +227,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
-    // CRITICAL FIX 2: Auto-scroll functions from original code
+    // Auto-scroll functions
     const checkForAutoScroll = (clientX: number) => {
         if (!scrollContainerRef?.current || !draggingTask) return;
 
@@ -269,7 +268,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
-    // Start auto-scrolling - original implementation
+    // Start auto-scrolling
     const startAutoScroll = () => {
         if (autoScrollActive.current) return;
 
@@ -330,7 +329,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         autoScrollTimerRef.current = requestAnimationFrame(doScroll);
     };
 
-    // Stop auto-scrolling - original implementation
+    // Stop auto-scrolling
     const stopAutoScroll = () => {
         autoScrollActive.current = false;
         if (autoScrollTimerRef.current !== null) {
@@ -546,65 +545,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
         }
     };
 
-    // Helper function to get timeline range based on view mode
-    const getTimelineRangeForViewMode = (start: Date, end: Date, viewMode: ViewMode): number => {
-        // Ensure consistent time boundaries
-        const startTime = new Date(start).setHours(0, 0, 0, 0);
-        const endTime = new Date(end).setHours(23, 59, 59, 999);
-        const fullRange = endTime - startTime;
-
-        // For day view, ensure exact day-based calculation
-        if (viewMode === ViewMode.DAY) {
-            return fullRange;
-        }
-
-        return fullRange;
-    };
-
-    // Helper function to normalize dates based on view mode
-    const normalizeDatesForViewMode = (
-        startDate: Date,
-        endDate: Date,
-        viewMode: ViewMode
-    ): { newStartDate: Date; newEndDate: Date } => {
-        let newStartDate = new Date(startDate);
-        let newEndDate = new Date(endDate);
-
-        switch (viewMode) {
-            case ViewMode.DAY:
-                // Set exact day boundaries for consistent behavior
-                newStartDate = new Date(
-                    newStartDate.getFullYear(),
-                    newStartDate.getMonth(),
-                    newStartDate.getDate(),
-                    0,
-                    0,
-                    0,
-                    0
-                );
-                newEndDate = new Date(
-                    newEndDate.getFullYear(),
-                    newEndDate.getMonth(),
-                    newEndDate.getDate(),
-                    23,
-                    59,
-                    59,
-                    999
-                );
-                break;
-
-            case ViewMode.WEEK:
-            case ViewMode.MONTH:
-            case ViewMode.QUARTER:
-            case ViewMode.YEAR:
-                // No special handling needed for other view modes
-                break;
-        }
-
-        return { newStartDate, newEndDate };
-    };
-
-    // CRITICAL FIX 3: Finalize task positioning on mouse up with special day view handling
+    // Finalize task positioning on mouse up with special day view handling
     const finalizeTaskPosition = () => {
         if (!taskElementRef.current || !targetPositionRef.current || !draggingTaskRef.current) return;
 
@@ -752,18 +693,20 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
     // Handle empty task groups
     if (!taskGroup.tasks || taskGroup.tasks.length === 0) {
-        return <div className="relative h-16 text-gantt-text">No tasks available</div>;
+        return <div className="rmg-task-row rmg-task-row-empty">No tasks available</div>;
     }
 
     return (
         <div
-            className={`relative border-b border-gray-200 dark:border-gray-700 text-gantt-task-text ${className}`}
+            className={`rmg-task-row ${className}`}
             style={{ height: `${rowHeight}px` }}
             onMouseMove={e => handleMouseMove(e)}
             onMouseLeave={() => setHoveredTask(null)}
             ref={rowRef}
             data-testid={`task-row-${taskGroup.id}`}
-            data-instance-id={instanceId.current}>
+            data-instance-id={instanceId.current}
+            data-rmg-component="task-row"
+            data-group-id={taskGroup.id}>
             {/* Render tasks by row to prevent overlaps */}
             {taskRows.map((rowTasks, rowIndex) => (
                 <React.Fragment key={`task-row-${rowIndex}`}>

@@ -59,7 +59,7 @@ export default {
             plugins: [autoprefixer()],
             minimize: true,
             modules: false,
-            // Change to TRUE to inject CSS into JS (for self-contained styling)
+            // Inject CSS into JS
             inject: true,
             // Still extract the CSS for those who want to import it directly
             extract: "index.css",

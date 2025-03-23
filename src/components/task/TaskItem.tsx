@@ -34,9 +34,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
     }
 
     // Get task colors - either from custom function or default
-    let backgroundColor = task.color || "bg-gantt-task";
+    let backgroundColor = task.color || "var(--rmg-task-color)";
     let borderColor = "";
-    let textColor = "text-gantt-task-text";
+    let textColor = "var(--rmg-task-text-color)";
 
     if (getTaskColor) {
         const colors = getTaskColor({ task, isHovered, isDragging });
@@ -150,8 +150,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
         return (
             <div
                 ref={taskRef}
-                className="absolute"
+                className="rmg-task-item-custom"
                 style={{
+                    position: "absolute",
                     left: `${Math.max(0, leftPx)}px`,
                     width: `${Math.max(20, widthPx)}px`,
                     top: `${topPx}px`,
@@ -163,37 +164,37 @@ const TaskItem: React.FC<TaskItemProps> = ({
                 data-testid={`task-${task.id}`}
                 data-task-id={task.id}
                 data-instance-id={instanceId}
-                data-dragging={isDragging ? "true" : "false"}>
+                data-dragging={isDragging ? "true" : "false"}
+                data-rmg-component="task">
                 {customTaskContent}
             </div>
         );
     }
 
-    // Calculate if we need to apply the background color as a class or inline style
-    const bgColorStyle = backgroundColor.startsWith("bg-") ? {} : { backgroundColor };
-    const bgColorClass = backgroundColor.startsWith("bg-") ? backgroundColor : "";
+    // Inline styles based on received task colors
+    const taskStyles: React.CSSProperties = {
+        left: `${Math.max(0, leftPx)}px`,
+        width: `${Math.max(20, widthPx)}px`,
+        top: `${topPx}px`,
+        willChange: isDragging ? "transform, left, width" : "auto",
+        backgroundColor:
+            backgroundColor.startsWith("var(") || backgroundColor.startsWith("#")
+                ? backgroundColor
+                : `var(--rmg-task-color)`,
+        color: textColor.startsWith("var(") || textColor.startsWith("#") ? textColor : `var(--rmg-task-text-color)`,
+    };
 
-    const borderColorStyle = borderColor
-        ? borderColor.startsWith("border-")
-            ? {}
-            : { borderColor, borderWidth: "1px" }
-        : {};
-    const borderColorClass = borderColor && borderColor.startsWith("border-") ? borderColor : "";
+    if (borderColor) {
+        taskStyles.borderColor = borderColor;
+        taskStyles.borderWidth = "1px";
+        taskStyles.borderStyle = "solid";
+    }
 
     return (
         <div
             ref={taskRef}
-            className={`absolute h-8 rounded ${bgColorClass} ${borderColorClass} ${textColor} flex items-center px-2 text-xs font-medium text-gantt-task-text ${
-                editMode ? "cursor-move" : "cursor-pointer"
-            } ${isDragging ? "shadow-lg dark:shadow-gray-900" : ""}`}
-            style={{
-                left: `${Math.max(0, leftPx)}px`,
-                width: `${Math.max(20, widthPx)}px`,
-                top: `${topPx}px`,
-                ...bgColorStyle,
-                ...borderColorStyle,
-                willChange: isDragging ? "transform, left, width" : "auto",
-            }}
+            className={`rmg-task-item ${isDragging ? "rmg-task-item-dragging" : ""}`}
+            style={taskStyles}
             onClick={e => onClick(e, task)}
             onMouseDown={e => onMouseDown(e, task, "move")}
             onMouseEnter={e => onMouseEnter(e, task)}
@@ -201,25 +202,26 @@ const TaskItem: React.FC<TaskItemProps> = ({
             data-testid={`task-${task.id}`}
             data-task-id={task.id}
             data-instance-id={instanceId}
-            data-dragging={isDragging ? "true" : "false"}>
+            data-dragging={isDragging ? "true" : "false"}
+            data-rmg-component="task">
             {/* Left resize handle */}
             {showHandles && (
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-2 bg-white dark:bg-gray-600 bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-l rmg-resize-handle"
+                    className="rmg-resize-handle rmg-resize-handle-left"
                     onMouseDown={handleResizeLeft}
+                    data-rmg-component="resize-handle"
+                    data-rmg-handle="left"
                 />
             )}
 
             {/* Task name */}
-            <div className="truncate select-none">{task.name || "Unnamed Task"}</div>
+            <div className="rmg-task-item-name">{task.name || "Unnamed Task"}</div>
 
             {/* Progress bar with interactive bubble */}
             {showProgress && typeof progressPercent === "number" && (
                 <div
                     ref={progressBarRef}
-                    className={`absolute bottom-1 left-1 right-1 h-1 bg-black dark:bg-white bg-opacity-20 dark:bg-opacity-30 rounded-full overflow-hidden ${
-                        editMode ? "cursor-pointer" : ""
-                    }`}
+                    className="rmg-progress-bar"
                     onClick={e => {
                         if (editMode && showProgress && onProgressUpdate) {
                             e.stopPropagation();
@@ -229,21 +231,18 @@ const TaskItem: React.FC<TaskItemProps> = ({
                             setProgressPercent(newPercent);
                             onProgressUpdate(task, newPercent);
                         }
-                    }}>
+                    }}
+                    data-rmg-component="progress-bar">
                     <div
-                        className="h-full bg-white dark:bg-gray-200 rounded-full relative"
-                        style={{ width: `${progressPercent}%` }}>
+                        className="rmg-progress-fill"
+                        style={{ width: `${progressPercent}%` }}
+                        data-rmg-component="progress-fill">
                         {/* Progress bubble handle */}
                         {editMode && (isHovered || isDraggingProgress) && (
                             <div
-                                className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 h-4 w-4 rounded-full bg-white dark:bg-gray-300 border-2 ${
-                                    borderColor || backgroundColor.startsWith("bg-")
-                                        ? borderColorClass || bgColorClass
-                                        : "border-blue-500 dark:border-blue-400"
-                                } cursor-ew-resize shadow-sm hover:shadow-md transition-shadow ${
-                                    isDraggingProgress ? "scale-110" : ""
-                                }`}
+                                className={`rmg-progress-handle ${isDraggingProgress ? "rmg-progress-handle-dragging" : ""}`}
                                 onMouseDown={handleProgressMouseDown}
+                                data-rmg-component="progress-handle"
                             />
                         )}
                     </div>
@@ -253,8 +252,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
             {/* Right resize handle */}
             {showHandles && (
                 <div
-                    className="absolute right-0 top-0 bottom-0 w-2 bg-white dark:bg-gray-600 bg-opacity-30 dark:bg-opacity-40 cursor-ew-resize rounded-r rmg-resize-handle"
+                    className="rmg-resize-handle rmg-resize-handle-right"
                     onMouseDown={handleResizeRight}
+                    data-rmg-component="resize-handle"
+                    data-rmg-handle="right"
                 />
             )}
         </div>

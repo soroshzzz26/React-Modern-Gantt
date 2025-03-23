@@ -93,11 +93,12 @@ const Tooltip: React.FC<
     if (renderTooltip) {
         return (
             <div
-                className={`rmg-task-tooltip absolute z-20 ${className}`}
+                className={`rmg-tooltip ${className} rmg-tooltip-visible`}
                 style={{
                     left: `${position.x}px`,
                     top: `${position.y - 40}px`,
-                }}>
+                }}
+                data-rmg-component="tooltip">
                 {renderTooltip({
                     task,
                     position,
@@ -113,45 +114,57 @@ const Tooltip: React.FC<
     // Default tooltip rendering
     return (
         <div
-            className={`rmg-task-tooltip absolute z-20 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-md shadow-md dark:shadow-gray-900 p-2 text-xs select-none ${className}`}
+            className={`rmg-tooltip ${className} rmg-tooltip-visible`}
             style={{
                 left: `${position.x}px`,
                 top: `${position.y - 40}px`,
-                minWidth: "200px",
-            }}>
+            }}
+            data-rmg-component="tooltip">
             {/* Task name */}
-            <div className="font-bold mb-1">{task.name || "Unnamed Task"}</div>
+            <div className="rmg-tooltip-title" data-rmg-component="tooltip-title">
+                {task.name || "Unnamed Task"}
+            </div>
 
             {/* Action indicator */}
-            {actionText && <div className="text-xs text-blue-500 dark:text-blue-400 mb-1 italic">{actionText}</div>}
+            {actionText && (
+                <div className="rmg-tooltip-action" data-rmg-component="tooltip-action">
+                    {actionText}
+                </div>
+            )}
 
             {/* Task details */}
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                <div className="font-semibold">Start:</div>
-                <div>{formatDate(displayStartDate)}</div>
+            <div className="rmg-tooltip-content" data-rmg-component="tooltip-content">
+                <div className="rmg-tooltip-row" data-rmg-component="tooltip-row">
+                    <div className="rmg-tooltip-label">Start:</div>
+                    <div className="rmg-tooltip-value">{formatDate(displayStartDate)}</div>
+                </div>
 
-                <div className="font-semibold">End:</div>
-                <div>{formatDate(displayEndDate)}</div>
+                <div className="rmg-tooltip-row" data-rmg-component="tooltip-row">
+                    <div className="rmg-tooltip-label">End:</div>
+                    <div className="rmg-tooltip-value">{formatDate(displayEndDate)}</div>
+                </div>
 
-                <div className="font-semibold">Duration:</div>
-                <div>
-                    {duration.value} {duration.unit}
+                <div className="rmg-tooltip-row" data-rmg-component="tooltip-row">
+                    <div className="rmg-tooltip-label">Duration:</div>
+                    <div className="rmg-tooltip-value">
+                        {duration.value} {duration.unit}
+                    </div>
                 </div>
 
                 {/* Show progress if enabled */}
                 {showProgress && typeof task.percent === "number" && (
-                    <>
-                        <div className="font-semibold">Progress:</div>
-                        <div>{task.percent}%</div>
-                    </>
+                    <div className="rmg-tooltip-row" data-rmg-component="tooltip-row">
+                        <div className="rmg-tooltip-label">Progress:</div>
+                        <div className="rmg-tooltip-value">{task.percent}%</div>
+                    </div>
                 )}
 
                 {/* Show dependencies if available */}
                 {task.dependencies && task.dependencies.length > 0 && (
-                    <>
-                        <div className="font-semibold">Dependencies:</div>
-                        <div>{task.dependencies.join(", ")}</div>
-                    </>
+                    <div className="rmg-tooltip-row" data-rmg-component="tooltip-row">
+                        <div className="rmg-tooltip-label">Dependencies:</div>
+                        <div className="rmg-tooltip-value">{task.dependencies.join(", ")}</div>
+                    </div>
                 )}
             </div>
         </div>

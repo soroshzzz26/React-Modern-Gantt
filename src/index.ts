@@ -73,3 +73,6 @@ export {
     calculateTaskPosition,
     detectTaskOverlaps,
 } from "./utils";
+
+// Export themes
+export { defaultTheme, darkTheme } from "./themes";

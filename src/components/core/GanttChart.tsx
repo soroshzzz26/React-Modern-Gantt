@@ -26,7 +26,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     locale = "default",
     styles = {},
     viewMode = ViewMode.MONTH,
-    viewModes, // New: Array of allowed view modes or false to hide
+    viewModes, // Array of allowed view modes or false to hide
     smoothDragging = true,
     movementThreshold = 3,
     animationSpeed = 0.25,
@@ -373,22 +373,12 @@ const GanttChart: React.FC<GanttChartProps> = ({
     };
 
     // Apply dark mode class if enabled
-    const themeClass = darkMode ? "dark" : "";
+    const themeClass = darkMode ? "rmg-dark" : "";
 
-    // Default styles that can be overridden by props
-    const defaultStyles = {
-        container: "",
-        title: "",
-        header: "",
-        taskList: "",
-        timeline: "",
-        taskRow: "",
-        todayMarker: "",
-        tooltip: "",
+    // Merge custom styles with component class names with a type cast fix
+    const getComponentClassName = (component: string, defaultClass: string) => {
+        return `${defaultClass} ${styles[component as keyof typeof styles] || ""}`;
     };
-
-    // Merge default styles with provided styles
-    const mergedStyles = { ...defaultStyles, ...styles };
 
     // Determine if we should show the view mode selector
     const shouldShowViewModeSelector = getAvailableViewModes() !== false;
@@ -406,12 +396,12 @@ const GanttChart: React.FC<GanttChartProps> = ({
         }
 
         return (
-            <div className="p-6 border-b border-gantt-border bg-gantt-bg">
-                <div className="flex justify-between items-center">
-                    <h1 className={`text-2xl font-bold text-gantt-text ${mergedStyles.title}`}>{title}</h1>
+            <div className="rmg-header">
+                <div className="rmg-header-content">
+                    <h1 className={getComponentClassName("title", "rmg-title")}>{title}</h1>
 
                     {shouldShowViewModeSelector && (
-                        <div className="flex space-x-2">
+                        <div className="rmg-view-mode-wrapper">
                             {renderViewModeSelector ? (
                                 renderViewModeSelector({
                                     activeMode: activeViewMode,
@@ -451,7 +441,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                 months={timeUnits}
                 currentMonthIndex={currentUnitIndex}
                 locale={locale}
-                className={mergedStyles.timeline}
+                className={getComponentClassName("timeline", "rmg-timeline")}
                 viewMode={activeViewMode}
                 unitWidth={viewUnitWidth}
             />
@@ -461,17 +451,18 @@ const GanttChart: React.FC<GanttChartProps> = ({
     return (
         <div
             ref={containerRef}
-            className={`rmg-gantt-chart w-full border border-gantt-border bg-gantt-bg text-gantt-text rounded-xl shadow-lg overflow-hidden ${themeClass} ${mergedStyles.container}`}
+            className={`rmg-gantt-chart ${themeClass} ${getComponentClassName("container", "")}`}
             style={
                 {
                     ...style,
                     "--gantt-unit-width": `${viewUnitWidth}px`,
                 } as React.CSSProperties
             }
-            data-testid="gantt-chart">
+            data-testid="gantt-chart"
+            data-rmg-component="gantt-chart">
             {renderHeaderContent()}
 
-            <div className="relative flex">
+            <div className="rmg-container" data-rmg-component="container">
                 {renderTaskList ? (
                     renderTaskList({
                         tasks,
@@ -484,20 +475,19 @@ const GanttChart: React.FC<GanttChartProps> = ({
                         tasks={tasks}
                         headerLabel={headerLabel}
                         onGroupClick={onGroupClick}
-                        className={mergedStyles.taskList}
+                        className={getComponentClassName("taskList", "rmg-task-list")}
                         viewMode={activeViewMode}
                     />
                 )}
 
                 <div
                     ref={scrollContainerRef}
-                    className={`flex-grow overflow-x-auto rmg-gantt-scroll-container ${
-                        isAutoScrolling ? "rmg-auto-scrolling" : ""
-                    }`}>
-                    <div className="min-w-max">
+                    className={`rmg-timeline-container ${isAutoScrolling ? "rmg-auto-scrolling" : ""}`}
+                    data-rmg-component="timeline-container">
+                    <div className="rmg-timeline-content" data-rmg-component="timeline-content">
                         {renderTimelineHeaderContent()}
 
-                        <div className="relative">
+                        <div className="rmg-timeline-grid" data-rmg-component="timeline-grid">
                             {showCurrentDateMarker && currentUnitIndex >= 0 && (
                                 <TodayMarker
                                     currentMonthIndex={currentUnitIndex}
@@ -509,7 +499,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                     }, 0)}
                                     label={todayLabel}
                                     dayOfMonth={currentDate.getDate()}
-                                    className={mergedStyles.todayMarker}
+                                    className={getComponentClassName("todayMarker", "rmg-today-marker")}
                                     viewMode={activeViewMode}
                                     unitWidth={viewUnitWidth}
                                 />
@@ -532,8 +522,8 @@ const GanttChart: React.FC<GanttChartProps> = ({
                                         onTaskClick={handleTaskClick}
                                         onTaskSelect={handleTaskSelect}
                                         onAutoScrollChange={handleAutoScrollingChange}
-                                        className={mergedStyles.taskRow}
-                                        tooltipClassName={mergedStyles.tooltip}
+                                        className={getComponentClassName("taskRow", "rmg-task-row")}
+                                        tooltipClassName={getComponentClassName("tooltip", "rmg-tooltip")}
                                         viewMode={activeViewMode}
                                         scrollContainerRef={scrollContainerRef}
                                         smoothDragging={smoothDragging}
