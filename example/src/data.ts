@@ -19,7 +19,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "Website Redesign",
                 startDate: relativeDate(-30),
                 endDate: relativeDate(15),
-                color: "bg-blue-500",
+                color: "#3B82F6", // was bg-blue-500
                 percent: 75,
             },
             {
@@ -27,7 +27,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "API Integration",
                 startDate: relativeDate(-15),
                 endDate: relativeDate(10),
-                color: "bg-indigo-500",
+                color: "#6366F1", // was bg-indigo-500
                 percent: 40,
             },
             {
@@ -35,7 +35,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "Database Migration",
                 startDate: relativeDate(5),
                 endDate: relativeDate(25),
-                color: "bg-purple-500",
+                color: "#A855F7", // was bg-purple-500
                 percent: 10,
             },
         ],
@@ -50,7 +50,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "Social Media Campaign",
                 startDate: relativeDate(-20),
                 endDate: relativeDate(0),
-                color: "bg-green-500",
+                color: "#22C55E", // was bg-green-500
                 percent: 100,
             },
             {
@@ -58,7 +58,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "Content Creation",
                 startDate: relativeDate(-5),
                 endDate: relativeDate(25),
-                color: "bg-emerald-500",
+                color: "#10B981", // was bg-emerald-500
                 percent: 30,
             },
         ],
@@ -73,7 +73,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "User Research",
                 startDate: relativeDate(-30),
                 endDate: relativeDate(-15),
-                color: "bg-amber-500",
+                color: "#F59E0B", // was bg-amber-500
                 percent: 100,
             },
             {
@@ -81,7 +81,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "Prototype Design",
                 startDate: relativeDate(-15),
                 endDate: relativeDate(5),
-                color: "bg-orange-500",
+                color: "#F97316", // was bg-orange-500
                 percent: 85,
                 dependencies: ["task-6"],
             },
@@ -90,7 +90,7 @@ export const basicDemoData: TaskGroup[] = [
                 name: "User Testing",
                 startDate: relativeDate(5),
                 endDate: relativeDate(30),
-                color: "bg-red-500",
+                color: "#EF4444", // was bg-red-500
                 percent: 0,
                 dependencies: ["task-7"],
             },
@@ -110,7 +110,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Project Planning",
                 startDate: relativeDate(-45),
                 endDate: relativeDate(-30),
-                color: "bg-blue-600",
+                color: "#2563EB", // was bg-blue-600
                 percent: 100,
             },
             {
@@ -118,7 +118,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "System Design",
                 startDate: relativeDate(-35),
                 endDate: relativeDate(-15),
-                color: "bg-blue-500",
+                color: "#3B82F6", // was bg-blue-500
                 percent: 100,
                 dependencies: ["task-planning"],
             },
@@ -127,7 +127,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Backend Development",
                 startDate: relativeDate(-20),
                 endDate: relativeDate(10),
-                color: "bg-indigo-600",
+                color: "#4F46E5", // was bg-indigo-600
                 percent: 70,
                 dependencies: ["task-design"],
             },
@@ -136,7 +136,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Frontend Development",
                 startDate: relativeDate(-15),
                 endDate: relativeDate(15),
-                color: "bg-indigo-500",
+                color: "#6366F1", // was bg-indigo-500
                 percent: 60,
                 dependencies: ["task-design"],
             },
@@ -145,7 +145,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Integration",
                 startDate: relativeDate(5),
                 endDate: relativeDate(25),
-                color: "bg-purple-500",
+                color: "#A855F7", // was bg-purple-500
                 percent: 20,
                 dependencies: ["task-backend", "task-frontend"],
             },
@@ -161,7 +161,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Test Planning",
                 startDate: relativeDate(-25),
                 endDate: relativeDate(-10),
-                color: "bg-teal-600",
+                color: "#0D9488", // was bg-teal-600
                 percent: 100,
             },
             {
@@ -169,7 +169,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Unit Testing",
                 startDate: relativeDate(-10),
                 endDate: relativeDate(10),
-                color: "bg-teal-500",
+                color: "#14B8A6", // was bg-teal-500
                 percent: 80,
                 dependencies: ["task-test-plan"],
             },
@@ -178,7 +178,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Integration Testing",
                 startDate: relativeDate(10),
                 endDate: relativeDate(30),
-                color: "bg-green-600",
+                color: "#16A34A", // was bg-green-600
                 percent: 10,
                 dependencies: ["task-unit-test", "task-integration"],
             },
@@ -187,7 +187,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "User Acceptance Testing",
                 startDate: relativeDate(25),
                 endDate: relativeDate(40),
-                color: "bg-green-500",
+                color: "#22C55E", // was bg-green-500
                 percent: 0,
                 dependencies: ["task-integration-test"],
             },
@@ -203,7 +203,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Environment Setup",
                 startDate: relativeDate(-40),
                 endDate: relativeDate(-25),
-                color: "bg-amber-600",
+                color: "#D97706", // was bg-amber-600
                 percent: 100,
             },
             {
@@ -211,7 +211,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "CI/CD Pipeline Setup",
                 startDate: relativeDate(-30),
                 endDate: relativeDate(-15),
-                color: "bg-amber-500",
+                color: "#F59E0B", // was bg-amber-500
                 percent: 100,
                 dependencies: ["task-env-setup"],
             },
@@ -220,7 +220,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Monitoring Setup",
                 startDate: relativeDate(-20),
                 endDate: relativeDate(-5),
-                color: "bg-orange-600",
+                color: "#EA580C", // was bg-orange-600
                 percent: 90,
                 dependencies: ["task-ci-setup"],
             },
@@ -229,7 +229,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Staging Deployment",
                 startDate: relativeDate(15),
                 endDate: relativeDate(25),
-                color: "bg-orange-500",
+                color: "#F97316", // was bg-orange-500
                 percent: 0,
                 dependencies: ["task-integration", "task-monitoring"],
             },
@@ -238,7 +238,7 @@ export const complexDemoData: TaskGroup[] = [
                 name: "Production Deployment",
                 startDate: relativeDate(35),
                 endDate: relativeDate(45),
-                color: "bg-red-500",
+                color: "#EF4444", // was bg-red-500
                 percent: 0,
                 dependencies: ["task-staging-deploy", "task-uat"],
             },
@@ -258,7 +258,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Requirements Gathering",
                 startDate: new Date(new Date().getFullYear(), 0, 15),
                 endDate: new Date(new Date().getFullYear(), 1, 28),
-                color: "bg-blue-600",
+                color: "#2563EB", // was bg-blue-600
                 percent: 100,
             },
             {
@@ -266,7 +266,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Feasibility Study",
                 startDate: new Date(new Date().getFullYear(), 1, 1),
                 endDate: new Date(new Date().getFullYear(), 2, 15),
-                color: "bg-blue-500",
+                color: "#3B82F6", // was bg-blue-500
                 percent: 100,
             },
             {
@@ -274,7 +274,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Project Charter",
                 startDate: new Date(new Date().getFullYear(), 2, 1),
                 endDate: new Date(new Date().getFullYear(), 2, 31),
-                color: "bg-blue-400",
+                color: "#60A5FA", // was bg-blue-400
                 percent: 100,
             },
         ],
@@ -289,7 +289,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Architecture Design",
                 startDate: new Date(new Date().getFullYear(), 3, 1),
                 endDate: new Date(new Date().getFullYear(), 4, 15),
-                color: "bg-indigo-600",
+                color: "#4F46E5", // was bg-indigo-600
                 percent: 100,
                 dependencies: ["task-project-charter"],
             },
@@ -298,7 +298,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Database Design",
                 startDate: new Date(new Date().getFullYear(), 4, 1),
                 endDate: new Date(new Date().getFullYear(), 5, 15),
-                color: "bg-indigo-500",
+                color: "#6366F1", // was bg-indigo-500
                 percent: 95,
                 dependencies: ["task-arch-design"],
             },
@@ -307,7 +307,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "UI/UX Design",
                 startDate: new Date(new Date().getFullYear(), 4, 15),
                 endDate: new Date(new Date().getFullYear(), 6, 15),
-                color: "bg-indigo-400",
+                color: "#818CF8", // was bg-indigo-400
                 percent: 90,
                 dependencies: ["task-arch-design"],
             },
@@ -323,7 +323,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Core Development",
                 startDate: new Date(new Date().getFullYear(), 5, 1),
                 endDate: new Date(new Date().getFullYear(), 8, 30),
-                color: "bg-purple-600",
+                color: "#8B5CF6", // was bg-purple-600
                 percent: 70,
                 dependencies: ["task-db-design"],
             },
@@ -332,7 +332,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "API Development",
                 startDate: new Date(new Date().getFullYear(), 6, 1),
                 endDate: new Date(new Date().getFullYear(), 8, 15),
-                color: "bg-purple-500",
+                color: "#A855F7", // was bg-purple-500
                 percent: 60,
                 dependencies: ["task-db-design"],
             },
@@ -341,7 +341,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Frontend Development",
                 startDate: new Date(new Date().getFullYear(), 6, 15),
                 endDate: new Date(new Date().getFullYear(), 9, 30),
-                color: "bg-purple-400",
+                color: "#C084FC", // was bg-purple-400
                 percent: 50,
                 dependencies: ["task-ui-design"],
             },
@@ -357,7 +357,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Unit Testing",
                 startDate: new Date(new Date().getFullYear(), 7, 1),
                 endDate: new Date(new Date().getFullYear(), 9, 30),
-                color: "bg-green-600",
+                color: "#16A34A", // was bg-green-600
                 percent: 60,
                 dependencies: ["task-core-dev", "task-api-dev"],
             },
@@ -366,7 +366,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Integration Testing",
                 startDate: new Date(new Date().getFullYear(), 9, 1),
                 endDate: new Date(new Date().getFullYear(), 10, 15),
-                color: "bg-green-500",
+                color: "#22C55E", // was bg-green-500
                 percent: 30,
                 dependencies: ["task-unit-testing", "task-frontend-dev"],
             },
@@ -375,7 +375,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Performance Testing",
                 startDate: new Date(new Date().getFullYear(), 10, 1),
                 endDate: new Date(new Date().getFullYear(), 11, 15),
-                color: "bg-green-400",
+                color: "#4ADE80", // was bg-green-400
                 percent: 10,
                 dependencies: ["task-integration-testing"],
             },
@@ -391,7 +391,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Beta Release",
                 startDate: new Date(new Date().getFullYear(), 10, 15),
                 endDate: new Date(new Date().getFullYear(), 11, 15),
-                color: "bg-amber-600",
+                color: "#D97706", // was bg-amber-600
                 percent: 5,
                 dependencies: ["task-integration-testing"],
             },
@@ -400,7 +400,7 @@ export const yearLongProjectData: TaskGroup[] = [
                 name: "Final Release",
                 startDate: new Date(new Date().getFullYear(), 11, 15),
                 endDate: new Date(new Date().getFullYear(), 11, 31),
-                color: "bg-amber-500",
+                color: "#F59E0B", // was bg-amber-500
                 percent: 0,
                 dependencies: ["task-performance-testing", "task-beta-release"],
             },

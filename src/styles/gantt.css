@@ -119,6 +119,10 @@
 .rmg-header {
     padding: 16px 24px;
     border-bottom: 1px solid var(--rmg-border-color);
+    background-color: var(--rmg-bg-color);
+}
+
+.rmg-header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -129,6 +133,11 @@
     font-weight: 700;
     color: var(--rmg-text-color);
     margin: 0;
+}
+
+.rmg-view-mode-wrapper {
+    display: flex;
+    align-items: center;
 }
 
 /* Container für Inhalt */
@@ -480,7 +489,7 @@
 }
 
 .rmg-view-mode-button-active {
-    background-color: var(--rmg-task-color);
+    background-color: var(--rmg-blue-500);
     color: white;
     font-weight: 600;
 }

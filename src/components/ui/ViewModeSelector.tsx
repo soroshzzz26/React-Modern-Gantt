@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 import { ViewMode } from "@/types";
 
 interface ViewModeSelectorProps {
@@ -42,7 +42,7 @@ const ViewModeSelector: React.FC<ViewModeSelectorProps> = ({ activeMode, onChang
                     onClick={() => onChange(mode.id)}
                     data-rmg-component="view-mode-button"
                     data-view-mode={mode.id}
-                    data-active={activeMode === mode.id}>
+                    data-active={activeMode === mode.id ? "true" : "false"}>
                     {mode.label}
                 </button>
             ))}

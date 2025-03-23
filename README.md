@@ -13,7 +13,7 @@ A flexible, customizable Gantt chart component for React applications with drag-
 ## Features
 
 - 📊 **Interactive timeline** with drag-and-drop task scheduling
-- 🎨 **Fully customizable** with Tailwind CSS or custom styling
+- 🎨 **Fully customizable** with CSS variables and custom classes
 - 🕒 **Multiple view modes** (Day, Week, Month, Quarter, Year)
 - 🌙 **Dark mode support** built-in
 - 📱 **Responsive design** that works across devices
@@ -29,7 +29,6 @@ A flexible, customizable Gantt chart component for React applications with drag-
 React Modern Gantt is designed to be compatible with a wide range of project setups:
 
 - **React**: Works with React 17, 18, and 19
-- **Tailwind CSS**: Compatible with both Tailwind CSS v3 and v4
 - **TypeScript/JavaScript**: Full TypeScript type definitions included, but works perfectly with JavaScript projects too
 
 ## Installation & Usage
@@ -48,67 +47,36 @@ yarn add react-modern-gantt
 import GanttChart from "react-modern-gantt";
 
 function MyApp() {
-  const tasks = [
-    {
-      id: "team-1",
-      name: "Engineering",
-      description: "Development Team",
-      tasks: [
+    const tasks = [
         {
-          id: "task-1",
-          name: "Website Redesign",
-          startDate: new Date(2023, 0, 1),
-          endDate: new Date(2023, 2, 15),
-          color: "bg-blue-500",
-          percent: 75,
+            id: "team-1",
+            name: "Engineering",
+            description: "Development Team",
+            tasks: [
+                {
+                    id: "task-1",
+                    name: "Website Redesign",
+                    startDate: new Date(2023, 0, 1),
+                    endDate: new Date(2023, 2, 15),
+                    color: "#3b82f6",
+                    percent: 75,
+                },
+                // More tasks...
+            ],
         },
-        // More tasks...
-      ],
-    },
-    // More groups...
-  ];
+        // More groups...
+    ];
 
-  const handleTaskUpdate = (groupId, updatedTask) => {
-    console.log("Task updated:", updatedTask);
-    // Update your state here
-  };
+    const handleTaskUpdate = (groupId, updatedTask) => {
+        console.log("Task updated:", updatedTask);
+        // Update your state here
+    };
 
-  return (
-
-  );
+    return <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} />;
 }
 ```
 
 That's it! No additional configuration required. The component comes fully styled and ready to use.
-
-### Advanced Usage Options
-
-If you need more control, you can use specific imports:
-
-```jsx
-// Standard GanttChart component (you'll need to import CSS separately)
-import { GanttChart } from "react-modern-gantt";
-import "react-modern-gantt/dist/index.css";
-
-// Fully styled version (explicit import, same as default)
-import { GanttChartWithStyles } from "react-modern-gantt";
-
-// Next.js specific version
-import { NextGanttChart } from "react-modern-gantt";
-```
-
-### Typescript Support
-
-Full TypeScript definitions are included. Import types as needed:
-
-```tsx
-import { GanttChart, Task, TaskGroup, ViewMode } from "react-modern-gantt";
-
-// Define your tasks with proper typing
-const tasks: TaskGroup[] = [
-    // Your typed tasks here
-];
-```
 
 ## Core Concepts
 
@@ -183,7 +151,7 @@ interface Task {
     name: string; // Task name
     startDate: Date; // Start date
     endDate: Date; // End date
-    color?: string; // Task color (Tailwind class or CSS color)
+    color?: string; // Task color (CSS color value or hex code)
     percent?: number; // Completion percentage (0-100)
     dependencies?: string[]; // IDs of dependent tasks
     [key: string]: any; // Additional custom properties
@@ -223,57 +191,92 @@ import { GanttChart, ViewMode } from "react-modern-gantt";
 
 ## Customization
 
-### Using Custom Styles
+### CSS Variables
 
-React Modern Gantt supports easy customization with Tailwind CSS classes or your own CSS:
+The easiest way to customize the appearance is by overriding CSS variables:
+
+```css
+:root {
+    /* Primary colors */
+    --rmg-bg-color: #f8f9fb;
+    --rmg-text-color: #1a202c;
+    --rmg-border-color: #e2e8f0;
+    --rmg-task-color: #3182ce;
+    --rmg-task-text-color: white;
+    --rmg-marker-color: #e53e3e;
+
+    /* Size variables */
+    --rmg-row-height: 50px;
+    --rmg-task-height: 36px;
+    --rmg-border-radius: 6px;
+
+    /* Animation speed */
+    --rmg-animation-speed: 0.25;
+}
+```
+
+### Using custom styles prop
+
+For more specific customization, you can use the `styles` prop to pass custom class names:
 
 ```jsx
 <GanttChart
     tasks={tasks}
     styles={{
-        container: "border-2 border-blue-200",
-        title: "text-2xl text-blue-800",
-        taskList: "bg-blue-50",
-        timeline: "bg-gray-50",
-        todayMarker: "bg-red-500",
-        taskRow: "hover:bg-slate-50",
-        tooltip: "shadow-lg",
+        container: "my-gantt-container",
+        title: "my-gantt-title",
+        taskList: "my-task-list",
+        timeline: "my-timeline",
+        todayMarker: "my-today-marker",
+        taskRow: "my-task-row",
+        tooltip: "my-tooltip",
     }}
     onTaskUpdate={handleTaskUpdate}
 />
 ```
 
-### Dark Mode
+### Data Attributes for Styling
 
-Dark mode is built-in and easy to enable:
+Each component has data attributes that you can use for more targeted styling:
 
-```jsx
-<GanttChart tasks={tasks} darkMode={true} onTaskUpdate={handleTaskUpdate} />
+```css
+/* Style all tasks */
+[data-rmg-component="task"] {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Style specific elements */
+[data-rmg-component="task-group-name"] {
+    font-weight: bold;
+}
+
+/* Style based on state */
+[data-rmg-component="task"][data-dragging="true"] {
+    opacity: 0.8;
+}
 ```
 
 ### Custom Render Functions
 
-You can customize virtually every aspect of the Gantt chart with custom render functions:
-
-#### Custom Task Rendering
+For complete control, you can use custom render functions:
 
 ```jsx
 <GanttChart
     tasks={tasks}
     renderTask={({ task, leftPx, widthPx, topPx, isHovered, isDragging, showProgress }) => (
         <div
-            className={`absolute h-8 rounded flex items-center px-2
-                ${isHovered ? "ring-2 ring-blue-500" : ""}
-                ${task.color || "bg-blue-500"}`}
+            className="my-custom-task"
             style={{
+                position: "absolute",
                 left: `${leftPx}px`,
                 width: `${widthPx}px`,
                 top: `${topPx}px`,
+                backgroundColor: task.color || "#3182ce",
             }}>
-            <div className="text-white truncate">{task.name}</div>
+            <div className="my-task-label">{task.name}</div>
             {showProgress && (
-                <div className="absolute bottom-1 left-1 right-1 h-1 bg-black/20 rounded-full">
-                    <div className="h-full bg-white/80 rounded-full" style={{ width: `${task.percent || 0}%` }} />
+                <div className="my-progress-bar">
+                    <div className="my-progress-fill" style={{ width: `${task.percent || 0}%` }} />
                 </div>
             )}
         </div>
@@ -281,65 +284,17 @@ You can customize virtually every aspect of the Gantt chart with custom render f
 />
 ```
 
-#### Custom View Mode Selector
+## Dark Mode
+
+Dark mode is built-in and easy to enable:
 
 ```jsx
-<GanttChart
-    tasks={tasks}
-    renderViewModeSelector={({ activeMode, onChange, darkMode }) => (
-        <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
-            <button
-                className={`px-3 py-1 rounded ${activeMode === "day" ? "bg-blue-500 text-white" : "text-gray-700"}`}
-                onClick={() => onChange("day")}>
-                Day
-            </button>
-            <button
-                className={`px-3 py-1 rounded ${activeMode === "month" ? "bg-blue-500 text-white" : "text-gray-700"}`}
-                onClick={() => onChange("month")}>
-                Month
-            </button>
-            <button
-                className={`px-3 py-1 rounded ${activeMode === "year" ? "bg-blue-500 text-white" : "text-gray-700"}`}
-                onClick={() => onChange("year")}>
-                Year
-            </button>
-        </div>
-    )}
-/>
+<GanttChart tasks={tasks} darkMode={true} onTaskUpdate={handleTaskUpdate} />
 ```
 
-#### Custom Header
+The component automatically applies the dark theme to all elements.
 
-```jsx
-<GanttChart
-    tasks={tasks}
-    renderHeader={({ title, darkMode, viewMode, onViewModeChange }) => (
-        <div className="flex justify-between items-center p-4 border-b">
-            <h1 className="text-xl font-bold flex items-center">
-                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                {title}
-            </h1>
-            <div className="flex space-x-4 items-center">
-                <span className="text-sm text-gray-500">Current view:</span>
-                <select
-                    value={viewMode}
-                    onChange={e => onViewModeChange(e.target.value)}
-                    className="border rounded p-1">
-                    <option value="day">Day</option>
-                    <option value="week">Week</option>
-                    <option value="month">Month</option>
-                    <option value="quarter">Quarter</option>
-                    <option value="year">Year</option>
-                </select>
-            </div>
-        </div>
-    )}
-/>
-```
-
-### Custom Colors and Styling
+## Task Colors
 
 You can customize task colors in multiple ways:
 
@@ -351,7 +306,7 @@ const tasks = [
         name: "High Priority Task",
         startDate: new Date(2023, 0, 1),
         endDate: new Date(2023, 0, 15),
-        color: "bg-red-500", // Using Tailwind class
+        color: "#ef4444", // Using hex color
         percent: 50,
     },
 ];
@@ -363,23 +318,23 @@ const tasks = [
         // Logic to determine color based on task properties
         if (task.percent === 100) {
             return {
-                backgroundColor: "bg-green-500",
-                borderColor: "border-green-700",
-                textColor: "text-white",
+                backgroundColor: "#22c55e",
+                borderColor: "#166534",
+                textColor: "#ffffff",
             };
         }
 
         if (task.dependencies && task.dependencies.length > 0) {
             return {
-                backgroundColor: "bg-amber-500",
-                textColor: "text-white",
+                backgroundColor: "#f59e0b",
+                textColor: "#ffffff",
             };
         }
 
         // Default color
         return {
-            backgroundColor: "bg-blue-500",
-            textColor: "text-white",
+            backgroundColor: "#3b82f6",
+            textColor: "#ffffff",
         };
     }}
 />;
@@ -418,92 +373,7 @@ const handleTaskUpdate = (groupId, updatedTask) => {
 };
 ```
 
-## Exported Utility Functions and Classes
-
-React Modern Gantt exports several utility functions and classes:
-
-### Common Utility Functions
-
-| Function                | Description                                  |
-| ----------------------- | -------------------------------------------- |
-| `formatDate`            | Format a date with different display options |
-| `getMonthsBetween`      | Get array of months between two dates        |
-| `getDaysInMonth`        | Get number of days in a month                |
-| `detectTaskOverlaps`    | Detect and group overlapping tasks           |
-| `calculateTaskPosition` | Calculate position of a task                 |
-| `formatDateRange`       | Format a date range as a string              |
-| `calculateDuration`     | Calculate duration between two dates         |
-| `findEarliestDate`      | Find earliest date in task groups            |
-| `findLatestDate`        | Find latest date in task groups              |
-
-### Utility Classes
-
-```jsx
-import { TaskManager, CollisionManager } from "react-modern-gantt";
-
-// Calculate task position
-const { leftPx, widthPx } = TaskManager.calculateTaskPixelPosition(
-    task,
-    startDate,
-    endDate,
-    totalMonths,
-    monthWidth,
-    ViewMode.MONTH
-);
-
-// Check for collisions
-const wouldCollide = CollisionManager.wouldCollide(taskToMove, allTasks, ViewMode.MONTH);
-```
-
 ## Advanced Examples
-
-### Using Multiple View Modes
-
-```jsx
-import { useState } from "react";
-import { GanttChart, ViewMode } from "react-modern-gantt";
-
-function MultiViewGantt() {
-    const [viewMode, setViewMode] = useState(ViewMode.MONTH);
-
-    const handleViewModeChange = newMode => {
-        setViewMode(newMode);
-        console.log(`View mode changed to: ${newMode}`);
-    };
-
-    return (
-        <GanttChart
-            tasks={tasks}
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-            // Only show Day, Month and Year options
-            renderViewModeSelector={({ activeMode, onChange, darkMode }) => (
-                <div className="flex rounded-lg border overflow-hidden">
-                    <button
-                        className={`px-3 py-1 ${activeMode === ViewMode.DAY ? "bg-indigo-600 text-white" : "bg-white"}`}
-                        onClick={() => onChange(ViewMode.DAY)}>
-                        Day
-                    </button>
-                    <button
-                        className={`px-3 py-1 ${
-                            activeMode === ViewMode.MONTH ? "bg-indigo-600 text-white" : "bg-white"
-                        }`}
-                        onClick={() => onChange(ViewMode.MONTH)}>
-                        Month
-                    </button>
-                    <button
-                        className={`px-3 py-1 ${
-                            activeMode === ViewMode.YEAR ? "bg-indigo-600 text-white" : "bg-white"
-                        }`}
-                        onClick={() => onChange(ViewMode.YEAR)}>
-                        Year
-                    </button>
-                </div>
-            )}
-        />
-    );
-}
-```
 
 ### Task Progress Updates
 
