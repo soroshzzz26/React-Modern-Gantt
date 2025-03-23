@@ -375,7 +375,7 @@ const GanttChart: React.FC<GanttChartProps> = ({
     // Apply dark mode class if enabled
     const themeClass = darkMode ? "rmg-dark" : "";
 
-    // Merge custom styles with component class names with a type cast fix
+    // Merge custom styles with component class names
     const getComponentClassName = (component: string, defaultClass: string) => {
         return `${defaultClass} ${styles[component as keyof typeof styles] || ""}`;
     };

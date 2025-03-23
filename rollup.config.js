@@ -59,9 +59,9 @@ export default {
             plugins: [autoprefixer()],
             minimize: true,
             modules: false,
-            // Inject CSS into JS
+            // CSS nicht in JS injizieren, sondern nur als Datei extrahieren
             inject: true,
-            // Still extract the CSS for those who want to import it directly
+            // Die CSS-Datei extrahieren
             extract: "index.css",
             config: {
                 path: "./postcss.config.mjs",
