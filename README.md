@@ -6,12 +6,36 @@ A flexible, customizable Gantt chart component for React applications with drag-
 [![license](https://img.shields.io/npm/l/react-modern-gantt.svg)](https://github.com/MikaStiebitz/React-Modern-Gantt/blob/main/LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/react-modern-gantt.svg)](https://bundlephobia.com/result?p=react-modern-gantt)
 
-![Dark](https://github.com/user-attachments/assets/bc5ab980-6a28-4010-83bc-a88ae81bb6fa)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bc5ab980-6a28-4010-83bc-a88ae81bb6fa" alt="React Modern Gantt in Dark Mode" width="800" />
+</p>
 
+<p align="center">
+  <a href="https://react-gantt-demo.vercel.app/" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/badge/View-LIVE_DEMO-blue?style=for-the-badge" alt="Live Demo" />
+  </a>
+</p>
 
-<a href="https://react-gantt-demo.vercel.app/" target="_blank" rel="noopener noreferrer">LIVE DEMO</a>
+---
 
-## Features
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Components](#-components)
+- [Task & TaskGroup Data Structure](#-task--taskgroup-data-structure)
+- [View Modes](#-view-modes)
+- [Customization](#-customization)
+- [Event Handling](#-event-handling)
+- [Dark Mode](#-dark-mode)
+- [Advanced Examples](#-advanced-examples)
+- [Browser Support](#-browser-support)
+- [FAQ](#-faq)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+## ✨ Features
 
 - 📊 **Interactive timeline** with drag-and-drop task scheduling
 - 🎨 **Fully customizable** with CSS variables and custom classes
@@ -25,30 +49,28 @@ A flexible, customizable Gantt chart component for React applications with drag-
 - 🌊 **Smooth animations** with configurable speeds and thresholds
 - 🔄 **Auto-scrolling** during drag operations
 
-## Compatibility
+## 📦 Installation
 
-React Modern Gantt is designed to be compatible with a wide range of project setups:
-
-- **React**: Works with React 17, 18, and 19
-- **TypeScript/JavaScript**: Full TypeScript type definitions included, but works perfectly with JavaScript projects too
-
-## Installation & Usage
-
-### Simple Installation
+### NPM
 
 ```bash
 npm install react-modern-gantt
-# or
+```
+
+### Yarn
+
+```bash
 yarn add react-modern-gantt
 ```
 
-### Zero-Configuration Usage
+## 🚀 Quick Start
 
 ```jsx
+import React, { useState } from "react";
 import GanttChart from "react-modern-gantt";
 
-function MyApp() {
-    const tasks = [
+function App() {
+    const [tasks, setTasks] = useState([
         {
             id: "team-1",
             name: "Engineering",
@@ -66,85 +88,41 @@ function MyApp() {
             ],
         },
         // More groups...
-    ];
+    ]);
 
     const handleTaskUpdate = (groupId, updatedTask) => {
-        console.log("Task updated:", updatedTask);
-        // Update your state here
+        setTasks(prevTasks =>
+            prevTasks.map(group =>
+                group.id === groupId
+                    ? {
+                          ...group,
+                          tasks: group.tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)),
+                      }
+                    : group
+            )
+        );
     };
 
-    return <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} />;
+    return <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} darkMode={false} showProgress={true} />;
 }
 ```
 
-That's it! No additional configuration required. The component comes fully styled and ready to use.
+## 🧩 Components
 
-## Core Concepts
+### Main Components
 
-React Modern Gantt is built around a few key concepts:
+- **`GanttChart`**: The main component for rendering a Gantt chart
+- **`TaskItem`**: Individual task bars
+- **`TaskList`**: The left sidebar with task groups
+- **`Timeline`**: The header timeline display
+- **`ViewModeSelector`**: Controls for switching between timeline views
 
-1. **Task Groups** - Collections of tasks, typically representing teams or departments
-2. **Tasks** - Individual work items with start and end dates
-3. **View Modes** - Different timeline scales (Day, Week, Month, Quarter, Year)
-4. **Interactions** - Drag, resize, click, and other user interactions
+### Utility Components
 
-## Component Props
+- **`Tooltip`**: Information tooltip for tasks
+- **`TodayMarker`**: Vertical line indicating the current date
 
-### GanttChart
-
-The main component for rendering a Gantt chart.
-
-#### Data and Configuration Props
-
-| Prop                    | Type          | Default              | Description                                              |
-| ----------------------- | ------------- | -------------------- | -------------------------------------------------------- |
-| `tasks`                 | `TaskGroup[]` | `[]`                 | Array of task groups                                     |
-| `startDate`             | `Date`        | Auto                 | Start date of the chart (defaults to earliest task date) |
-| `endDate`               | `Date`        | Auto                 | End date of the chart (defaults to latest task date)     |
-| `title`                 | `string`      | `"Project Timeline"` | Title displayed at the top of the chart                  |
-| `currentDate`           | `Date`        | `new Date()`         | Current date for the today marker                        |
-| `showCurrentDateMarker` | `boolean`     | `true`               | Whether to show the today marker                         |
-| `todayLabel`            | `string`      | `"Today"`            | Label for today marker                                   |
-| `editMode`              | `boolean`     | `true`               | Whether tasks can be dragged/resized                     |
-| `headerLabel`           | `string`      | `"Resources"`        | Header label for the task list column                    |
-| `showProgress`          | `boolean`     | `false`              | Whether to show progress indicators                      |
-| `darkMode`              | `boolean`     | `false`              | Whether to use dark mode                                 |
-| `locale`                | `string`      | `'default'`          | Locale for date formatting                               |
-| `viewMode`              | `ViewMode`    | `ViewMode.MONTH`     | Timeline display mode (day, week, month, quarter, year)  |
-| `showViewModeSelector`  | `boolean`     | `true`               | Whether to show the view mode selector                   |
-| `smoothDragging`        | `boolean`     | `true`               | Enable smooth animations for dragging operations         |
-| `movementThreshold`     | `number`      | `3`                  | Minimum pixel movement threshold to reduce jitter        |
-| `animationSpeed`        | `number`      | `0.25`               | Animation speed for smooth transitions (0.1-1)           |
-| `fontSize`              | `string`      | `'inherit'`          | Base font size                                           |
-| `rowHeight`             | `number`      | `40`                 | Height of task rows in pixels                            |
-| `styles`                | `GanttStyles` | `{}`                 | Custom style classes                                     |
-
-#### Custom Render Props
-
-These props allow advanced customization of each component part:
-
-| Prop                     | Type                                                                       | Description                             |
-| ------------------------ | -------------------------------------------------------------------------- | --------------------------------------- |
-| `renderTaskList`         | `(props: TaskListRenderProps) => ReactNode`                                | Custom render for the task list sidebar |
-| `renderTask`             | `(props: TaskRenderProps) => ReactNode`                                    | Custom render for individual task bars  |
-| `renderTooltip`          | `(props: TooltipRenderProps) => ReactNode`                                 | Custom render for task tooltips         |
-| `renderViewModeSelector` | `(props: ViewModeSelectorRenderProps) => ReactNode`                        | Custom render for view mode tabs        |
-| `renderHeader`           | `(props: HeaderRenderProps) => ReactNode`                                  | Custom render for the chart header      |
-| `renderTimelineHeader`   | `(props: TimelineHeaderRenderProps) => ReactNode`                          | Custom render for timeline header       |
-| `getTaskColor`           | `(props: TaskColorProps) => { backgroundColor, borderColor?, textColor? }` | Customize task colors                   |
-
-#### Event Handlers
-
-| Prop                | Type                                           | Description                                               |
-| ------------------- | ---------------------------------------------- | --------------------------------------------------------- |
-| `onTaskUpdate`      | `(groupId: string, updatedTask: Task) => void` | Called when a task is moved, resized, or progress updated |
-| `onTaskClick`       | `(task: Task, group: TaskGroup) => void`       | Called when a task is clicked                             |
-| `onTaskSelect`      | `(task: Task, isSelected: boolean) => void`    | Called when a task is selected                            |
-| `onTaskDoubleClick` | `(task: Task) => void`                         | Called when a task is double-clicked                      |
-| `onGroupClick`      | `(group: TaskGroup) => void`                   | Called when a group is clicked                            |
-| `onViewModeChange`  | `(viewMode: ViewMode) => void`                 | Called when view mode changes                             |
-
-## Task and TaskGroup Interfaces
+## 📊 Task & TaskGroup Data Structure
 
 ```typescript
 interface Task {
@@ -168,17 +146,17 @@ interface TaskGroup {
 }
 ```
 
-## View Modes
+## 🕒 View Modes
 
 The component supports five different view modes to adapt to different timeline needs:
 
-| View Mode | Description            | Best Used For                                |
-| --------- | ---------------------- | -------------------------------------------- |
-| `DAY`     | Shows individual days  | Detailed short-term planning (days/weeks)    |
-| `WEEK`    | Shows weeks            | Short to medium-term planning (weeks/months) |
-| `MONTH`   | Shows months (default) | Medium-term planning (months/quarters)       |
-| `QUARTER` | Shows quarters         | Medium to long-term planning (quarters/year) |
-| `YEAR`    | Shows years            | Long-term planning (years)                   |
+| View Mode | Description    | Best Used For                                |
+| --------- | -------------- | -------------------------------------------- |
+| `DAY`     | Shows days     | Detailed short-term planning (days/weeks)    |
+| `WEEK`    | Shows weeks    | Short to medium-term planning (weeks/months) |
+| `MONTH`   | Shows months   | Medium-term planning (months/quarters)       |
+| `QUARTER` | Shows quarters | Medium to long-term planning (quarters/year) |
+| `YEAR`    | Shows years    | Long-term planning (years)                   |
 
 ```jsx
 import { GanttChart, ViewMode } from "react-modern-gantt";
@@ -190,7 +168,7 @@ import { GanttChart, ViewMode } from "react-modern-gantt";
 <GanttChart tasks={tasks} viewMode={ViewMode.DAY} />
 ```
 
-## Customization
+## 🎨 Customization
 
 ### CSS Variables
 
@@ -216,9 +194,7 @@ The easiest way to customize the appearance is by overriding CSS variables:
 }
 ```
 
-### Using custom styles prop
-
-For more specific customization, you can use the `styles` prop to pass custom class names:
+### Custom Styles
 
 ```jsx
 <GanttChart
@@ -236,30 +212,7 @@ For more specific customization, you can use the `styles` prop to pass custom cl
 />
 ```
 
-### Data Attributes for Styling
-
-Each component has data attributes that you can use for more targeted styling:
-
-```css
-/* Style all tasks */
-[data-rmg-component="task"] {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Style specific elements */
-[data-rmg-component="task-group-name"] {
-    font-weight: bold;
-}
-
-/* Style based on state */
-[data-rmg-component="task"][data-dragging="true"] {
-    opacity: 0.8;
-}
-```
-
-### Custom Render Functions
-
-For complete control, you can use custom render functions:
+### Custom Rendering
 
 ```jsx
 <GanttChart
@@ -285,7 +238,39 @@ For complete control, you can use custom render functions:
 />
 ```
 
-## Dark Mode
+## 🎯 Event Handling
+
+Handle various interactions with the Gantt chart:
+
+```jsx
+<GanttChart
+    tasks={tasks}
+    onTaskUpdate={(groupId, updatedTask) => {
+        console.log(`Task ${updatedTask.id} updated in group ${groupId}`);
+        // Update your state here
+        updateTasks(groupId, updatedTask);
+    }}
+    onTaskClick={(task, group) => {
+        console.log(`Task ${task.id} clicked in group ${group.id}`);
+        // Do something when a task is clicked
+        selectTask(task.id);
+    }}
+    onTaskSelect={(task, isSelected) => {
+        console.log(`Task ${task.id} selection state: ${isSelected}`);
+        // Handle selection state changes
+    }}
+    onGroupClick={group => {
+        console.log(`Group ${group.id} clicked`);
+        // Do something when a group is clicked
+    }}
+    onViewModeChange={viewMode => {
+        console.log(`View mode changed to: ${viewMode}`);
+        // Handle view mode changes
+    }}
+/>
+```
+
+## 🌙 Dark Mode
 
 Dark mode is built-in and easy to enable:
 
@@ -293,74 +278,104 @@ Dark mode is built-in and easy to enable:
 <GanttChart tasks={tasks} darkMode={true} onTaskUpdate={handleTaskUpdate} />
 ```
 
-The component automatically applies the dark theme to all elements.
+## 🔄 Advanced Examples
 
-## Task Colors
-
-You can customize task colors in multiple ways:
+### Custom Task Rendering by Status
 
 ```jsx
-// 1. Using the color property on tasks
-const tasks = [
-    {
-        id: "task-1",
-        name: "High Priority Task",
-        startDate: new Date(2023, 0, 1),
-        endDate: new Date(2023, 0, 15),
-        color: "#ef4444", // Using hex color
-        percent: 50,
-    },
-];
-
-// 2. Using the getTaskColor prop for dynamic coloring
 <GanttChart
     tasks={tasks}
-    getTaskColor={({ task, isHovered, isDragging }) => {
-        // Logic to determine color based on task properties
+    getTaskColor={({ task }) => {
+        // Task is complete
         if (task.percent === 100) {
             return {
-                backgroundColor: "#22c55e",
+                backgroundColor: "#22c55e", // Green
                 borderColor: "#166534",
                 textColor: "#ffffff",
             };
         }
 
-        if (task.dependencies && task.dependencies.length > 0) {
+        // Task has dependencies
+        if (task.dependencies?.length > 0) {
             return {
-                backgroundColor: "#f59e0b",
+                backgroundColor: "#f59e0b", // Orange
+                textColor: "#ffffff",
+            };
+        }
+
+        // High priority task
+        if (task.priority === "high") {
+            return {
+                backgroundColor: "#ef4444", // Red
                 textColor: "#ffffff",
             };
         }
 
         // Default color
         return {
-            backgroundColor: "#3b82f6",
+            backgroundColor: "#3b82f6", // Blue
             textColor: "#ffffff",
         };
     }}
-/>;
+/>
 ```
 
-## Handling Task Updates
+### Custom Tooltip for Detailed Information
 
-Handle task updates with custom logic:
+```jsx
+<GanttChart
+    tasks={tasks}
+    renderTooltip={({ task, position, dragType, startDate, endDate }) => (
+        <div className="custom-tooltip">
+            <h3>{task.name}</h3>
+
+            {dragType && (
+                <div className="drag-indicator">{dragType === "move" ? "Moving task..." : "Resizing task..."}</div>
+            )}
+
+            <div className="date-range">
+                {format(startDate, "MMM d, yyyy")} - {format(endDate, "MMM d, yyyy")}
+            </div>
+
+            <div className="progress-section">
+                <div className="progress-label">Progress: {task.percent || 0}%</div>
+                <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${task.percent || 0}%` }} />
+                </div>
+            </div>
+
+            {task.assignee && <div className="assignee">Assigned to: {task.assignee}</div>}
+        </div>
+    )}
+/>
+```
+
+## 🌐 Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## ❓ FAQ
+
+### Can I change the date format in the timeline?
+
+Yes, you can use the `locale` prop to change the date formatting:
+
+```jsx
+<GanttChart
+    tasks={tasks}
+    locale="de-DE" // For German formatting
+/>
+```
+
+### How do I handle updates to tasks?
+
+The Gantt chart is a controlled component, so updates are handled through the `onTaskUpdate` callback:
 
 ```jsx
 const handleTaskUpdate = (groupId, updatedTask) => {
-    // Validate dates
-    if (updatedTask.startDate > updatedTask.endDate) {
-        alert("Start date cannot be after end date");
-        return;
-    }
-
-    // Check for progress updates
-    const originalTask = tasks.find(group => group.id === groupId)?.tasks.find(task => task.id === updatedTask.id);
-
-    if (originalTask && originalTask.percent !== updatedTask.percent) {
-        console.log(`Progress updated: ${originalTask.percent}% → ${updatedTask.percent}%`);
-    }
-
-    // Update state
     setTasks(prevTasks =>
         prevTasks.map(group =>
             group.id === groupId
@@ -374,45 +389,37 @@ const handleTaskUpdate = (groupId, updatedTask) => {
 };
 ```
 
-## Advanced Examples
+### Can I make the Gantt chart read-only?
 
-### Task Progress Updates
+Yes, set the `editMode` prop to `false`:
 
 ```jsx
-const handleTaskUpdate = (groupId, updatedTask) => {
-    // Check if this is a progress update
-    const existingTask = findTaskById(updatedTask.id);
-
-    if (existingTask && existingTask.percent !== updatedTask.percent) {
-        // This is a progress update
-        console.log(`Task ${updatedTask.id} progress updated to ${updatedTask.percent}%`);
-
-        // Special handling for completed tasks
-        if (updatedTask.percent === 100 && existingTask.percent < 100) {
-            console.log(`Task ${updatedTask.id} is now complete!`);
-            // Maybe trigger some notification or update other dependent tasks?
-        }
-    } else {
-        // This is a date/position update
-        console.log(`Task ${updatedTask.id} dates updated:`, {
-            startDate: updatedTask.startDate,
-            endDate: updatedTask.endDate,
-        });
-    }
-
-    // Update your state with the new task data
-    updateTasksState(groupId, updatedTask);
-};
+<GanttChart tasks={tasks} editMode={false} />
 ```
 
-## Browser Support
+### How do I disable progress indicators?
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+Set the `showProgress` prop to `false`:
 
-## Contributing
+```jsx
+<GanttChart tasks={tasks} showProgress={false} />
+```
+
+### Can I customize the visual appearance of specific tasks?
+
+Yes, use the `getTaskColor` function:
+
+```jsx
+<GanttChart
+    tasks={tasks}
+    getTaskColor={({ task }) => ({
+        backgroundColor: task.isUrgent ? "#ef4444" : "#3b82f6",
+        textColor: "white",
+    })}
+/>
+```
+
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -422,6 +429,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

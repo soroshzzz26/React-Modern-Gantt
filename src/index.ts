@@ -5,6 +5,9 @@
  * @module react-modern-gantt
  */
 
+// Import styles directly (this creates a side effect - the CSS will be loaded)
+import "./styles/gantt.css";
+
 // Re-export self-contained GanttChart as default export
 import GanttChartWithStyles from "./with-styles";
 export default GanttChartWithStyles;

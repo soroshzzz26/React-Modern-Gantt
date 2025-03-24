@@ -564,10 +564,6 @@
     animation: update-flash 1s cubic-bezier(0.2, 0, 0.13, 2);
 }
 
-.rmg-today-marker {
-    animation: pulse 3s infinite ease-in-out;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 640px) {
     .rmg-task-list {

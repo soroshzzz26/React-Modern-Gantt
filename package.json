@@ -84,7 +84,8 @@
         }
     },
     "sideEffects": [
-        "*.css"
+        "*.css",
+        "./styles/gantt.css"
     ],
     "exports": {
         ".": {

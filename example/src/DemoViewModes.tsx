@@ -50,6 +50,7 @@ const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }: DemoViewModes
                     style={{
                         backgroundColor: demoType === "complex" ? "#4f46e5" : undefined,
                         color: demoType === "complex" ? "white" : undefined,
+                        padding: "5px 10px",
                     }}>
                     Complex Project
                 </button>
@@ -58,6 +59,7 @@ const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }: DemoViewModes
                     style={{
                         backgroundColor: demoType === "yearLong" ? "#4f46e5" : undefined,
                         color: demoType === "yearLong" ? "white" : undefined,
+                        padding: "5px 10px",
                     }}>
                     Year-Long Project
                 </button>
