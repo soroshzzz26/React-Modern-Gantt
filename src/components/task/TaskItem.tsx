@@ -77,7 +77,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
     const handleProgressMouseMove = useCallback(
         (e: MouseEvent) => {
-            if (!isDraggingProgress || !progressBarRef.current || !taskRef.current) return;
+            if (!isDraggingProgress || !taskRef.current) return;
 
             // Get progress bar bounds
             const taskRect = taskRef.current.getBoundingClientRect();
@@ -89,14 +89,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
             // Update progress value with constraints
             setProgressPercent(Math.max(0, Math.min(100, newPercent)));
-
-            // Apply smooth visual update directly to the DOM for immediate feedback
-            if (progressBarRef.current && progressBarRef.current.firstChild) {
-                (progressBarRef.current.firstChild as HTMLElement).style.width = `${Math.max(
-                    0,
-                    Math.min(100, newPercent)
-                )}%`;
-            }
         },
         [isDraggingProgress]
     );
@@ -235,12 +227,17 @@ const TaskItem: React.FC<TaskItemProps> = ({
                     data-rmg-component="progress-bar">
                     <div
                         className="rmg-progress-fill"
-                        style={{ width: `${progressPercent}%` }}
+                        style={{
+                            width: `${progressPercent}%`,
+                            transition: isDraggingProgress ? "none" : "width 0.3s ease-out",
+                        }}
                         data-rmg-component="progress-fill">
                         {/* Progress bubble handle */}
                         {editMode && (isHovered || isDraggingProgress) && (
                             <div
-                                className={`rmg-progress-handle ${isDraggingProgress ? "rmg-progress-handle-dragging" : ""}`}
+                                className={`rmg-progress-handle ${
+                                    isDraggingProgress ? "rmg-progress-handle-dragging" : ""
+                                }`}
                                 onMouseDown={handleProgressMouseDown}
                                 data-rmg-component="progress-handle"
                             />

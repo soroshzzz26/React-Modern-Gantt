@@ -162,7 +162,9 @@ const Timeline: React.FC<TimelineProps> = ({
         <div
             className={`rmg-timeline ${className}`}
             style={{ "--gantt-unit-width": `${unitWidth}px` } as React.CSSProperties}
-            data-rmg-component="timeline">
+            data-rmg-component="timeline"
+            data-view-mode={viewMode}>
+            {/* Add data-view-mode attribute */}
             {/* Higher-level header for minutes/hours/days/months/years */}
             {needsHierarchicalDisplay && (
                 <div className="rmg-timeline-header-higher" data-rmg-component="timeline-header-higher">
@@ -178,13 +180,14 @@ const Timeline: React.FC<TimelineProps> = ({
                     ))}
                 </div>
             )}
-
             {/* Main time unit headers */}
             <div className="rmg-timeline-header" data-rmg-component="timeline-header">
                 {months.map((timeUnit, index) => (
                     <div
                         key={`timeunit-${index}`}
-                        className={`rmg-timeline-unit ${index === currentMonthIndex ? "rmg-timeline-unit-current" : ""}`}
+                        className={`rmg-timeline-unit ${
+                            index === currentMonthIndex ? "rmg-timeline-unit-current" : ""
+                        }`}
                         style={{ width: `${unitWidth}px` }}
                         data-timeunit={timeUnit.toISOString()}
                         data-rmg-component="timeline-unit">
