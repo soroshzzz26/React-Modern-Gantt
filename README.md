@@ -68,6 +68,8 @@ yarn add react-modern-gantt
 ```jsx
 import React, { useState } from "react";
 import GanttChart from "react-modern-gantt";
+// ⚠️ IMPORTANT: Don't forget to import the styles!
+import "react-modern-gantt/dist/index.css";
 
 function App() {
     const [tasks, setTasks] = useState([
@@ -105,6 +107,28 @@ function App() {
 
     return <GanttChart tasks={tasks} onTaskUpdate={handleTaskUpdate} darkMode={false} showProgress={true} />;
 }
+```
+
+> 📌 **Note:** Make sure to import the CSS file to apply all necessary styles:
+> `import "react-modern-gantt/dist/index.css";`
+> Without this import, the component will not be styled correctly.
+
+### Using CSS styles
+
+The Gantt chart requires CSS styles that are shipped separately from the component code. You have two options:
+
+#### Option 1: Import CSS file (Recommended)
+
+```js
+// In your application entry point (e.g., App.js or index.js)
+import "react-modern-gantt/dist/index.css";
+```
+
+#### Option 2: Reference CSS in HTML
+
+```html
+<!-- In your HTML file -->
+<link rel="stylesheet" href="https://unpkg.com/react-modern-gantt@0.5.0/dist/index.css" />
 ```
 
 ## 🧩 Components
@@ -418,6 +442,16 @@ Yes, use the `getTaskColor` function:
     })}
 />
 ```
+
+### Why are my styles not loading?
+
+If your Gantt chart appears without styling, make sure you've imported the CSS file:
+
+```js
+import "react-modern-gantt/dist/index.css";
+```
+
+This import should be included in your application's entry point or in the component where you use the Gantt chart.
 
 ## 🤝 Contributing
 
