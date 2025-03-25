@@ -535,19 +535,6 @@
     scroll-behavior: auto !important;
 }
 
-/* Animations */
-@keyframes pulse {
-    0% {
-        opacity: 0.8;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0.8;
-    }
-}
-
 @keyframes update-flash {
     0% {
         box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
@@ -558,10 +545,6 @@
     100% {
         box-shadow: 0 0 0 2px rgba(79, 70, 229, 0);
     }
-}
-
-.rmg-task-updated {
-    animation: update-flash 1s cubic-bezier(0.2, 0, 0.13, 2);
 }
 
 /* Responsive Adjustments */

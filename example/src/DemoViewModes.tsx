@@ -67,8 +67,8 @@ const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }: DemoViewModes
 
             <div style={{ marginBottom: "20px" }}>
                 <p>
-                    This demo showcases different view modes (Day, Week, Month, Quarter, Year). The view mode selector
-                    is built into the Gantt chart.
+                    This demo showcases different view modes (Minute, Hour, Day, Week, Month, Quarter, Year). The view
+                    mode selector is built into the Gantt chart.
                 </p>
             </div>
 
@@ -78,7 +78,15 @@ const DemoViewModes: React.FC<DemoViewModesProps> = ({ darkMode }: DemoViewModes
                 darkMode={darkMode}
                 showProgress={true}
                 viewMode={viewMode}
-                viewModes={[ViewMode.DAY, ViewMode.WEEK, ViewMode.MONTH, ViewMode.QUARTER, ViewMode.YEAR]}
+                viewModes={[
+                    ViewMode.MINUTE,
+                    ViewMode.HOUR,
+                    ViewMode.DAY,
+                    ViewMode.WEEK,
+                    ViewMode.MONTH,
+                    ViewMode.QUARTER,
+                    ViewMode.YEAR,
+                ]}
                 onViewModeChange={handleViewModeChange}
                 onTaskUpdate={handleTaskUpdate}
             />
