@@ -1,11 +1,13 @@
 /**
- * React Modern Gantt - Standalone CSS
- * Vollständige Ersetzung der Tailwind-Klassen mit nativem CSS
+ * React Modern Gantt - Optimierte CSS
+ * Modernes, anpassbares Styling für Gantt-Diagramme
  */
 
-/* Basisvariablen */
+/* ======================================================
+   1. Basis-Variablen (Light Mode)
+   ====================================================== */
 :root {
-    /* Farben */
+    /* Basis-Farben */
     --rmg-white: #ffffff;
     --rmg-black: #000000;
 
@@ -21,19 +23,17 @@
     --rmg-gray-800: #1f2937;
     --rmg-gray-900: #111827;
 
-    /* Farben */
+    /* Farbpalette */
     --rmg-blue-50: #eff6ff;
     --rmg-blue-100: #dbeafe;
     --rmg-blue-500: #3b82f6;
     --rmg-blue-600: #2563eb;
     --rmg-blue-700: #1d4ed8;
-
     --rmg-red-500: #ef4444;
-
     --rmg-indigo-500: #6366f1;
     --rmg-indigo-600: #4f46e5;
 
-    /* Komponentenfarben */
+    /* Komponenten (Light Mode) */
     --rmg-bg-color: var(--rmg-white);
     --rmg-text-color: var(--rmg-gray-800);
     --rmg-border-color: var(--rmg-gray-200);
@@ -42,27 +42,29 @@
     --rmg-task-color: var(--rmg-blue-500);
     --rmg-task-text-color: var(--rmg-white);
 
-    /* Nützliche Variablen */
+    /* UI-Elemente */
     --rmg-tooltip-bg: var(--rmg-white);
     --rmg-tooltip-text: var(--rmg-gray-800);
     --rmg-tooltip-border: var(--rmg-gray-200);
     --rmg-resize-handle-bg: rgba(255, 255, 255, 0.3);
     --rmg-progress-bg: rgba(0, 0, 0, 0.2);
     --rmg-progress-fill: var(--rmg-white);
+
+    /* Schatten */
     --rmg-shadow-color: rgba(0, 0, 0, 0.1);
     --rmg-shadow-hover: rgba(0, 0, 0, 0.2);
     --rmg-shadow-drag: rgba(0, 0, 0, 0.3);
+
+    /* Scrollbar */
+    --rmg-scrollbar-track: rgba(229, 231, 235, 0.3);
+    --rmg-scrollbar-thumb: rgba(156, 163, 175, 0.5);
+    --rmg-scrollbar-thumb-hover: rgba(107, 114, 128, 0.7);
+    --rmg-scrollbar-size: 8px;
 
     /* Animationen */
     --rmg-animation-speed: 0.25;
     --rmg-transition-fast: 150ms ease;
     --rmg-transition-normal: 250ms ease;
-
-    /* Scrollbar */
-    --rmg-scrollbar-track: rgba(229, 231, 235, 0.5);
-    --rmg-scrollbar-thumb: rgba(156, 163, 175, 0.7);
-    --rmg-scrollbar-thumb-hover: rgba(107, 114, 128, 0.8);
-    --rmg-scrollbar-size: 8px;
 
     /* Layout */
     --rmg-row-height: 40px;
@@ -72,15 +74,15 @@
     --rmg-task-border-radius: 4px;
 }
 
-/* Dark Mode Theme */
+/* ======================================================
+   2. Dark Mode Variablen
+   ====================================================== */
 .rmg-dark {
     --rmg-bg-color: var(--rmg-gray-800);
     --rmg-text-color: var(--rmg-gray-100);
     --rmg-border-color: var(--rmg-gray-700);
     --rmg-highlight-color: var(--rmg-gray-700);
-    --rmg-marker-color: var(--rmg-red-500);
     --rmg-task-color: var(--rmg-indigo-600);
-    --rmg-task-text-color: var(--rmg-white);
 
     --rmg-tooltip-bg: var(--rmg-gray-800);
     --rmg-tooltip-text: var(--rmg-gray-100);
@@ -88,16 +90,19 @@
     --rmg-resize-handle-bg: rgba(255, 255, 255, 0.4);
     --rmg-progress-bg: rgba(255, 255, 255, 0.3);
     --rmg-progress-fill: var(--rmg-gray-200);
+
     --rmg-shadow-color: rgba(0, 0, 0, 0.3);
     --rmg-shadow-hover: rgba(0, 0, 0, 0.4);
     --rmg-shadow-drag: rgba(0, 0, 0, 0.5);
 
-    --rmg-scrollbar-track: rgba(55, 65, 81, 0.5);
-    --rmg-scrollbar-thumb: rgba(75, 85, 99, 0.7);
-    --rmg-scrollbar-thumb-hover: rgba(107, 114, 128, 0.8);
+    --rmg-scrollbar-track: rgba(55, 65, 81, 0.3);
+    --rmg-scrollbar-thumb: rgba(75, 85, 99, 0.5);
+    --rmg-scrollbar-thumb-hover: rgba(107, 114, 128, 0.7);
 }
 
-/* Hauptcontainer */
+/* ======================================================
+   3. Hauptcontainer
+   ====================================================== */
 .rmg-gantt-chart {
     width: 100%;
     border: 1px solid var(--rmg-border-color);
@@ -115,7 +120,14 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Header-Bereich */
+.rmg-container {
+    display: flex;
+    position: relative;
+}
+
+/* ======================================================
+   4. Header und Titel
+   ====================================================== */
 .rmg-header {
     padding: 16px 24px;
     border-bottom: 1px solid var(--rmg-border-color);
@@ -140,13 +152,9 @@
     align-items: center;
 }
 
-/* Container für Inhalt */
-.rmg-container {
-    display: flex;
-    position: relative;
-}
-
-/* Aufgabenliste auf der linken Seite */
+/* ======================================================
+   5. Aufgabenliste (Sidebar)
+   ====================================================== */
 .rmg-task-list {
     width: 160px;
     flex-shrink: 0;
@@ -202,7 +210,9 @@
     color: var(--rmg-gray-400);
 }
 
-/* Timeline-Ansicht */
+/* ======================================================
+   6. Timeline und Grid
+   ====================================================== */
 .rmg-timeline-container {
     flex-grow: 1;
     overflow-x: auto;
@@ -242,7 +252,6 @@
     background-color: var(--rmg-highlight-color);
 }
 
-/* Task Rows and Grid */
 .rmg-timeline-grid {
     position: relative;
 }
@@ -255,7 +264,40 @@
     box-sizing: border-box;
 }
 
-/* Task Items */
+/* Spezielle Minute und Hour View Styles */
+.rmg-timeline[data-view-mode="minute"] .rmg-timeline-unit,
+.rmg-timeline[data-view-mode="hour"] .rmg-timeline-unit {
+    font-size: 0.7rem;
+    padding: 4px 2px;
+    border-right: 1px dotted var(--rmg-border-color);
+}
+
+.rmg-timeline[data-view-mode="minute"] .rmg-timeline-header-higher .rmg-timeline-unit,
+.rmg-timeline[data-view-mode="hour"] .rmg-timeline-header-higher .rmg-timeline-unit {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.rmg-dark .rmg-timeline[data-view-mode="minute"] .rmg-timeline-header-higher .rmg-timeline-unit,
+.rmg-dark .rmg-timeline[data-view-mode="hour"] .rmg-timeline-header-higher .rmg-timeline-unit {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.rmg-timeline[data-view-mode="minute"] .rmg-timeline-unit-current,
+.rmg-timeline[data-view-mode="hour"] .rmg-timeline-unit-current {
+    background-color: var(--rmg-highlight-color);
+    font-weight: 700;
+}
+
+.rmg-timeline-grid[data-view-mode="minute"] .rmg-task-item,
+.rmg-timeline-grid[data-view-mode="hour"] .rmg-task-item {
+    height: 28px;
+    font-size: 0.75rem;
+}
+
+/* ======================================================
+   7. Aufgabenelemente
+   ====================================================== */
 .rmg-task-item {
     position: absolute;
     height: var(--rmg-task-height);
@@ -302,7 +344,9 @@
     line-height: 1.2;
 }
 
-/* Resize Handles */
+/* ======================================================
+   8. Resize Handles
+   ====================================================== */
 .rmg-resize-handle {
     position: absolute;
     top: 0;
@@ -331,7 +375,9 @@
     opacity: 1;
 }
 
-/* Progress Bar */
+/* ======================================================
+   9. Progress Bar
+   ====================================================== */
 .rmg-progress-bar {
     position: absolute;
     bottom: 4px;
@@ -350,7 +396,6 @@
     transition: width 0.3s ease-out;
 }
 
-/* Progress Handle */
 .rmg-progress-handle {
     position: absolute;
     right: 0;
@@ -380,7 +425,9 @@
     box-shadow: 0 2px 5px var(--rmg-shadow-hover);
 }
 
-/* Today Marker */
+/* ======================================================
+   10. Today Marker
+   ====================================================== */
 .rmg-today-marker {
     position: absolute;
     top: 0;
@@ -406,7 +453,9 @@
     box-shadow: 0 1px 3px var(--rmg-shadow-color);
 }
 
-/* Tooltip */
+/* ======================================================
+   11. Tooltip
+   ====================================================== */
 .rmg-tooltip {
     position: absolute;
     z-index: 1000;
@@ -462,7 +511,9 @@
     color: var(--rmg-gray-400);
 }
 
-/* View Mode Selector */
+/* ======================================================
+   12. View Mode Selector
+   ====================================================== */
 .rmg-view-mode-selector {
     display: inline-flex;
     background-color: rgba(0, 0, 0, 0.05);
@@ -494,12 +545,17 @@
     font-weight: 600;
 }
 
-/* Scrollbar Styling */
+/* ======================================================
+   13. Scrollbar Styling
+   ====================================================== */
 .rmg-timeline-container {
+    /* Firefox scrollbar */
     scrollbar-width: thin;
     scrollbar-color: var(--rmg-scrollbar-thumb) var(--rmg-scrollbar-track);
+    scroll-behavior: smooth;
 }
 
+/* Webkit-based browsers (Chrome, Safari, newer Edge) */
 .rmg-timeline-container::-webkit-scrollbar {
     width: var(--rmg-scrollbar-size);
     height: var(--rmg-scrollbar-size);
@@ -508,6 +564,7 @@
 .rmg-timeline-container::-webkit-scrollbar-track {
     background: var(--rmg-scrollbar-track);
     border-radius: 12px;
+    margin: 0 6px; /* Add some space on the edges */
 }
 
 .rmg-timeline-container::-webkit-scrollbar-thumb {
@@ -515,6 +572,8 @@
     border-radius: 12px;
     border: 2px solid transparent;
     background-clip: content-box;
+    min-height: 40px; /* Minimum height for better usability */
+    transition: background-color 0.2s ease;
 }
 
 .rmg-timeline-container::-webkit-scrollbar-thumb:hover {
@@ -525,29 +584,33 @@
     background-color: transparent;
 }
 
-/* Smooth Scrolling */
-.rmg-timeline-container {
-    scroll-behavior: smooth;
-}
-
 /* Auto-Scrolling */
 .rmg-auto-scrolling {
     scroll-behavior: auto !important;
 }
 
-@keyframes update-flash {
-    0% {
-        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-    }
-    50% {
-        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4);
-    }
-    100% {
-        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0);
-    }
+/* Visual scrollable indicator */
+.rmg-timeline-container.rmg-scrollable-x::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.03));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
-/* Responsive Adjustments */
+.rmg-timeline-container.rmg-scrollable-x:hover::after {
+    opacity: 1;
+}
+
+.rmg-dark .rmg-timeline-container.rmg-scrollable-x::after {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03));
+}
+
 @media (max-width: 640px) {
     .rmg-task-list {
         width: 120px;
@@ -562,83 +625,68 @@
     }
 }
 
-/* Utility classes für Tailwind-artige Standardisierung */
+/* ======================================================
+   16. Utility-Klassen
+   ====================================================== */
 .bg-blue-500 {
     background-color: #3b82f6;
 }
-
 .bg-indigo-500 {
     background-color: #6366f1;
 }
-
 .bg-purple-500 {
     background-color: #a855f7;
 }
-
 .bg-green-500 {
     background-color: #22c55e;
 }
-
 .bg-emerald-500 {
     background-color: #10b981;
 }
-
 .bg-amber-500 {
     background-color: #f59e0b;
 }
-
 .bg-orange-500 {
     background-color: #f97316;
 }
-
 .bg-red-500 {
     background-color: #ef4444;
+}
+.bg-teal-500 {
+    background-color: #14b8a6;
+}
+.bg-yellow-400 {
+    background-color: #facc15;
 }
 
 .bg-blue-600 {
     background-color: #2563eb;
 }
-
 .bg-indigo-600 {
     background-color: #4f46e5;
 }
-
 .bg-green-600 {
     background-color: #16a34a;
 }
-
 .bg-emerald-600 {
     background-color: #059669;
 }
-
 .bg-amber-600 {
     background-color: #d97706;
 }
-
 .bg-orange-600 {
     background-color: #ea580c;
 }
-
 .bg-red-600 {
     background-color: #dc2626;
 }
-
-.bg-teal-500 {
-    background-color: #14b8a6;
-}
-
 .bg-teal-600 {
     background-color: #0d9488;
-}
-
-.bg-yellow-400 {
-    background-color: #facc15;
 }
 
 .text-white {
     color: #ffffff;
 }
-
 .text-gray-900 {
     color: #111827;
 }
@@ -646,38 +694,20 @@
 .border-blue-700 {
     border-color: #1d4ed8;
 }
-
 .border-emerald-800 {
     border-color: #065f46;
 }
-
 .border-yellow-600 {
     border-color: #ca8a04;
 }
 
-.ring-2 {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-    box-shadow: 0 0 0 2px currentColor;
-}
-
-.ring-white {
-    --tw-ring-color: white;
-}
-
-.shadow-lg {
-    box-shadow:
-        0 10px 15px -3px rgba(0, 0, 0, 0.1),
-        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+.border {
+    border-width: 1px;
+    border-style: solid;
 }
 
 .truncate {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.border {
-    border-width: 1px;
-    border-style: solid;
 }

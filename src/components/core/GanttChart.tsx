@@ -487,7 +487,10 @@ const GanttChart: React.FC<GanttChartProps> = ({
                     <div className="rmg-timeline-content" data-rmg-component="timeline-content">
                         {renderTimelineHeaderContent()}
 
-                        <div className="rmg-timeline-grid" data-rmg-component="timeline-grid">
+                        <div
+                            className="rmg-timeline-grid"
+                            data-rmg-component="timeline-grid"
+                            data-view-mode={activeViewMode}>
                             {showCurrentDateMarker && currentUnitIndex >= 0 && (
                                 <TodayMarker
                                     currentMonthIndex={currentUnitIndex}
