@@ -17,7 +17,7 @@ const Timeline: React.FC<TimelineProps> = ({
     const getLocale = () => {
         if (locale === "default") return undefined;
         // This would use actual locale imports in a real implementation
-        return undefined;
+        return locale;
     };
 
     // Format date based on view mode for the main timeline
