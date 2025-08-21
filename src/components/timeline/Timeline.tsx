@@ -33,12 +33,12 @@ const Timeline: React.FC<TimelineProps> = ({
                 return format(date, "d", { locale: getLocale() });
             case ViewMode.WEEK:
                 const weekNum = getWeek(date);
-                return `W${weekNum}`;
+                return `هفته${weekNum}`;
             case ViewMode.MONTH:
                 return format(date, "MMM yyyy", { locale: getLocale() });
             case ViewMode.QUARTER:
                 const quarter = Math.floor(date.getMonth() / 3) + 1;
-                return `Q${quarter} ${date.getFullYear()}`;
+                return `چارک${quarter} ${date.getFullYear()}`;
             case ViewMode.YEAR:
                 return date.getFullYear().toString();
             default:
